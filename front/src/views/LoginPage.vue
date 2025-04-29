@@ -97,6 +97,7 @@ button:hover {
 .register-redirect {
   margin-top: 1rem;
   font-size: 0.9rem;
+  color: black;
 }
 
 .register-redirect a {
@@ -134,6 +135,10 @@ body.dark-mode button:hover {
 
 body.dark-mode .register-redirect a {
   color: #667eea;
+}
+
+body.dark-mode .register-redirect {
+  color: black; /* ou une autre couleur claire adaptée au fond sombre */
 }
 
 /* Responsive Mobile */
