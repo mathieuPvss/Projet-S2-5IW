@@ -11,9 +11,6 @@
     </main>
 
     <AppFooter />
-
-    <!-- Bouton pour basculer le dark mode -->
-    <button @click="toggleDarkMode">Toggle Dark Mode</button>
   </div>
 </template>
 

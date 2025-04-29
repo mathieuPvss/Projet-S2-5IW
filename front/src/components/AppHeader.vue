@@ -31,10 +31,14 @@ onMounted(() => {
   if (theme === 'dark') {
     document.body.classList.add('dark');
   }
-});
+}); 
 </script>
 
 <style scoped>
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 :root {
   --color-bg-light: #ffffff;
   --color-bg-dark: #1e1e1e;
@@ -63,6 +67,7 @@ onMounted(() => {
 .dark .header {
   background: var(--color-bg-dark);
   color: var(--color-text-dark);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .logo {
