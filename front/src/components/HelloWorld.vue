@@ -2,27 +2,25 @@
   <div class="home">
     <div class="search-container">
       <h1 class="title">Moteur de Recherche</h1>
-      
-      <!-- Barre de recherche principale -->
+
       <div class="search-bar">
         <input
           v-model="query"
           @keyup.enter="search"
           type="text"
           placeholder="Entrez votre recherche..."
+          aria-label="Champ de recherche"
           class="search-input"
         />
-        <button @click="search" class="search-button">
-          <i class="fas fa-search"></i>
+        <button @click="search" class="search-button" aria-label="Lancer la recherche">
+          🔍
         </button>
       </div>
-      
-      <!-- Bouton de recherche avancée -->
+
       <button @click="toggleAdvancedSearch" class="advanced-search-button">
         Recherche avancée
       </button>
 
-      <!-- Formulaire de Recherche Avancée -->
       <div v-if="showAdvancedSearch" class="advanced-search-form">
         <div class="form-group">
           <label for="category">Catégorie :</label>
@@ -52,34 +50,33 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
-  name: 'HelloWorld',
+  name: 'Home',
   data() {
     return {
-      query: '', // Texte de recherche
-      showAdvancedSearch: false, // Afficher la recherche avancée
+      query: '',
+      showAdvancedSearch: false,
       advancedFilters: {
         category: '',
         date: '',
-      }, // Paramètres pour la recherche avancée
+      },
     };
   },
   methods: {
     search() {
-    if (this.query.trim()) {
-      // Remplacer par un appel API, par exemple :
-      this.isLoading = true;
-      axios.get(`/api/search?q=${this.query}`)
-        .then(response => {
-          this.isLoading = false;
-          console.log('Résultats de la recherche:', response.data);
-        })
-        .catch(error => {
-          this.isLoading = false;
-          console.error('Erreur lors de la recherche:', error);
-        });
-    }
-  },
+      if (this.query.trim()) {
+        axios
+          .get(`/api/search?q=${this.query}`)
+          .then(response => {
+            console.log('Résultats de la recherche:', response.data);
+          })
+          .catch(error => {
+            console.error('Erreur lors de la recherche:', error);
+          });
+      }
+    },
     toggleAdvancedSearch() {
       this.showAdvancedSearch = !this.showAdvancedSearch;
     },
@@ -91,125 +88,136 @@ export default {
 </script>
 
 <style scoped>
-/* Design global */
+:root {
+  --bg-light: #ffffff;
+  --bg-dark: #121212;
+  --text-light: #202124;
+  --text-dark: #f1f1f1;
+  --primary: #4285F4;
+  --primary-hover: #357ae8;
+  --input-bg: #f9f9f9;
+}
+
+.dark {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+}
+
 .home {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  padding: 2rem;
+  min-height: 100vh;
   background: linear-gradient(135deg, #4285F4, #34A853);
-  font-family: 'Roboto', sans-serif;
+  transition: background 0.3s ease;
 }
 
-/* Conteneur principal */
 .search-container {
-  text-align: center;
-  padding: 40px;
-  background-color: white;
-  border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 600px;
-  animation: fadeIn 1s ease-out;
+  background-color: var(--bg-light);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  animation: fadeIn 0.8s ease;
 }
 
-/* Titre de la page */
+.dark .search-container {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+}
+
 .title {
   font-size: 2rem;
-  font-weight: 500;
-  color: #202124;
-  margin-bottom: 20px;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
   text-transform: uppercase;
 }
 
-/* Barre de recherche */
 .search-bar {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-/* Champ de recherche */
 .search-input {
-  width: 80%;
-  padding: 15px;
-  font-size: 1.1rem;
-  border: 1px solid #ccc;
+  flex: 1;
+  padding: 0.8rem 1rem;
   border-radius: 50px;
-  outline: none;
-  transition: all 0.3s ease;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  transition: box-shadow 0.3s ease;
 }
 
 .search-input:focus {
-  border-color: #4285F4;
-  box-shadow: 0 0 10px rgba(66, 133, 244, 0.3);
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 8px rgba(66, 133, 244, 0.4);
 }
 
-/* Bouton de recherche */
 .search-button {
-  padding: 12px;
-  background-color: #4285F4;
+  background: var(--primary);
   color: white;
   border: none;
-  border-radius: 50%;
-  margin-left: 10px;
+  padding: 0.8rem 1rem;
+  border-radius: 50px;
+  font-size: 1.2rem;
   cursor: pointer;
-  font-size: 1.5rem;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .search-button:hover {
-  background-color: #357ae8;
-  transform: scale(1.1);
+  background-color: var(--primary-hover);
+  transform: scale(1.05);
 }
 
-.search-button:active {
-  transform: scale(0.95);
-}
-
-/* Bouton de recherche avancée */
-.advanced-search-form {
-  margin-top: 20px;
-  background-color: #f9f9f9;
-  padding: 20px;
+.advanced-search-button {
+  background: transparent;
+  border: 1px solid var(--primary);
+  padding: 0.5rem 1rem;
+  color: var(--primary);
   border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  transform: translateY(20px);
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background 0.3s ease;
+}
+
+.advanced-search-button:hover {
+  background: rgba(66, 133, 244, 0.1);
+}
+
+.advanced-search-form {
+  margin-top: 1.5rem;
+  text-align: left;
+  background: var(--input-bg);
+  padding: 1rem;
+  border-radius: 12px;
   transition: all 0.3s ease;
 }
 
-.advanced-search-form-enter-active, .advanced-search-form-leave-active {
-  transition: opacity 0.3s, transform 0.3s;
+.dark .advanced-search-form {
+  background: #1f1f1f;
 }
 
-.advanced-search-form-enter, .advanced-search-form-leave-to {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-
-/* Champs du formulaire */
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .input-field {
-  padding: 10px;
   width: 100%;
-  border: 1px solid #ccc;
+  padding: 0.6rem 0.8rem;
   border-radius: 8px;
+  border: 1px solid #ccc;
   font-size: 1rem;
-  outline: none;
-  transition: border-color 0.3s ease;
 }
 
 .input-field:focus {
-  border-color: #4285F4;
+  border-color: var(--primary);
+  outline: none;
 }
 
-/* Animation de la page */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -218,6 +226,22 @@ export default {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .search-bar {
+    flex-direction: column;
+  }
+
+  .search-input,
+  .search-button {
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  .search-button {
+    margin-top: 0.5rem;
   }
 }
 </style>

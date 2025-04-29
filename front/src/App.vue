@@ -38,13 +38,6 @@ export default {
 </script>
 
 <style scoped>
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #4285F4, #34A853);
-  margin: 0;
-}
 
 .main-content {
   flex: 1;
