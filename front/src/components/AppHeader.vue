@@ -9,7 +9,7 @@
       <a href="#">Fonctionnalités</a>
       <a href="#">Contact</a>
       <router-link to="/register">S'inscrire</router-link>
-      <button class="btn-login">Se connecter</button>
+      <router-link to="/login" class="btn-login">Se connecter</router-link>
       <button @click="toggleDarkMode" class="btn-darkmode" aria-label="Changer le thème">
         🌓
       </button>
@@ -34,7 +34,7 @@ onMounted(() => {
 }); 
 </script>
 
-<style scoped>
+<style>
 body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }

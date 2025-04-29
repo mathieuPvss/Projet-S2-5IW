@@ -13,7 +13,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .footer {
   text-align: center;
   padding: 1rem;
@@ -23,7 +23,7 @@ export default {
   transition: background-color 0.3s, color 0.3s;
 }
 
-:deep(.dark) .footer {
+.dark .footer {
   background-color: var(--footer-bg-dark, #2c2c2c);
   color: var(--text-color-dark, #e0e0e0);
 }
