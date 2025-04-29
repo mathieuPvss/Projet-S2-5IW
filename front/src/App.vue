@@ -11,6 +11,9 @@
     </main>
 
     <AppFooter />
+
+    <!-- Bouton pour basculer le dark mode -->
+    <button @click="toggleDarkMode">Toggle Dark Mode</button>
   </div>
 </template>
 
@@ -33,12 +36,17 @@ export default {
     setTimeout(() => {
       this.isLoading = false;
     }, 2000);
+  },
+  methods: {
+    // Toggle pour activer/désactiver le dark mode
+    toggleDarkMode() {
+      document.body.classList.toggle('dark');
+    }
   }
 }
 </script>
 
 <style scoped>
-
 .main-content {
   flex: 1;
   display: flex;
@@ -57,5 +65,21 @@ export default {
   color: #4285F4;
   font-size: 1.5rem;
   z-index: 1000;
+}
+
+/* Styles pour le dark mode */
+body.dark {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+body.dark .main-content {
+  background-color: #1e1e1e;
+}
+
+/* Styles de base pour le mode clair */
+body {
+  background-color: #ffffff;
+  color: #333;
 }
 </style>

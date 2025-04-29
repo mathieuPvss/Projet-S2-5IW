@@ -21,15 +21,15 @@
 import { onMounted } from 'vue';
 
 function toggleDarkMode() {
-  const html = document.documentElement;
-  html.classList.toggle('dark');
-  localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+  const body = document.body;
+  body.classList.toggle('dark');
+  localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
 }
 
 onMounted(() => {
   const theme = localStorage.getItem('theme');
   if (theme === 'dark') {
-    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
   }
 });
 </script>
