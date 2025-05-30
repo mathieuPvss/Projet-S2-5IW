@@ -1,8 +1,7 @@
 <template>
   <header class="header">
     <div class="logo">
-      <img src="@/assets/logo.png" alt="Logo" />
-      <span>SearchFlow</span>
+      <img src="@/assets/logo2.png" alt="Logo" />
     </div>
     <nav class="nav">
       <a href="#">À propos</a>
@@ -73,6 +72,7 @@ body {
 .logo {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   font-size: 1.4rem;
   font-weight: bold;
