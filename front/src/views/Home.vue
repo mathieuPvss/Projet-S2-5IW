@@ -1,7 +1,9 @@
 <template>
   <div class="home">
     <div class="search-container">
-      <h1 class="title">SearchFlow</h1>
+      <div class="logo">
+        <img src="@/assets/logo2.png" alt="Logo SearchFlow" />
+      </div>
       <input
         v-model="query"
         @keyup.enter="search"
@@ -67,15 +69,10 @@ export default {
   color: #f0f0f0;
 }
 
-.title {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  color: var(--title-color, #333);
-  transition: color 0.3s;
-}
-
-:deep(.dark) .title {
-  --title-color: #f9f9f9;
+.logo img {
+  width: 150px;
+  height: auto;
+  margin-bottom: 1rem;
 }
 
 .search-input {
@@ -131,14 +128,14 @@ export default {
 
 /* Responsive */
 @media (max-width: 500px) {
-  .title {
-    font-size: 1.6rem;
-  }
-
   .search-input,
   .search-button,
   .register-button {
     font-size: 0.95rem;
+  }
+
+  .logo img {
+    width: 80px;
   }
 }
 </style>
