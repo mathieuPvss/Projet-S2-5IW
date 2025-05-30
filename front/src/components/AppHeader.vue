@@ -80,8 +80,8 @@ body {
 }
 
 .logo img {
-  width: 36px;
-  height: 36px;
+  width: 55px;
+  height: 55px;
 }
 
 .nav {
