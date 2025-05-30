@@ -3,7 +3,7 @@
     <AppHeader />
 
     <div v-if="isLoading" class="loading-screen">
-      <p>Chargement...</p>
+      <div class="spinner"></div>
     </div>
 
     <main v-else class="main-content">
@@ -51,6 +51,23 @@ export default {
   align-items: center;
   padding: 2rem;
 }
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(66, 133, 244, 0.3);
+  border-top-color: #4285f4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Animation de rotation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
 .loading-screen {
   position: absolute;
