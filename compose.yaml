@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:17.4
+    container_name: postgres-query-forge-dev
+    volumes:
+      - postgres-query-forge-dev:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+  nestjs:
+    image: node:23-alpine
+    container_name: nestjs-query-forge-dev
+    working_dir: /app
+    volumes:
+      - ./nestjs/query-forge-dev:/app
+    ports:
+      - 3000:${NEST_PORT}
+      - 9229:9229
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - NEST_PORT=${NEST_PORT}
+    entrypoint: ["sh", "./entrypoint.sh"]
+    depends_on:
+      - postgres
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer-query-forge-dev
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+
+volumes:
+  postgres-query-forge-dev:

@@ -144,3 +144,6 @@ dist
 
 # output.css
 **/output.css
+
+.env
+.vscode
