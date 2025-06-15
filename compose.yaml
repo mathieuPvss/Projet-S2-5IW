@@ -11,12 +11,12 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
 
-  nestjs:
+  backend:
     image: node:23-alpine
-    container_name: nestjs-query-forge-dev
+    container_name: backend-query-forge-dev
     working_dir: /app
     volumes:
-      - ./nestjs/query-forge-dev:/app
+      - ./backend/query-forge-dev:/app
     ports:
       - 3000:${NEST_PORT}
       - 9229:9229
