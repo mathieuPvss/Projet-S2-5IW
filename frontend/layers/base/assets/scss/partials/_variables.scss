@@ -1,0 +1,59 @@
+// Nuxt-like dark theme SCSS variables
+
+// Color theme
+$bg-gradient: var(--bg-gradient);
+
+$background: hsl(var(--background));
+$foreground: hsl(var(--foreground));
+
+$card: hsl(var(--card));
+$card-foreground: hsl(var(--card-foreground));
+
+$popover: hsl(var(--popover));
+$popover-foreground: hsl(var(--popover-foreground));
+
+$primary: hsl(var(--primary));
+$primary-foreground: hsl(var(--primary-foreground));
+
+$secondary: hsl(var(--secondary));
+$secondary-foreground: hsl(var(--secondary-foreground));
+
+$muted: hsl(var(--muted));
+$muted-foreground: hsl(var(--muted-foreground));
+
+$accent: hsl(var(--accent));
+$accent-foreground: hsl(var(--accent-foreground));
+
+$destructive: hsl(var(--destructive));
+$destructive-foreground: hsl(var(--destructive-foreground));
+
+$warnes: var(--warnes);
+// Border and input colors
+
+$border: hsl(var(--border));
+$input: hsl(var(--input));
+$ring: hsl(var(--ring));
+
+$radius: var(--radius);
+
+// Spacing
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 2rem;
+$spacing-xl: 4rem;
+
+// Borders
+$border-radius-sm: 0.25rem;
+$border-radius-md: 0.5rem;
+$border-radius-lg: 1rem;
+
+// Shadows
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
+
+// Transitions
+$transition-fast: 0.2s ease;
+$transition-base: 0.4s ease;
+
