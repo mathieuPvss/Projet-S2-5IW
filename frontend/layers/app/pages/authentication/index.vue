@@ -24,7 +24,7 @@
       <div
         class="mt-6 text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary">
         By clicking continue, you agree to our <NuxtLink to="/terms">Terms of Service</NuxtLink>
-        and <a href="#">Privacy Policy</a>.
+        and <NuxtLink to="/privacy">Privacy Policy</NuxtLink>.
       </div>
     </Tabs>
   </div>
