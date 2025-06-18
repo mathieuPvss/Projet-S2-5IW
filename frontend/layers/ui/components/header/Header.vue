@@ -1,7 +1,7 @@
 <template>
   <header
     :class="cn(
-      'w-full p-4 backdrop-blur bg-background/40 sticky top-0 z-50 flex flex-row items-center justify-between transition-all duration-300 ease-in-out',
+      'w-full p-4 bg-transparent sticky top-0 z-50 flex flex-row items-center justify-between transition-all duration-300 ease-in-out',
        headerScrollClass
      )"
   >
@@ -41,7 +41,7 @@ function handleScroll() {
   console.log('Scroll Top:', scrollTop);
   if (!isScrolled.value && scrollTop > 300) {
     isScrolled.value = true;
-    headerScrollClass.value = ' bg-transparent backdrop-blur-none py-0';
+    headerScrollClass.value = ' py-0';
   } else if (isScrolled.value && scrollTop <= 200) {
     isScrolled.value = false;
     headerScrollClass.value = '';
