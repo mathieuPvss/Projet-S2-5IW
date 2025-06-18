@@ -28,6 +28,13 @@
         </DropdownMenuContent>
       </DropdownMenu>
     </NavigationMenuItem>
+    <NavigationMenuItem v-else>
+      <NuxtLink v-slot="{ href, navigate }" to="/authentication" custom>
+        <NavigationMenuLink :href :class="cn(navigationMenuTriggerStyle(), 'bg-transparent')" @click="navigate">
+          <LogIn class="h-4 w-4" alt="S'identifier"/>
+        </NavigationMenuLink>
+      </NuxtLink>
+    </NavigationMenuItem>
     <NavigationMenuItem>
       <DarkMode />
     </NavigationMenuItem>
@@ -37,7 +44,7 @@
 import { Button } from "@ui/components/button";
 import {
   NavigationMenu,
-  NavigationMenuItem,
+  NavigationMenuItem, navigationMenuTriggerStyle,
 } from "@ui/components/navigation-menu";
 import {
   DropdownMenu,
@@ -50,11 +57,13 @@ import {
   DropdownMenuShortcut,
 } from "@ui/components/dropdown-menu";
 import {
+  LogIn,
   LogOut,
   User,
 } from "lucide-vue-next";
 import { DarkMode } from "@ui/components/dark-mode";
 import { useAuthStore} from "@/stores/auth";
+import { cn } from "@lib/utils";
 
 const auth = useAuthStore();
 const user = computed(() => auth.user ? auth.user : null);

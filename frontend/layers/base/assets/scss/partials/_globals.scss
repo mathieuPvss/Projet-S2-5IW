@@ -3,7 +3,7 @@
 
 @layer base {
   :root {
-    --bg-gradient:radial-gradient(at 9% 43%, #33425b 0px, transparent 50%), radial-gradient(at 91% 86%, #87dfd6 0px, transparent 50%), radial-gradient(at 4% 0%, #38817a 0px, transparent 50%), radial-gradient(at 27% 7%, #f9f8eb 0px, transparent 50%), #33425b;
+    --bg-gradient:radial-gradient(at 9% 43%, #fff 0px, transparent 50%), radial-gradient(at 91% 86%, #87dfd6 0px, transparent 50%), radial-gradient(at 4% 0%, #38817a 0px, transparent 50%), radial-gradient(at 27% 7%, #f9f8eb 0px, transparent 50%), #fff;
 
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
@@ -123,7 +123,7 @@
     color: $foreground;
   }
   html {
-    background: $background;
+    background: $bg-gradient;
     background-attachment: fixed;
     background-position: center;
     background-repeat: no-repeat;
