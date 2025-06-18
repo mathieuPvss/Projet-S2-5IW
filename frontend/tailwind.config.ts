@@ -99,10 +99,16 @@ export default <Partial<Config>>{
   					opacity: '1',
   					transform: 'translateX(0)'
   				}
-  			}
+  			},
+        'cursor-blink': {
+          '0%': {
+            opacity: '0'
+          },
+        },
   		},
   		animation: {
-  			'fade-left': 'fade-left 0.2s ease'
+  			'fade-left': 'fade-left 0.2s ease',
+        'cursor-blink': 'cursor-blink 1s ease-in-out infinite',
   		}
   	}
   },

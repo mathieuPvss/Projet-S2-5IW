@@ -27,7 +27,7 @@
               />
               <span class="absolute start-0 inset-y-0 flex items-center justify-start w-full overflow-hidden px-2 z-0">
                 <Search class="size-6 text-muted-foreground shrink-0 search-icon" />
-                <Typewriter :text="displayedText" :speed="50" :delay="1000" :repeat="true" v-if="!searchFocus  && searchText.length === 0"/>
+                <Typewriter :text="displayedText" :speed="50" :delay="1000" :repeat="true" v-if="!searchFocus  && searchText.length === 0" class="ml-4 pr-4"/>
               </span>
 
             </div>

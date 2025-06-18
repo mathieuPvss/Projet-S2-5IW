@@ -124,6 +124,10 @@
   }
   html {
     background: $background;
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
     &.dark {
       body {
         background-image: radial-gradient(#404040 1px, transparent 1px);
@@ -133,6 +137,8 @@
   body {
     background-size:20px 20px;
     background-image:radial-gradient(#eee 1px,transparent 1px);
+    background-attachment: fixed;
+    background-position: center;
   }
 
   a {
