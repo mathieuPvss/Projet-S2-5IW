@@ -50,7 +50,7 @@ const handleChangeTab = (tab: string) => {
 
 const handleRegister = async (values: Record<string, string>) => {
   try {
-    const response = await fetch(baseUrl + '/api/users/register', {
+    const response = await fetch(baseUrl + '/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ const handleRegister = async (values: Record<string, string>) => {
 
 const handleLogin = async (values: Record<string, string>) => {
   try {
-    const response = await fetch(baseUrl + '/api/users/login', {
+    const response = await fetch(baseUrl + '/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
