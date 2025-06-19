@@ -39,10 +39,6 @@ const activeTab = ref<string>('login');
 const baseUrl = useRuntimeConfig().public.apiBaseUrl
 
 const auth = useAuthStore();
-onMounted(async () => {
-  if(auth.token)
-    await navigateTo({path: '/'});
-});
 
 const handleChangeTab = (tab: string) => {
   activeTab.value = tab;
@@ -103,8 +99,10 @@ const handleLogin = async (values: Record<string, string>) => {
       }),
     });
 
-    const data: Record<string, string>[] = await response.json();
+    //const data: Record<string, string>[] = await response.json();
 
+    const data: { token: string, [key: string]: any } = await response.json();
+    
     if (!response.ok) {
       if(response.status === 401) {
         toast({
@@ -144,4 +142,11 @@ const handleLogin = async (values: Record<string, string>) => {
     });
   }
 };
+
+onMounted(() => {
+  auth.init();
+  if (auth.token) {
+    navigateTo('/');
+  }
+});
 </script>

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { jwtDecode } from "jwt-decode";
 import type { DecodedToken } from "@/dto/decodedToken.dto";
-import {toast} from "@ui/components/toast";
+import { toast } from "@ui/components/toast";
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -10,9 +10,21 @@ export const useAuthStore = defineStore('auth', {
   }),
   actions: {
     login(storageToken: string) {
-      this.token = storageToken
-      this.user = jwtDecode(storageToken)
-      localStorage.setItem('token', storageToken)
+      if (typeof storageToken !== 'string') {
+        toast({
+          title: 'Erreur',
+          description: 'Token invalide.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      try {
+        this.token = storageToken;
+        this.user = jwtDecode(storageToken);
+        localStorage.setItem('token', storageToken);
+      } catch (error) {
+        this.logout();
+      }
     },
     async logout() {
       toast({
@@ -20,21 +32,21 @@ export const useAuthStore = defineStore('auth', {
         description: "Vous avez été déconnecté avec succès.",
         variant: "default",
       });
-      this.token = null
-      this.user = null
-      localStorage.removeItem('token')
+      this.token = null;
+      this.user = null;
+      localStorage.removeItem('token');
       await navigateTo('/');
     },
     init() {
-      const storageToken = localStorage.getItem('token')
-      if (storageToken) {
+      const storageToken = localStorage.getItem('token');
+      if (storageToken && typeof storageToken === 'string') {
         try {
           this.token = storageToken;
           this.user = jwtDecode(storageToken);
         } catch (e) {
-          this.logout()
+          this.logout();
         }
       }
     },
   },
-})
+});
