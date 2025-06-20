@@ -11,9 +11,9 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
 
-  backend:
+  nestjs:
     image: node:23-alpine
-    container_name: backend-query-forge-dev
+    container_name: nestjs-query-forge-dev
     working_dir: /app
     volumes:
       - ./backend/query-forge-dev:/app
@@ -32,6 +32,26 @@ services:
     depends_on:
       - postgres
 
+  sync-service:
+    build:
+      context: ./backend/sync-service
+      dockerfile: Dockerfile
+    container_name: sync-service-query-forge-dev
+    volumes:
+      - ./backend/sync-service/src:/app/src
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+    depends_on:
+      - postgres
+      - elasticsearch
+    restart: unless-stopped
+
   adminer:
     image: adminer:latest
     container_name: adminer-query-forge-dev
@@ -40,5 +60,74 @@ services:
     depends_on:
       - postgres
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: elasticsearch
+    ports:
+      - ${ES_PORT}:9200
+    environment:
+      - discovery.type=${EL_DISCOVERY_TYPE}
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS}
+      - ES_PORT=${ES_PORT}
+      - xpack.security.enabled=false
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  elasticsearch-init:
+    image: curlimages/curl:8.6.0
+    container_name: elasticsearch-init
+    depends_on:
+      - elasticsearch
+    entrypoint: >
+      sh -c '
+        echo "⏳ Attente d Elasticsearch..."
+        until curl -s http://elasticsearch:9200 >/dev/null; do
+          echo "🔁 Elasticsearch pas encore prêt, retry..."
+          sleep 2
+        done
+        echo "✅ Elasticsearch disponible !"
+
+        # Vérifier si l'index existe
+        if curl -s -f "http://elasticsearch:9200/contents" > /dev/null; then
+          echo "ℹ️ L'index contents existe déjà."
+        else
+          echo "🔄 Création de l'index..."
+          curl -X PUT "http://elasticsearch:9200/contents" -H "Content-Type: application/json" -d "{
+            \"settings\": {
+              \"number_of_shards\": 1,
+              \"number_of_replicas\": 0
+            },
+            \"mappings\": {
+              \"properties\": {
+                \"source\": { \"type\": \"keyword\" },
+                \"source_id\": { \"type\": \"keyword\" },
+                \"url\": { \"type\": \"keyword\" },
+                \"title\": { \"type\": \"text\" },
+                \"description\": { \"type\": \"text\" },
+                \"thumbnail\": { \"type\": \"keyword\" },
+                \"channel\": { \"type\": \"keyword\" },
+                \"published_at\": { \"type\": \"date\" },
+                \"language\": { \"type\": \"keyword\" },
+                \"tags\": { \"type\": \"keyword\" },
+                \"origin_question\": { \"type\": \"text\" },
+                \"created_at\": { \"type\": \"date\" }
+              }
+            }
+          }"
+          echo "✅ Index créé avec succès."
+        fi
+      '
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    container_name: kibana
+    ports:
+      - ${KIBANA_PORT}:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+    depends_on:
+      - elasticsearch
+
 volumes:
   postgres-query-forge-dev:
+  esdata:
