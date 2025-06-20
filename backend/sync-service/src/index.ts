@@ -168,8 +168,8 @@ async function syncContent(): Promise<void> {
 // Planification de la tâche (tous les jours à minuit)
 // Réinitialisation du compteur YouTube à minuit
 
-// Exécution de la synchronisation toutes les 2 minutes
-cron.schedule("*/2 * * * *", () => {
+// Exécution de la synchronisation tous les jours à 18h00
+cron.schedule("0 18 * * *", () => {
   youtubeApiCallCount = 0;
   console.log(
     "Compteur d'appels API YouTube réinitialisé : ",
@@ -177,8 +177,6 @@ cron.schedule("*/2 * * * *", () => {
   );
   console.log("Lancement de la synchronisation programmée");
   syncContent();
-  youtubeApiCallCount++;
-  console.log("Compteur d'appels API YouTube : ", youtubeApiCallCount);
 });
 
 // Première exécution au démarrage
