@@ -1,6 +1,9 @@
 <template>
   <header
-    :class="cn('w-full p-4 backdrop-blur bg-gray-400/30 sticky top-0 z-50 flex flex-row items-center justify-between transition-all durantion-300 ease-in-out' + headerScrollClass)"
+    :class="cn(
+      'w-full p-4 bg-transparent sticky top-0 z-50 flex flex-row items-center justify-between transition-all duration-300 ease-in-out',
+       headerScrollClass
+     )"
   >
     <NuxtLink href="/" class="flex items-center">
       <SiteIcon height="24" width="48"/>
@@ -28,16 +31,22 @@ const isTablet = useMediaQuery("(max-width: 1024px)");
 const isToggled = ref(false);
 
 const headerScrollClass = ref('');
+const isScrolled = ref(false);
 
 onMounted(() => {
-  window.onscroll = () => {
-    if (window.scrollY > 0) {
-      headerScrollClass.value = ' bg-transparent backdrop-blur-none py-0';
-    } else {
-      headerScrollClass.value = '';
-    }
-  };
-})
+  window.addEventListener('scroll', handleScroll);
+});
+function handleScroll() {
+  const scrollTop = window.scrollY;
+  console.log('Scroll Top:', scrollTop);
+  if (!isScrolled.value && scrollTop > 300) {
+    isScrolled.value = true;
+    headerScrollClass.value = ' py-0';
+  } else if (isScrolled.value && scrollTop <= 200) {
+    isScrolled.value = false;
+    headerScrollClass.value = '';
+  }
+}
 
 function handleToggleMenu() {
   isToggled.value = !isToggled.value;
