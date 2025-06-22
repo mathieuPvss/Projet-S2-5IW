@@ -64,10 +64,12 @@ async function processYouTubeQuestions(
     try {
       youtubeApiCallCount++;
       console.log(
-        `Recherche YouTube pour la question: ${question.content} (Appel ${youtubeApiCallCount}/${YOUTUBE_DAILY_LIMIT})`
+        `Recherche YouTube pour la question: ${question.content} de la technologie: ${question.technologie} (Appel ${youtubeApiCallCount}/${YOUTUBE_DAILY_LIMIT})`
       );
 
-      const videos = await youtubeService.searchVideos(question.content);
+      const videos = await youtubeService.searchVideos(
+        question.content + " " + question.technologie
+      );
 
       if (videos.length > 0) {
         for (const video of videos) {
