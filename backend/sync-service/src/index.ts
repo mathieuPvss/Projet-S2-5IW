@@ -3,6 +3,8 @@ import { Pool } from "pg";
 import { ElasticsearchService } from "./services/elasticsearch.service";
 import { YouTubeService } from "./services/youtube.service";
 import { Content } from "./interfaces/content.interface";
+import { TiktokService } from "./services/tiktok.service";
+import { ApifyClient } from "apify-client";
 
 // Configuration de la connexion à la base de données
 const pool = new Pool({
@@ -15,6 +17,7 @@ const pool = new Pool({
 
 const elasticsearchService = new ElasticsearchService();
 const youtubeService = new YouTubeService(process.env.YOUTUBE_API_KEY || "");
+const tiktokService = new TiktokService();
 
 // Constantes
 const YOUTUBE_DAILY_LIMIT = 100;
@@ -22,7 +25,7 @@ let youtubeApiCallCount = 0;
 
 // Fonction pour mettre à jour le statut d'une question_usage
 async function updateQuestionUsageStatus(
-  questionId: number,
+  questionId: string,
   sourceId: number,
   status: "success" | "error",
   reason?: string
@@ -52,7 +55,7 @@ async function updateQuestionUsageStatus(
 
 // Traitement des questions pour YouTube
 async function processYouTubeQuestions(
-  questions: Array<{ id: number; content: string; technologie: string }>,
+  questions: Array<{ id: string; content: string; technologie: string }>,
   sourceId: number
 ): Promise<void> {
   for (const question of questions) {
@@ -114,6 +117,50 @@ async function processYouTubeQuestions(
   }
 }
 
+async function processTiktokQuestions(
+  technologies: Array<{
+    technologie: string;
+  }>,
+  sourceId: number
+): Promise<void> {
+  for (const techno of technologies) {
+    console.log(
+      `Traitement de la technologie: ${techno.technologie} pour tiktok`
+    );
+    const questionsIds = await pool.query<{ id: string }>(
+      "SELECT id FROM question WHERE technologie = $1",
+      [techno.technologie]
+    );
+    try {
+      const tiktokContents = await tiktokService.searchContent(
+        techno.technologie
+      );
+
+      if (tiktokContents.length > 0) {
+        for (const content of tiktokContents) {
+          await elasticsearchService.indexContent(content);
+        }
+
+        for (const questionId of questionsIds.rows) {
+          await updateQuestionUsageStatus(questionId.id, sourceId, "success");
+        }
+      } else {
+        for (const questionId of questionsIds.rows) {
+          await updateQuestionUsageStatus(questionId.id, sourceId, "error");
+        }
+      }
+    } catch (error) {
+      console.error(
+        `Erreur lors du traitement de la technologie "${techno.technologie} pour tiktok":`,
+        error
+      );
+      for (const questionId of questionsIds.rows) {
+        await updateQuestionUsageStatus(questionId.id, sourceId, "error");
+      }
+    }
+  }
+}
+
 // Fonction principale de synchronisation
 async function syncContent(): Promise<void> {
   console.log("Début de la synchronisation...");
@@ -127,8 +174,8 @@ async function syncContent(): Promise<void> {
     }>("SELECT * FROM content_source");
 
     // Récupération des questions en attente (max 10 par technologie)
-    const questionsResult = await pool.query<{
-      id: number;
+    const questionsResultForYoutube = await pool.query<{
+      id: string;
       content: string;
       technologie: string;
     }>(`
@@ -147,15 +194,34 @@ async function syncContent(): Promise<void> {
       WHERE rn <= 10
     `);
 
+    const questionsResultForTiktok = await pool.query<{
+      technologie: string;
+    }>(`
+      SELECT DISTINCT q.technologie
+      FROM question_usage qu
+      JOIN question q ON qu.question_id = q.id
+      JOIN content_source cs ON qu.content_source_id = cs.id
+      WHERE cs.name = 'tiktok'
+      GROUP BY q.technologie
+      `);
+
     // Traitement par source
     for (const source of contentSourcesResult.rows) {
       console.log(`Traitement de la source: ${source.name}`);
 
       switch (source.name) {
         case "youtube":
-          await processYouTubeQuestions(questionsResult.rows, source.id);
+          await processYouTubeQuestions(
+            questionsResultForYoutube.rows,
+            source.id
+          );
           break;
-        // Ajouter d'autres sources ici
+        case "tiktok":
+          await processTiktokQuestions(
+            questionsResultForTiktok.rows,
+            source.id
+          );
+          break;
         default:
           console.log(`Source non prise en charge: ${source.name}`);
       }
@@ -182,8 +248,7 @@ cron.schedule("0 18 * * *", () => {
 });
 
 // Première exécution au démarrage
-console.log("Service de synchronisation démarré");
-syncContent();
 
-// todo :
-// - ajouter les tags
+console.log("Service de synchronisation démarré");
+
+syncContent();

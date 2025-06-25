@@ -32,26 +32,6 @@ services:
     depends_on:
       - postgres
 
-  sync-service:
-    build:
-      context: ./backend/sync-service
-      dockerfile: Dockerfile
-    container_name: sync-service-query-forge-dev
-    volumes:
-      - ./backend/sync-service/src:/app/src
-    environment:
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
-      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
-    depends_on:
-      - postgres
-      - elasticsearch
-    restart: unless-stopped
-
   adminer:
     image: adminer:latest
     container_name: adminer-query-forge-dev
