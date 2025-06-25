@@ -44,8 +44,9 @@ export class TiktokService {
       const itemsResult = items as any;
 
       // Transformation des résultats en format Content et verifie si c'est une video tiktok
-      return itemsResult[0].organicResults.map((item: any) => {
-        if (item.url.includes("/video/")) {
+      return itemsResult[0].organicResults
+        .filter((item: any) => item.url.includes("/video/"))
+        .map((item: any) => {
           return {
             source: "tiktok",
             source_id: this.extractTikTokId(item.url) || "",
@@ -60,10 +61,7 @@ export class TiktokService {
             origin_question: `${technology} programmation`,
             created_at: new Date().toISOString(),
           };
-        } else {
-          return null;
-        }
-      });
+        });
     } catch (error) {
       console.error("Erreur lors de la recherche TikTok:", error);
       throw new Error("Échec de la recherche de contenu TikTok");

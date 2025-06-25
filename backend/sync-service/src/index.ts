@@ -26,7 +26,7 @@ let youtubeApiCallCount = 0;
 // Fonction pour mettre à jour le statut d'une question_usage
 async function updateQuestionUsageStatus(
   questionId: string,
-  sourceId: number,
+  sourceId: string,
   status: "success" | "error",
   reason?: string
 ): Promise<void> {
@@ -56,7 +56,7 @@ async function updateQuestionUsageStatus(
 // Traitement des questions pour YouTube
 async function processYouTubeQuestions(
   questions: Array<{ id: string; content: string; technologie: string }>,
-  sourceId: number
+  sourceId: string
 ): Promise<void> {
   for (const question of questions) {
     if (youtubeApiCallCount >= YOUTUBE_DAILY_LIMIT) {
@@ -121,7 +121,7 @@ async function processTiktokQuestions(
   technologies: Array<{
     technologie: string;
   }>,
-  sourceId: number
+  sourceId: string
 ): Promise<void> {
   for (const techno of technologies) {
     console.log(
@@ -168,7 +168,7 @@ async function syncContent(): Promise<void> {
   try {
     // Récupération des content sources
     const contentSourcesResult = await pool.query<{
-      id: number;
+      id: string;
       name: string;
       type: string;
     }>("SELECT * FROM content_source");
