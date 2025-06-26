@@ -1,15 +1,16 @@
 <template>
-  <p class="overflow-hidden whitespace-nowrap text-md lg:text-2xl text-muted-foreground px-4"
+  <p class="overflow-hidden whitespace-nowrap text-md lg:text-2xl text-muted-foreground"
      v-if="!hidden"
      ref="textContainer"
   >
-    <template v-for="(char, index) in displayedText" :key="index">
-      {{ char }}
-    </template>
-    <span class="inline-block w-2 animate-pulse">|</span>
+    {{ displayedText }}
+    <span :class="cn('inline-block w-3 bg-muted-foreground h-0.5',animation)"></span>
   </p>
 </template>
 <script lang="ts" setup>
+import { ref, onMounted } from 'vue';
+import { computed } from 'vue';
+import { cn } from '@lib/utils';
 const props = defineProps(
   {
     text: {
@@ -34,7 +35,6 @@ const props = defineProps(
     },
   }
 );
-import { ref, onMounted } from 'vue';
 const displayedText: Ref<string> = ref('');
 const textContainer = ref<HTMLElement | null>(null);
 const typeText = (text: string[], speed: number, repeat: boolean, delay: number) => {
@@ -66,6 +66,9 @@ const typeText = (text: string[], speed: number, repeat: boolean, delay: number)
   };
   typeNextChar();
 };
+const animation = computed(() => {
+  return `animate-[cursor-blink_0.5s_ease-in-out_infinite]`;
+});
 onMounted(() => {
   typeText(props.text, props.speed, props.repeat, props.delay);
 });
