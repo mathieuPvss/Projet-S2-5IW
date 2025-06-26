@@ -202,6 +202,7 @@ async function syncContent(): Promise<void> {
       JOIN question q ON qu.question_id = q.id
       JOIN content_source cs ON qu.content_source_id = cs.id
       WHERE cs.name = 'tiktok'
+      AND qu.status = 'pending'
       GROUP BY q.technologie
       `);
 
