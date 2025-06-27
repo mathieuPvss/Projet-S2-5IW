@@ -22,27 +22,62 @@
                 autofocus
                 @focus="searchFocus = true"
                 @focusout="searchFocus = false"
-                @input="handleSearchChange"
                 v-model:model-value="searchText"
               />
               <span class="absolute start-0 inset-y-0 flex items-center justify-start w-full overflow-hidden px-2 z-0">
                 <Search class="size-6 text-muted-foreground shrink-0 search-icon" />
                 <Typewriter :text="displayedText" :speed="50" :delay="1000" :repeat="true" v-if="!searchFocus  && searchText.length === 0" class="ml-4 pr-4"/>
               </span>
-
             </div>
           </FormControl>
         </FormItem>
       </FormField>
     </form>
+
+    <!-- Résultats -->
+    <div v-if="searchFocus && searchText.length > 0" class="w-full mt-12 flex flex-col items-center gap-6">
+      <!-- Résultats textuels -->
+      <div v-for="result in searchResults" :key="result.id" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-4xl">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ result.title }}</h3>
+            <p class="text-gray-600 dark:text-gray-300 mt-2 text-sm">{{ result.description }}</p>
+            <div class="mt-4 text-xs text-gray-500 dark:text-gray-400 flex flex-wrap gap-4">
+              <span>Source : <a :href="result.link" class="underline" target="_blank">{{ result.link }}</a></span>
+              <span>Dernière mise à jour : {{ result.updatedAt || 'N/A' }}</span>
+              <span v-if="result.tags">Tags : {{ result.tags.join(', ') }}</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-center gap-2 ml-4">
+            <span class="text-yellow-500 font-semibold border border-yellow-500 px-2 py-0.5 rounded-full text-xs">Vérifié</span>
+            <div class="flex flex-col gap-1">
+              <button class="text-green-500 hover:text-green-600"><ThumbsUp class="text-green-500 w-5 h-5" /></button>
+              <button class="text-red-500 hover:text-red-600"><ThumbsDown class="text-red-500 w-5 h-5" /></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Résultats vidéos -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+        <div v-for="video in videoResults" :key="video.id" class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 text-center">
+          <img :src="video.thumbnail" alt="thumbnail" class="w-full h-40 object-cover rounded mb-4" />
+          <h4 class="text-md font-semibold text-gray-800 dark:text-white">{{ video.title }}</h4>
+          <p class="text-sm text-gray-500">{{ video.source }}</p>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
+
 <script lang="ts" setup>
 import { FormItem, FormLabel } from "@ui/components/form";
 import { Input } from "@ui/components/input";
 import { Search } from "lucide-vue-next";
-import {Typewriter} from "@ui/components/typewriter";
-import {cn} from "@lib/utils";
+import { Typewriter } from "@ui/components/typewriter";
+import { cn } from "@lib/utils";
+import { ThumbsUp, ThumbsDown } from 'lucide-vue-next'
+import { ref, watch } from 'vue';
 
 const displayedText = ref([
   "How to make a loop in Golang",
@@ -56,12 +91,30 @@ const displayedText = ref([
   "Testing strategies for modern web development",
   "Deploying applications on cloud platforms"
 ]);
+
 const searchText = ref("");
 const searchFocus = ref(false);
-function handleSearchChange(e: Event) {
-  searchFocus.value = true;
-}
+const searchResults = ref<any[]>([]);
+const videoResults = ref<any[]>([]);
+
+watch(searchText, async (val) => {
+  if (val.trim().length === 0) {
+    searchResults.value = [];
+    videoResults.value = [];
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/search?q=${encodeURIComponent(val)}`);
+    const data = await res.json();
+    searchResults.value = data.texts || [];
+    videoResults.value = data.videos || [];
+  } catch (e) {
+    console.error("Erreur lors de la recherche :", e);
+  }
+});
 </script>
+
 <style scoped>
 #search:hover + span .search-icon {
   @apply text-emerald-500 rotate-[360deg] transition duration-300 ease-in-out;
