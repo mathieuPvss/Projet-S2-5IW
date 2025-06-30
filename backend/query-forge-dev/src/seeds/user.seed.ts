@@ -33,12 +33,28 @@ const users: Partial<User>[] = [
 export const seedUsers = async (dataSource: DataSource) => {
   const userRepository = dataSource.getRepository(User);
 
-  await Promise.all(
-    users.map(async (userData) => {
-      const user = userRepository.create(userData);
-      return userRepository.save(user);
-    }),
-  );
+  let usersCreated = 0;
+  let usersSkipped = 0;
 
-  console.log(`${users.length} utilisateurs ont été créés avec succès.`);
+  for (const userData of users) {
+    // Vérifier si l'utilisateur existe déjà
+    const existingUser = await userRepository.findOne({
+      where: { email: userData.email },
+    });
+
+    if (!existingUser) {
+      const user = userRepository.create(userData);
+      await userRepository.save(user);
+      usersCreated++;
+      console.log(`Utilisateur ${userData.email} créé avec succès.`);
+    } else {
+      usersSkipped++;
+      console.log(`Utilisateur ${userData.email} existe déjà.`);
+    }
+  }
+
+  console.log(
+    `${usersCreated} nouveaux utilisateurs ont été créés avec succès.`,
+  );
+  console.log(`${usersSkipped} utilisateurs existants ont été ignorés.`);
 };

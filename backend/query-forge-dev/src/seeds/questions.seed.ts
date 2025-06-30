@@ -14,15 +14,33 @@ export const seedQuestions = async (dataSource: DataSource) => {
     skip_empty_lines: true,
   });
 
-  const questions = records.map((record: any) => {
-    const question = new Question();
-    question.technologie = record.technologie;
-    question.category = record.type;
-    question.content = record.question;
-    return question;
-  });
+  let questionsCreated = 0;
+  let questionsSkipped = 0;
 
-  await questionRepository.save(questions);
+  for (const record of records) {
+    // Vérifier si la question existe déjà
+    const existingQuestion = await questionRepository.findOne({
+      where: {
+        technologie: record.technologie,
+        category: record.type,
+        content: record.question,
+      },
+    });
 
-  console.log(`${questions.length} questions ont été importées avec succès.`);
+    if (!existingQuestion) {
+      const question = new Question();
+      question.technologie = record.technologie;
+      question.category = record.type;
+      question.content = record.question;
+      await questionRepository.save(question);
+      questionsCreated++;
+    } else {
+      questionsSkipped++;
+    }
+  }
+
+  console.log(
+    `${questionsCreated} nouvelles questions ont été importées avec succès.`,
+  );
+  console.log(`${questionsSkipped} questions existantes ont été ignorées.`);
 };

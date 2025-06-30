@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^9.0.2",
+    "apify-client": "^2.12.5",
     "axios": "^1.10.0",
     "dotenv": "^16.5.0",
     "googleapis": "^150.0.1",
