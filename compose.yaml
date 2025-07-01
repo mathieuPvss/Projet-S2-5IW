@@ -108,6 +108,21 @@ services:
     depends_on:
       - elasticsearch
 
+  agent-ia:
+    image: node:23-alpine
+    container_name: agent-ia
+    working_dir: /app
+    volumes:
+      - ./backend/agent-ia:/app
+    ports:
+      - ${AGENT_AI_PORT}:${AGENT_AI_PORT}
+    environment:
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AGENT_AI_PORT=${AGENT_AI_PORT}
+      - AGENT_AI_REQUIRE_AUTH=${AGENT_AI_REQUIRE_AUTH}
+    entrypoint: ["sh", "./entrypoint.sh"]
+
 volumes:
   postgres-query-forge-dev:
   esdata:
