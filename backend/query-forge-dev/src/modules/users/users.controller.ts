@@ -18,7 +18,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role, User } from './entities/user.entity';
 import { UsersService } from './users.service';
-import { Roles } from 'src/common/decorator/roles.decorateur';
+import { Roles } from 'src/common/decorator/roles.decorator';
 
 @ApiTags('Users')
 @Controller('users')
