@@ -6,6 +6,23 @@ import { Content } from "./interfaces/content.interface";
 import { TiktokService } from "./services/tiktok.service";
 import { ApifyClient } from "apify-client";
 
+interface ScrapeConfig {
+  startUrl: string;
+
+  followLinks?: {
+    selector: string;
+    limit?: number;
+  };
+
+  scrapeFields: {
+    [fieldName: string]: string;
+  };
+
+  nextPageSelector?: string;
+
+  maxPages?: number;
+}
+
 // Configuration de la connexion à la base de données
 const pool = new Pool({
   host: process.env.POSTGRES_HOST,
@@ -169,8 +186,10 @@ async function syncContent(): Promise<void> {
     // Récupération des content sources
     const contentSourcesResult = await pool.query<{
       id: string;
+      enabled: boolean;
       name: string;
-      type: string;
+      type: "scraper" | "api";
+      config: ScrapeConfig | null;
     }>("SELECT * FROM content_source");
 
     // Récupération des questions en attente (max 10 par technologie)
@@ -210,21 +229,36 @@ async function syncContent(): Promise<void> {
     for (const source of contentSourcesResult.rows) {
       console.log(`Traitement de la source: ${source.name}`);
 
-      switch (source.name) {
-        case "youtube":
-          await processYouTubeQuestions(
-            questionsResultForYoutube.rows,
-            source.id
-          );
+      switch (source.type) {
+        case "scraper":
+          if (source.enabled) {
+            await processScraperService(source.config);
+          }
           break;
-        case "tiktok":
-          await processTiktokQuestions(
-            questionsResultForTiktok.rows,
-            source.id
-          );
+        case "api":
+          switch (source.name) {
+            case "youtube":
+              if (source.enabled) {
+                await processYouTubeQuestions(
+                  questionsResultForYoutube.rows,
+                  source.id
+                );
+              }
+              break;
+            case "tiktok":
+              if (source.enabled) {
+                await processTiktokQuestions(
+                  questionsResultForTiktok.rows,
+                  source.id
+                );
+              }
+              break;
+            default:
+              console.log(`Source non prise en charge: ${source.name}`);
+          }
           break;
         default:
-          console.log(`Source non prise en charge: ${source.name}`);
+          console.log(`Source type non prise en charge: ${source.name}`);
       }
     }
 

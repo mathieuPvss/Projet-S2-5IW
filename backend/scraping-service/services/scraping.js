@@ -141,7 +141,6 @@ class ScrapingService {
 
         const extractedData = {
             url: currentUrl,
-            timestamp: new Date().toISOString()
         };
 
         // Extraire chaque champ configuré

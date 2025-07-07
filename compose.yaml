@@ -153,8 +153,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - ${SCRAPING_SERVICE_PORT}:${SCRAPING_SERVICE_PORT}
-    # volumes:
-    #   - ./backend/scraping-service:/app
+    volumes:
+      - ./backend/scraping-service:/app
     environment:
       - SCRAPING_SERVICE_PORT=${SCRAPING_SERVICE_PORT}
     cap_add:
