@@ -1,0 +1,14 @@
+{
+  "startUrl": "https://quotes.toscrape.com/",
+  "followLinks": {
+    "selector": "a[href*='/author/']",
+    "limit": 3
+  },
+  "scrapeFields": {
+    "quote": ".text",
+    "author": ".author",
+    "tags": ".tag"
+  },
+  "nextPageSelector": ".next a",
+  "maxPages": 2
+}

@@ -1,0 +1,10 @@
+{
+  "startUrl": "https://quotes.toscrape.com/",
+  "scrapeFields": {
+    "quote": ".text",
+    "author": ".author",
+    "tags": ".tag"
+  },
+  "nextPageSelector": ".next a",
+  "maxPages": 3
+}
