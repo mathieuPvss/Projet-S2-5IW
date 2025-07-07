@@ -198,7 +198,7 @@ class ScrapingService {
                     const links = Array.from(document.querySelectorAll('a'));
                     return links.find(link => link.textContent.trim().includes(text));
                 }, searchText);
-                console.log(nextButton);
+
 
                 if (!nextButton.asElement()) {
                     console.log(`🔚 Bouton avec le texte "${searchText}" non trouvé`);
@@ -227,11 +227,35 @@ class ScrapingService {
                 return false;
             }
 
+            const buttonHTML = await this.page.evaluate((element) => {
+                return {
+                    outerHTML: element.outerHTML,
+                    innerHTML: element.innerHTML,
+                    textContent: element.textContent.trim(),
+                    tagName: element.tagName,
+                    className: element.className,
+                    id: element.id,
+                    href: element.href || null,
+                    disabled: element.disabled,
+                    title: element.title || null
+                };
+            }, nextButton);
+
+
             // Cliquer sur le bouton
-            await Promise.all([
-                this.page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 0 }),
-                nextButton.click()
-            ]);
+            if (buttonHTML.href) {
+                console.log(`🔗 Navigation directe vers: ${buttonHTML.href}`);
+                await this.page.goto(buttonHTML.href, {
+                    waitUntil: 'networkidle2',
+                    timeout: 0
+                });
+            } else {
+                // Fallback: essayer le click si pas de href
+                await Promise.all([
+                    this.page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 0 }),
+                    nextButton.click()
+                ]);
+            }
 
             console.log('➡️ Navigation vers la page suivante');
             return true;
