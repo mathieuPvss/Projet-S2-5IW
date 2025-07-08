@@ -1,0 +1,70 @@
+- name: Install K3s on master
+  hosts: master
+  become: true
+  vars_files:
+    - group_vars/all/vault.yml
+
+  tasks:
+    - name: Copy k3s install script
+      copy:
+        src: roles/k3s/files/k3s_install.sh
+        dest: /tmp/k3s_install.sh
+        owner: "{{ vm_user }}"
+        group: "{{ vm_user }}"
+        mode: '0755'
+
+    - name: Run k3s install script
+      ansible.builtin.shell: /tmp/k3s_install.sh
+      become_user: "{{ vm_user }}"
+      environment:
+        PASSWORD: "{{ vm_password }}"
+
+- name: Join workers to K3s cluster
+  hosts: worker
+  become: true
+  vars_files:
+    - group_vars/all/vault.yml
+
+  vars:
+    master_ip: "{{ groups['master'][0] }}"
+
+  pre_tasks:
+    - name: Get node token from master
+      delegate_to: "{{ groups['master'][0] }}"
+      run_once: true
+      command: cat /var/lib/rancher/k3s/server/node-token
+      register: raw_token
+
+    - name: Set global fact for token
+      run_once: true
+      delegate_to: localhost
+      set_fact:
+        global_k3s_token: "{{ raw_token.stdout | trim }}"
+        cacheable: true
+
+    - name: Inject token into all worker hosts
+      run_once: true
+      delegate_to: localhost
+      add_host:
+        name: "{{ item }}"
+        groups: injected
+        token: "{{ global_k3s_token }}"
+      loop: "{{ groups['worker'] }}"
+
+  tasks:
+    - name: Copy join script to worker
+      copy:
+        src: roles/k3s/files/join_node.sh
+        dest: /tmp/join_node.sh
+        owner: "{{ vm_user }}"
+        group: "{{ vm_user }}"
+        mode: '0755'
+
+    - name: Run join script as agent
+      ansible.builtin.shell: /tmp/join_node.sh agent
+      become_user: "{{ vm_user }}"
+      environment:
+        TOKEN: "{{ hostvars[inventory_hostname].token }}"
+        MASTER_IP: "{{ master_ip }}"
+        K3S_VERSION: "v1.31.6+k3s1"
+        PASSWORD: "{{ vm_password }}"
