@@ -52,7 +52,7 @@ class ScrapingService {
     async initBrowser() {
         this.browser = await puppeteer.launch({
             headless: 'new',
-            // executablePath: '/home/pptruser/.cache/puppeteer/chrome/linux-136.0.7103.92/chrome-linux64/chrome',
+            executablePath: '/home/pptruser/.cache/puppeteer/chrome/linux-136.0.7103.92/chrome-linux64/chrome',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
