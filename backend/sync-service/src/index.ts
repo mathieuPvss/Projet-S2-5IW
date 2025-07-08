@@ -4,9 +4,9 @@ import { ElasticsearchService } from "./services/elasticsearch.service";
 import { YouTubeService } from "./services/youtube.service";
 import { Content } from "./interfaces/content.interface";
 import { TiktokService } from "./services/tiktok.service";
-import { ApifyClient } from "apify-client";
+import { ScraperService } from "./services/scraper.service";
 
-interface ScrapeConfig {
+export interface ScrapeConfig {
   startUrl: string;
 
   followLinks?: {
@@ -35,6 +35,7 @@ const pool = new Pool({
 const elasticsearchService = new ElasticsearchService();
 const youtubeService = new YouTubeService(process.env.YOUTUBE_API_KEY || "");
 const tiktokService = new TiktokService();
+const scraperService = new ScraperService();
 
 // Constantes
 const YOUTUBE_DAILY_LIMIT = 100;
@@ -231,8 +232,9 @@ async function syncContent(): Promise<void> {
 
       switch (source.type) {
         case "scraper":
-          if (source.enabled) {
-            await processScraperService(source.config);
+          if (source.enabled && source.config) {
+            let newContents = await scraperService.scrapeContent(source.config);
+            await elasticsearchService.indexBulkContent(newContents);
           }
           break;
         case "api":

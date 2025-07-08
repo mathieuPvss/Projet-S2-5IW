@@ -52,7 +52,7 @@ export const seedContentSources = async (dataSource: DataSource) => {
       },
       scrapeFields: {
         titre: 'h1.fs-headline1 a.question-hyperlink',
-        desc: '.js-post-body',
+        description: '.js-post-body',
         tags: 'ul.js-post-tag-list-wrapper a.s-tag',
         publishDate: "time[itemprop='dateCreated']@datetime",
       },
