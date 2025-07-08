@@ -179,6 +179,32 @@ async function processTiktokQuestions(
   }
 }
 
+async function processScraper(
+  sourceId: string,
+  sourceName: string,
+  sourceConfig: ScrapeConfig
+): Promise<void> {
+  try {
+    let newContents = await scraperService.scrapeContent(
+      sourceName,
+      sourceConfig
+    );
+    if (newContents.length > 0) {
+      await elasticsearchService.indexBulkContent(newContents);
+
+      await pool.query(
+        "UPDATE content_source SET enabled = false WHERE id = $1",
+        [sourceId]
+      );
+    }
+  } catch (error) {
+    console.error(
+      `Erreur lors du traitement de la source "${sourceName}":`,
+      error
+    );
+  }
+}
+
 // Fonction principale de synchronisation
 async function syncContent(): Promise<void> {
   console.log("Début de la synchronisation...");
@@ -233,14 +259,14 @@ async function syncContent(): Promise<void> {
       switch (source.type) {
         case "scraper":
           if (source.enabled && source.config) {
-            let newContents = await scraperService.scrapeContent(source.config);
-            await elasticsearchService.indexBulkContent(newContents);
+            await processScraper(source.id, source.name, source.config);
           }
           break;
         case "api":
           switch (source.name) {
             case "youtube":
               if (source.enabled) {
+                console.log("youtube test");
                 await processYouTubeQuestions(
                   questionsResultForYoutube.rows,
                   source.id
@@ -249,6 +275,7 @@ async function syncContent(): Promise<void> {
               break;
             case "tiktok":
               if (source.enabled) {
+                console.log("tiktok test");
                 await processTiktokQuestions(
                   questionsResultForTiktok.rows,
                   source.id

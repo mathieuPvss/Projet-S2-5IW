@@ -22,9 +22,14 @@ export class ScraperService {
       process.env.SCRAPER_SERVICE_URL || "http://scraping-service:3001";
   }
 
-  async scrapeContent(config: ScrapeConfig): Promise<Content[]> {
+  async scrapeContent(
+    sourceName: string,
+    config: ScrapeConfig
+  ): Promise<Content[]> {
     try {
-      console.log(`🔍 Début du scraping pour: ${config.startUrl}`);
+      console.log(
+        `🔍 Début du scraping pour: ${sourceName} - ${config.startUrl}`
+      );
 
       const response = await axios.post<ScrapeResponse>(
         `${this.scraperServiceUrl}/api/scrape`,
@@ -42,11 +47,6 @@ export class ScraperService {
       }
 
       const contents: Content[] = response.data.results.map((result, index) => {
-        // Générer un ID unique basé sur l'URL et l'index
-        const sourceId = `scrape_${Buffer.from(config.startUrl + index)
-          .toString("base64")
-          .substring(0, 16)}`;
-
         // Construire le titre à partir des champs scrapés ou utiliser une valeur par défaut
         const title =
           result.title ||
@@ -69,8 +69,8 @@ export class ScraperService {
           : [];
 
         const content: Content = {
-          source: "scraper " + config.startUrl,
-          source_id: sourceId,
+          source: sourceName,
+          source_id: config.startUrl,
           url: result.url || config.startUrl,
           title: String(title).substring(0, 255), // Limiter la taille du titre
           description: String(description).substring(0, 1000), // Limiter la taille de la description

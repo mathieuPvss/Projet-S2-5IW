@@ -51,13 +51,13 @@ export const seedContentSources = async (dataSource: DataSource) => {
         limit: 15,
       },
       scrapeFields: {
-        titre: 'h1.fs-headline1 a.question-hyperlink',
+        title: 'h1.fs-headline1 a.question-hyperlink',
         description: '.js-post-body',
         tags: 'ul.js-post-tag-list-wrapper a.s-tag',
         publishDate: "time[itemprop='dateCreated']@datetime",
       },
-      nextPageSelector: 'text:Next',
-      maxPages: 250,
+      nextPageSelector: "a.s-pagination--item[rel='next']",
+      maxPages: 10,
     };
     // avec cette config va prendre environ 3H pour avoir 3818 questions de stackoverflow :(
     stackoverflow = new ContentSource();
