@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean, IsObject } from 'class-validator';
+import { ScrapeConfig } from '../entities/content-source.entity';
 
 export class CreateContentSourceDto {
   @ApiProperty({
@@ -17,4 +18,25 @@ export class CreateContentSourceDto {
   @IsNotEmpty()
   @IsBoolean()
   enabled: boolean;
+
+  @ApiProperty({
+    description: 'Type de la source',
+    example: 'scraper',
+  })
+  @IsNotEmpty()
+  @IsString()
+  type: 'scraper';
+
+  @ApiProperty({
+    description: 'Configuration de la source',
+    example: {
+      startUrl: 'https://exemple.com/questions',
+      scrapeFields: {
+        titre: 'h1.fs-headline1 a.question-hyperlink',
+      },
+    },
+  })
+  @IsNotEmpty()
+  @IsObject()
+  config: ScrapeConfig;
 }

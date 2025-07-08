@@ -1,0 +1,13 @@
+{
+  "startUrl": "https://stackoverflow.com/questions",
+  "followLinks": {
+    "selector": "a.s-link[href*='/questions/']",
+    "limit": 3
+  },
+  "scrapeFields": {
+    "titre": "h1.fs-headline1 a.question-hyperlink",
+    "desc": ".js-post-body"
+  },
+  "maxPages": 5,
+  "nextPageSelector": "text:Next"
+}

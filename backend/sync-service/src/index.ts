@@ -4,7 +4,24 @@ import { ElasticsearchService } from "./services/elasticsearch.service";
 import { YouTubeService } from "./services/youtube.service";
 import { Content } from "./interfaces/content.interface";
 import { TiktokService } from "./services/tiktok.service";
-import { ApifyClient } from "apify-client";
+import { ScraperService } from "./services/scraper.service";
+
+export interface ScrapeConfig {
+  startUrl: string;
+
+  followLinks?: {
+    selector: string;
+    limit?: number;
+  };
+
+  scrapeFields: {
+    [fieldName: string]: string;
+  };
+
+  nextPageSelector?: string;
+
+  maxPages?: number;
+}
 
 // Configuration de la connexion à la base de données
 const pool = new Pool({
@@ -18,6 +35,7 @@ const pool = new Pool({
 const elasticsearchService = new ElasticsearchService();
 const youtubeService = new YouTubeService(process.env.YOUTUBE_API_KEY || "");
 const tiktokService = new TiktokService();
+const scraperService = new ScraperService();
 
 // Constantes
 const YOUTUBE_DAILY_LIMIT = 100;
@@ -161,6 +179,32 @@ async function processTiktokQuestions(
   }
 }
 
+async function processScraper(
+  sourceId: string,
+  sourceName: string,
+  sourceConfig: ScrapeConfig
+): Promise<void> {
+  try {
+    let newContents = await scraperService.scrapeContent(
+      sourceName,
+      sourceConfig
+    );
+    if (newContents.length > 0) {
+      await elasticsearchService.indexBulkContent(newContents);
+
+      await pool.query(
+        "UPDATE content_source SET enabled = false WHERE id = $1",
+        [sourceId]
+      );
+    }
+  } catch (error) {
+    console.error(
+      `Erreur lors du traitement de la source "${sourceName}":`,
+      error
+    );
+  }
+}
+
 // Fonction principale de synchronisation
 async function syncContent(): Promise<void> {
   console.log("Début de la synchronisation...");
@@ -169,8 +213,10 @@ async function syncContent(): Promise<void> {
     // Récupération des content sources
     const contentSourcesResult = await pool.query<{
       id: string;
+      enabled: boolean;
       name: string;
-      type: string;
+      type: "scraper" | "api";
+      config: ScrapeConfig | null;
     }>("SELECT * FROM content_source");
 
     // Récupération des questions en attente (max 10 par technologie)
@@ -210,21 +256,38 @@ async function syncContent(): Promise<void> {
     for (const source of contentSourcesResult.rows) {
       console.log(`Traitement de la source: ${source.name}`);
 
-      switch (source.name) {
-        case "youtube":
-          await processYouTubeQuestions(
-            questionsResultForYoutube.rows,
-            source.id
-          );
+      switch (source.type) {
+        case "scraper":
+          if (source.enabled && source.config) {
+            await processScraper(source.id, source.name, source.config);
+          }
           break;
-        case "tiktok":
-          await processTiktokQuestions(
-            questionsResultForTiktok.rows,
-            source.id
-          );
+        case "api":
+          switch (source.name) {
+            case "youtube":
+              if (source.enabled) {
+                console.log("youtube test");
+                await processYouTubeQuestions(
+                  questionsResultForYoutube.rows,
+                  source.id
+                );
+              }
+              break;
+            case "tiktok":
+              if (source.enabled) {
+                console.log("tiktok test");
+                await processTiktokQuestions(
+                  questionsResultForTiktok.rows,
+                  source.id
+                );
+              }
+              break;
+            default:
+              console.log(`Source non prise en charge: ${source.name}`);
+          }
           break;
         default:
-          console.log(`Source non prise en charge: ${source.name}`);
+          console.log(`Source type non prise en charge: ${source.name}`);
       }
     }
 

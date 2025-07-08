@@ -146,6 +146,24 @@ services:
     depends_on:
       - postgres
 
+  scraping-service:
+    container_name: scraping-service
+    build:
+      context: ./backend/scraping-service
+      dockerfile: Dockerfile
+    ports:
+      - ${SCRAPING_SERVICE_PORT}:${SCRAPING_SERVICE_PORT}
+    volumes:
+      - ./backend/scraping-service:/app
+    environment:
+      - SCRAPING_SERVICE_PORT=${SCRAPING_SERVICE_PORT}
+    cap_add:
+      - SYS_ADMIN
+    init: true
+    working_dir: /app
+    security_opt:
+      - seccomp:unconfined
+
 volumes:
   postgres-query-forge-dev:
   esdata:

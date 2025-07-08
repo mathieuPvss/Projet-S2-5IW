@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsBoolean } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsObject } from 'class-validator';
+import { ScrapeConfig } from '../entities/content-source.entity';
 
 export class UpdateContentSourceDto {
   @ApiProperty({
@@ -19,4 +20,23 @@ export class UpdateContentSourceDto {
   @IsOptional()
   @IsBoolean()
   enabled?: boolean;
+
+  @ApiProperty({
+    description: 'Type de la source',
+    example: 'scraper',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  type?: 'scraper';
+
+  @ApiProperty({
+    description: 'Configuration de la source',
+    example: {
+      startUrl: 'https://exemple.com/questions',
+    },
+  })
+  @IsOptional()
+  @IsObject()
+  config?: ScrapeConfig;
 }
