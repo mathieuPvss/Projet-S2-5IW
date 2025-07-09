@@ -37,7 +37,7 @@ import { useAuthStore} from "@/stores/auth";
 
 const activeTab = ref<string>('login');
 const baseUrl = useRuntimeConfig().public.apiBaseUrl
-
+console.log("Base URL:", baseUrl);
 const auth = useAuthStore();
 
 const handleChangeTab = (tab: string) => {
@@ -52,8 +52,6 @@ const handleRegister = async (values: Record<string, string>) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: values.lastname,
-        firstname: values.firstname,
         email: values.email,
         password: values.password,
       }),
@@ -99,10 +97,9 @@ const handleLogin = async (values: Record<string, string>) => {
       }),
     });
 
-    //const data: Record<string, string>[] = await response.json();
+   
+    const data: { access_token?: string; message?: string } = await response.json();
 
-    const data: { token: string, [key: string]: any } = await response.json();
-    
     if (!response.ok) {
       if(response.status === 401) {
         toast({
@@ -127,21 +124,34 @@ const handleLogin = async (values: Record<string, string>) => {
       });
       return;
     }
-    auth.login(data.token);
+
+    
+    if (data.access_token) {
+      auth.login(data.access_token);
+    } else {
+      toast({
+        title: 'Erreur',
+        description: 'Le token est manquant dans la réponse.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     toast({
       title: 'Connexion réussie !',
       description: 'Bienvenue !',
     });
     await navigateTo('/');
+
   } catch (error) {
     toast({
       title: 'Erreur',
-      description: error.message || 'Une erreur est survenue.',
+      description: (error as Error).message || 'Une erreur est survenue.',
       variant: 'destructive',
     });
   }
 };
+
 
 onMounted(() => {
   auth.init();

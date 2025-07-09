@@ -2,30 +2,57 @@
   <header
     :class="cn(
       'w-full p-4 bg-transparent sticky top-0 z-50 flex flex-row items-center justify-between transition-all duration-300 ease-in-out',
-       headerScrollClass
-     )"
+      headerScrollClass
+    )"
   >
     <NuxtLink href="/" class="flex items-center">
-      <SiteIcon height="24" width="48"/>
+      <SiteIcon height="24" width="48" />
       <span class="ml-2 font-bold">Gogole</span>
     </NuxtLink>
 
-    <Button v-if="isTablet && !isToggled" variant="ghost" @click="handleToggleMenu" aria-label="Toggle menu" class="h-full p-4 [&_svg]:size-12">
-      <Icon icon="ic:round-menu"/>
-    </Button>
-    <MainMenu v-else/>
+    <div class="flex items-center gap-4">
+      <!-- Menu burger pour les tablettes et mobiles uniquement si connecté -->
+      <Button
+        v-if="auth.token && isTablet && !isToggled"
+        variant="ghost"
+        @click="handleToggleMenu"
+        aria-label="Toggle menu"
+        class="h-full p-4 [&_svg]:size-12"
+      >
+        <Icon icon="ic:round-menu" />
+      </Button>
+
+      <!-- Menu principal si connecté -->
+      <MainMenu v-else-if="auth.token" />
+
+      <!-- Bouton de connexion si NON connecté -->
+      <NuxtLink
+        v-if="!auth.token"
+        href="/authentication"
+        class="text-sm font-medium hover:underline"
+      >
+        Connexion
+      </NuxtLink>
+    </div>
   </header>
-  <MobileMenu v-if="isTablet && isToggled" @toggle="handleToggleMenu"/>
+
+  <!-- Menu mobile si connecté -->
+  <MobileMenu
+    v-if="auth.token && isTablet && isToggled"
+    @toggle="handleToggleMenu"
+  />
 </template>
 
 <script lang="ts" setup>
-import { MainMenu } from "@ui/components/menu";
+import { MainMenu, MobileMenu } from "@ui/components/menu";
 import SiteIcon from "@/layers/base/components/SiteIcon.vue";
 import { useMediaQuery } from "@vueuse/core";
-import { MobileMenu } from "@ui/components/menu";
-import {Icon} from "@iconify/vue";
-import { onMounted } from "vue";
+import { Icon } from "@iconify/vue";
+import { onMounted, ref } from "vue";
 import { cn } from "@lib/utils";
+import { useAuthStore } from "@/stores/auth";
+
+const auth = useAuthStore();
 
 const isTablet = useMediaQuery("(max-width: 1024px)");
 const isToggled = ref(false);
@@ -36,9 +63,9 @@ const isScrolled = ref(false);
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
 });
+
 function handleScroll() {
   const scrollTop = window.scrollY;
-  console.log('Scroll Top:', scrollTop);
   if (!isScrolled.value && scrollTop > 300) {
     isScrolled.value = true;
     headerScrollClass.value = ' py-0';
