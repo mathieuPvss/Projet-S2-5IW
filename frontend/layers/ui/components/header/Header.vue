@@ -15,8 +15,10 @@
       <NuxtLink
         v-if="auth.user?.role === 'admin'"
         href="/admin"
-        class="text-sm font-medium hover:underline text-red-500"
+        class="flex items-center text-sm font-medium hover:underline text-red-500"
+        aria-label="Accéder au Backoffice"
       >
+        <Icon icon="mdi:view-dashboard" class="mr-1" />
         Backoffice
       </NuxtLink>
 
@@ -38,8 +40,10 @@
       <NuxtLink
         v-if="!auth.token"
         href="/authentication"
-        class="text-sm font-medium hover:underline"
+        class="flex items-center text-sm font-medium hover:underline"
+        aria-label="Se connecter"
       >
+        <Icon icon="mdi:login" class="mr-1" />
         Connexion
       </NuxtLink>
     </div>
