@@ -11,6 +11,15 @@
     </NuxtLink>
 
     <div class="flex items-center gap-4">
+      <!-- Backoffice si admin -->
+      <NuxtLink
+        v-if="auth.user?.role === 'admin'"
+        href="/admin"
+        class="text-sm font-medium hover:underline text-red-500"
+      >
+        Backoffice
+      </NuxtLink>
+
       <!-- Menu burger pour les tablettes et mobiles uniquement si connecté -->
       <Button
         v-if="auth.token && isTablet && !isToggled"
