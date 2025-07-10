@@ -12,7 +12,9 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
 
   nestjs:
-    image: node:23-alpine
+    build:
+      context: ./backend/query-forge-dev
+      dockerfile: Dockerfile
     container_name: nestjs-query-forge-dev
     working_dir: /app
     volumes:
@@ -28,7 +30,6 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
       - JWT_SECRET=${JWT_SECRET}
       - NEST_PORT=${NEST_PORT}
-    entrypoint: ["sh", "./entrypoint.sh"]
     depends_on:
       - postgres
 
