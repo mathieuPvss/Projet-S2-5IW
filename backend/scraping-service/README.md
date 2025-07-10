@@ -104,6 +104,20 @@ Retourne un exemple de configuration avec documentation.
 
 Vérification de santé du serveur.
 
+### `GET /metrics`
+
+Endpoint pour les métriques Prometheus. Retourne les métriques de performance et d'utilisation du service de scraping au format Prometheus.
+
+#### Métriques disponibles
+
+- `scraping_operations_total` - Nombre total d'opérations de scraping
+- `scraping_duration_seconds` - Durée des opérations en secondes
+- `scraping_errors_total` - Nombre total d'erreurs
+- `scraping_visited_pages_total` - Nombre de pages visitées
+- `scraping_browser_instances` - Instances de navigateur actives
+
+Pour plus de détails sur les métriques, consultez le fichier [METRICS.md](./METRICS.md).
+
 ## 🎯 Exemples d'utilisation
 
 ### Scraping simple (page unique)

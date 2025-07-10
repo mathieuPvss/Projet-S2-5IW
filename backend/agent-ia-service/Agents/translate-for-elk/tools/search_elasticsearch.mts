@@ -49,6 +49,7 @@ export const searchElasticsearch = tool(
         .map((hit) => {
           const src = hit._source as any;
           return {
+            id: hit._id,
             score: hit._score,
             source: src.source,
             title: src.title,

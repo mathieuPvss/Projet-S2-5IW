@@ -1,5 +1,14 @@
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
+const {
+    scrapingDurationHistogram,
+    activePagesGauge,
+    browserInstancesGauge,
+    visitedPagesCounter,
+    followedLinksCounter,
+    responseSizeHistogram,
+    scrapingErrorCounter
+} = require('./metrics');
 
 class ScrapingService {
     constructor(config) {
@@ -10,6 +19,8 @@ class ScrapingService {
     }
 
     async scrape() {
+        const timer = scrapingDurationHistogram.startTimer({ operation_type: 'full_scrape' });
+
         try {
             // Initialiser le navigateur
             await this.initBrowser();
@@ -20,6 +31,7 @@ class ScrapingService {
 
             while (hasNextPage && currentPage <= this.config.maxPages) {
                 console.log(`📄 Traitement de la page ${currentPage}`);
+                activePagesGauge.set(currentPage);
 
                 // Aller à la page (ou y rester si c'est la première)
                 if (currentPage === 1) {
@@ -27,6 +39,7 @@ class ScrapingService {
                         waitUntil: 'networkidle2',
                         timeout: 0
                     });
+                    visitedPagesCounter.inc();
                 }
 
                 // Extraire les données de la page actuelle
@@ -35,6 +48,9 @@ class ScrapingService {
                 // Vérifier s'il y a une page suivante
                 if (this.config.nextPageSelector) {
                     hasNextPage = await this.goToNextPage();
+                    if (hasNextPage) {
+                        visitedPagesCounter.inc();
+                    }
                 } else {
                     hasNextPage = false;
                 }
@@ -46,40 +62,58 @@ class ScrapingService {
             return this.results;
         } finally {
             await this.closeBrowser();
+            activePagesGauge.set(0);
+            timer();
         }
     }
 
     async initBrowser() {
-        this.browser = await puppeteer.launch({
-            headless: 'new',
-            executablePath: '/home/pptruser/.cache/puppeteer/chrome/linux-136.0.7103.92/chrome-linux64/chrome',
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-accelerated-2d-canvas',
-                '--no-first-run',
-                '--no-zygote',
-                '--single-process',
-                '--disable-gpu'
-            ]
-        });
+        const timer = scrapingDurationHistogram.startTimer({ operation_type: 'browser_init' });
 
-        this.page = await this.browser.newPage();
+        try {
+            this.browser = await puppeteer.launch({
+                headless: 'new',
+                executablePath: '/home/pptruser/.cache/puppeteer/chrome/linux-136.0.7103.92/chrome-linux64/chrome',
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--single-process',
+                    '--disable-gpu'
+                ]
+            });
 
-        // Configurer la page
-        await this.page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-        await this.page.setViewport({ width: 1280, height: 720 });
+            browserInstancesGauge.inc();
+            this.page = await this.browser.newPage();
 
-        // Bloquer les ressources non nécessaires pour améliorer les performances
-        await this.page.setRequestInterception(true);
-        this.page.on('request', (req) => {
-            if (req.resourceType() === 'stylesheet' || req.resourceType() === 'font' || req.resourceType() === 'image') {
-                req.abort();
-            } else {
-                req.continue();
-            }
-        });
+            // Configurer la page
+            await this.page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+            await this.page.setViewport({ width: 1280, height: 720 });
+
+            // Bloquer les ressources non nécessaires pour améliorer les performances
+            await this.page.setRequestInterception(true);
+            this.page.on('request', (req) => {
+                if (req.resourceType() === 'stylesheet' || req.resourceType() === 'font' || req.resourceType() === 'image') {
+                    req.abort();
+                } else {
+                    req.continue();
+                }
+            });
+
+            // Instrumenter les réponses pour mesurer la taille
+            this.page.on('response', (response) => {
+                const contentLength = response.headers()['content-length'];
+                if (contentLength) {
+                    responseSizeHistogram.observe(parseInt(contentLength));
+                }
+            });
+
+        } finally {
+            timer();
+        }
     }
 
     async scrapePage() {
@@ -120,6 +154,9 @@ class ScrapingService {
                     timeout: 0
                 });
 
+                followedLinksCounter.inc();
+                visitedPagesCounter.inc();
+
                 // Extraire les données
                 await this.extractDataFromCurrentPage();
 
@@ -130,6 +167,7 @@ class ScrapingService {
                 });
             } catch (error) {
                 console.error(`❌ Erreur lors du traitement du lien ${link}:`, error.message);
+                scrapingErrorCounter.inc({ error_type: 'link_processing_error' });
             }
         }
     }
@@ -177,6 +215,7 @@ class ScrapingService {
             } catch (error) {
                 console.error(`❌ Erreur lors de l'extraction du champ ${fieldName}:`, error.message);
                 extractedData[fieldName] = '';
+                scrapingErrorCounter.inc({ error_type: 'field_extraction_error' });
             }
         }
 
@@ -268,6 +307,7 @@ class ScrapingService {
     async closeBrowser() {
         if (this.browser) {
             await this.browser.close();
+            browserInstancesGauge.dec();
         }
     }
 }

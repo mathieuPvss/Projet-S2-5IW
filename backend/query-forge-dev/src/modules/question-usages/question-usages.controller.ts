@@ -14,11 +14,15 @@ import { CreateQuestionUsageDto } from './dto/create-question-usage.dto';
 import { UpdateQuestionUsageDto } from './dto/update-question-usage.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { QuestionUsage } from './entities/question-usage.entity';
+import { MetricsService } from '../metrics/metrics.service';
 
 @ApiTags('question-usages')
 @Controller('question-usages')
 export class QuestionUsagesController {
-  constructor(private readonly questionUsagesService: QuestionUsagesService) {}
+  constructor(
+    private readonly questionUsagesService: QuestionUsagesService,
+    private readonly metricsService: MetricsService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer une nouvelle utilisation de question' })
@@ -27,8 +31,12 @@ export class QuestionUsagesController {
     description: "L'utilisation de question a été créée avec succès.",
     type: QuestionUsage,
   })
-  create(@Body() createQuestionUsageDto: CreateQuestionUsageDto) {
-    return this.questionUsagesService.create(createQuestionUsageDto);
+  async create(@Body() createQuestionUsageDto: CreateQuestionUsageDto) {
+    const result = await this.questionUsagesService.create(
+      createQuestionUsageDto,
+    );
+    this.metricsService.incrementQuestionUsages('create');
+    return result;
   }
 
   @Get()
@@ -38,8 +46,10 @@ export class QuestionUsagesController {
     description: 'Liste de toutes les utilisations de questions.',
     type: [QuestionUsage],
   })
-  findAll() {
-    return this.questionUsagesService.findAll();
+  async findAll() {
+    const result = await this.questionUsagesService.findAll();
+    this.metricsService.incrementQuestionUsages('findAll');
+    return result;
   }
 
   @Get(':id')
@@ -53,8 +63,10 @@ export class QuestionUsagesController {
     status: 404,
     description: 'Utilisation de question non trouvée.',
   })
-  findOne(@Param('id') id: string) {
-    return this.questionUsagesService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const result = await this.questionUsagesService.findOne(id);
+    this.metricsService.incrementQuestionUsages('findOne');
+    return result;
   }
 
   @Patch(':id')
@@ -68,11 +80,16 @@ export class QuestionUsagesController {
     status: 404,
     description: 'Utilisation de question non trouvée.',
   })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateQuestionUsageDto: UpdateQuestionUsageDto,
   ) {
-    return this.questionUsagesService.update(id, updateQuestionUsageDto);
+    const result = await this.questionUsagesService.update(
+      id,
+      updateQuestionUsageDto,
+    );
+    this.metricsService.incrementQuestionUsages('update');
+    return result;
   }
 
   @Delete(':id')
@@ -86,7 +103,9 @@ export class QuestionUsagesController {
     status: 404,
     description: 'Utilisation de question non trouvée.',
   })
-  remove(@Param('id') id: string) {
-    return this.questionUsagesService.remove(id);
+  async remove(@Param('id') id: string) {
+    const result = await this.questionUsagesService.remove(id);
+    this.metricsService.incrementQuestionUsages('remove');
+    return result;
   }
 }

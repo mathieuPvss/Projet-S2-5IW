@@ -19,11 +19,15 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Role, User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { Roles } from 'src/common/decorator/roles.decorator';
+import { MetricsService } from '../metrics/metrics.service';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly metricsService: MetricsService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer un nouvel utilisateur' })
@@ -33,8 +37,10 @@ export class UsersController {
     type: User,
   })
   @Public()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    const result = await this.usersService.create(createUserDto);
+    this.metricsService.incrementDbOperations('create', 'user', 'success');
+    return result;
   }
 
   @Get()
@@ -46,8 +52,10 @@ export class UsersController {
   })
   @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN)
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    const result = await this.usersService.findAll();
+    this.metricsService.incrementDbOperations('read', 'user', 'success');
+    return result;
   }
 
   @Get('id/:id')
@@ -55,8 +63,10 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Utilisateur trouvé.', type: User })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé.' })
   @ApiBearerAuth('access-token')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const result = await this.usersService.findOne(id);
+    this.metricsService.incrementDbOperations('read', 'user', 'success');
+    return result;
   }
 
   @Put(':id')
@@ -68,8 +78,10 @@ export class UsersController {
   })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé.' })
   @ApiBearerAuth('access-token')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    const result = await this.usersService.update(id, updateUserDto);
+    this.metricsService.incrementDbOperations('update', 'user', 'success');
+    return result;
   }
 
   @Delete(':id')
@@ -78,7 +90,9 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé.' })
   @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN)
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  async remove(@Param('id') id: string) {
+    const result = await this.usersService.remove(id);
+    this.metricsService.incrementDbOperations('delete', 'user', 'success');
+    return result;
   }
 }
