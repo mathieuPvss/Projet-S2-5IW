@@ -109,7 +109,9 @@ services:
       - elasticsearch
 
   agent-ia-service:
-    image: node:23-alpine
+    build:
+      context: ./backend/agent-ia-service
+      dockerfile: Dockerfile
     container_name: agent-ia-service-query-forge-dev
     working_dir: /app
     volumes:
@@ -122,7 +124,6 @@ services:
       - AGENT_AI_PORT=${AGENT_AI_PORT}
       - AGENT_AI_REQUIRE_AUTH=${AGENT_AI_REQUIRE_AUTH}
       - JWT_SECRET=${JWT_SECRET}
-    entrypoint: ["sh", "./entrypoint.sh"]
 
   auth-service:
     image: node:23-alpine
