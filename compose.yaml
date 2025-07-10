@@ -126,7 +126,9 @@ services:
       - JWT_SECRET=${JWT_SECRET}
 
   auth-service:
-    image: node:23-alpine
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
     container_name: auth-service-query-forge-dev
     working_dir: /app
     volumes:
@@ -143,7 +145,6 @@ services:
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN}
       - PORT=${AUTH_PORT}
-    entrypoint: ["sh", "./entrypoint.sh"]
     depends_on:
       - postgres
 
