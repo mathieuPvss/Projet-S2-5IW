@@ -19,6 +19,7 @@ services:
     working_dir: /app
     volumes:
       - ./backend/query-forge-dev:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
     ports:
       - 3000:${NEST_PORT}
       - 9229:9229
@@ -117,6 +118,7 @@ services:
     working_dir: /app
     volumes:
       - ./backend/agent-ia-service:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
     ports:
       - ${AGENT_AI_PORT}:${AGENT_AI_PORT}
     environment:
@@ -134,6 +136,7 @@ services:
     working_dir: /app
     volumes:
       - ./backend/auth-service:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
     ports:
       - 4000:4000
     environment:
@@ -156,8 +159,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - ${SCRAPING_SERVICE_PORT}:${SCRAPING_SERVICE_PORT}
-    # volumes:
-    #   - ./backend/scraping-service:/app
+    volumes:
+      - ./backend/scraping-service:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
     environment:
       - SCRAPING_SERVICE_PORT=${SCRAPING_SERVICE_PORT}
     cap_add:
