@@ -167,6 +167,25 @@ services:
     security_opt:
       - seccomp:unconfined
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    container_name: frontend-query-forge-dev
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
+    environment:
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=4444
+    ports:
+      - 4444:4444
+    depends_on:
+      - nestjs
+      - auth-service
+      - agent-ia-service
+
 volumes:
   postgres-query-forge-dev:
   esdata:
