@@ -79,4 +79,10 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: "2025-04-07",
+
+  nitro: {
+    routeRules: {
+      "/metrics": { proxy: "/api/metrics" },
+    },
+  },
 });
