@@ -7,7 +7,7 @@
   >
     <NuxtLink href="/" class="flex items-center">
       <SiteIcon height="24" width="48"/>
-      <span class="ml-2 font-bold">Gogole</span>
+      <span class="ml-2 font-bold">Query Forge Dev</span>
     </NuxtLink>
 
     <Button v-if="isTablet && !isToggled" variant="ghost" @click="handleToggleMenu" aria-label="Toggle menu" class="h-full p-4 [&_svg]:size-12">

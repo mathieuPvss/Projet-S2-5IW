@@ -4,7 +4,7 @@
       <div class="flex h-8 w-8 p-1 items-center justify-center rounded-md bg-primary text-primary-foreground">
         <SiteIcon color="white"/>
       </div>
-      Gogole Inc.
+      Query Forge Dev
     </a>
     <Tabs class="w-[400px]" :model-value="activeTab">
       <TabsList class="grid w-full grid-cols-2">
