@@ -37,7 +37,6 @@ import { useAuthStore} from "@/stores/auth";
 
 const activeTab = ref<string>('login');
 const baseUrl = useRuntimeConfig().public.apiBaseUrl
-console.log("Base URL:", baseUrl);
 const auth = useAuthStore();
 
 const handleChangeTab = (tab: string) => {
