@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monitoring-ingress
+  namespace: monitoring
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+    kubernetes.io/ingress.class: traefik
+spec:
+  tls:
+    - hosts:
+        - grafana.query-forge-dev.ualtarh.com
+      secretName: monitoring-tls
+  rules:
+    # Grafana
+    - host: grafana.query-forge-dev.ualtarh.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000

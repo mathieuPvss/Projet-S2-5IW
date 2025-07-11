@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-metrics
+  namespace: query-forge-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-metrics
+  template:
+    metadata:
+      labels:
+        app: postgres-metrics
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9187"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: postgres-exporter
+          image: prometheuscommunity/postgres-exporter:latest
+          ports:
+            - containerPort: 9187
+          env:
+            - name: DATA_SOURCE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: POSTGRES_URI_EXTERNAL
+          envFrom:
+            - secretRef:
+                name: database-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service-metrics
+  namespace: query-forge-dev
+  labels:
+    app: postgres-metrics
+spec:
+  selector:
+    app: postgres-metrics
+  ports:
+    - name: postgres-metrics
+      port: 9187
+      targetPort: 9187

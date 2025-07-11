@@ -1,0 +1,40 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    # Configuration automatique pour K3S
+    additionalArguments:
+      - "--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.cloudflare.acme.email=lo.gauthier.glo@gmail.com"
+      - "--certificatesresolvers.cloudflare.acme.storage=/data/acme.json"
+      - "--certificatesresolvers.cloudflare.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+      - "--certificatesresolvers.cloudflare.acme.dnschallenge.delaybeforecheck=10s"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+
+    # Variables d'environnement pour Cloudflare
+    env:
+      - name: CF_API_EMAIL
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-secret
+            key: CF_API_EMAIL
+      - name: CF_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-secret
+            key: CF_API_KEY
+
+    # Volumes pour ACME
+    volumes:
+      - name: acme-storage
+        persistentVolumeClaim:
+          claimName: traefik-pvc
+
+    volumeMounts:
+      - name: acme-storage
+        mountPath: /data

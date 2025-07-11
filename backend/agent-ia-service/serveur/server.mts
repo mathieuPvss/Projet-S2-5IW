@@ -215,7 +215,7 @@ app.get("/health", async (req: Request, res: Response) => {
 
 app.use(jwtAuthMiddleware);
 
-app.get("/agents", async (req: Request, res: Response) => {
+app.get("/app/agents", async (req: Request, res: Response) => {
   try {
     const agents = await loadAgentsConfig();
     res.json(agents);
@@ -228,7 +228,7 @@ app.get("/agents", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/:agentId/invoke", async (req: Request, res: Response) => {
+app.post("/app/:agentId/invoke", async (req: Request, res: Response) => {
   const { agentId } = req.params;
   const userInput: UserInput = req.body;
   const startTime = Date.now();
@@ -314,7 +314,7 @@ app.post("/:agentId/invoke", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/:agentId/stream", async (req: Request, res: Response) => {
+app.post("/app/:agentId/stream", async (req: Request, res: Response) => {
   const { agentId } = req.params;
   const userInput: UserInput = req.body;
   const streamStartTime = Date.now();
@@ -529,7 +529,7 @@ app.post("/:agentId/stream", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/:agentId/stop", async (req: Request, res: Response) => {
+app.post("/app/:agentId/stop", async (req: Request, res: Response) => {
   const { agentId } = req.params;
   const { thread_id } = req.body;
 
@@ -578,7 +578,7 @@ app.post("/:agentId/stop", async (req: Request, res: Response) => {
 });
 
 // Route pour obtenir l'historique d'une conversation
-app.get("/conversations/:threadId", async (req: Request, res: Response) => {
+app.get("/app/conversations/:threadId", async (req: Request, res: Response) => {
   const { threadId } = req.params;
 
   try {
@@ -613,7 +613,7 @@ app.get("/conversations/:threadId", async (req: Request, res: Response) => {
 });
 
 // Route pour lister toutes les conversations
-app.get("/conversations", async (req: Request, res: Response) => {
+app.get("/app/conversations", async (req: Request, res: Response) => {
   try {
     const conversationList = Array.from(conversations.values()).map((conv) => ({
       thread_id: conv.thread_id,
@@ -672,16 +672,20 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log("🚀 Serveur Agent CLI démarré !");
       console.log(`📡 Port: ${PORT}`);
-      console.log(`🌐 URL: http://localhost:${PORT}`);
+      console.log(`🌐 URL: http://localhost:${PORT}/app`);
       console.log(`📋 Health check: http://localhost:${PORT}/health`);
-      console.log(`🤖 Agents: http://localhost:${PORT}/agents`);
+      console.log(`🤖 Agents: http://localhost:${PORT}/app/agents`);
       console.log("");
       console.log("📚 Endpoints disponibles:");
       console.log("  GET  /health                     - Vérification de santé");
       console.log("  GET  /agents                     - Liste des agents");
-      console.log("  POST /:agentId/invoke            - Invocation directe");
-      console.log("  POST /:agentId/stream            - Streaming SSE");
-      console.log("  POST /:agentId/stop              - Arrêter la génération");
+      console.log(
+        "  POST /app/:agentId/invoke            - Invocation directe"
+      );
+      console.log("  POST /app/:agentId/stream            - Streaming SSE");
+      console.log(
+        "  POST /app/:agentId/stop              - Arrêter la génération"
+      );
       console.log(
         "  GET  /conversations              - Liste des conversations"
       );

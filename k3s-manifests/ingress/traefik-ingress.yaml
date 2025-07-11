@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: traefik-dashboard-ingress
+  namespace: kube-system
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+    kubernetes.io/ingress.class: traefik
+spec:
+  tls:
+    - hosts:
+        - traefik.query-forge-dev.ualtarh.com
+      secretName: traefik-dashboard-tls
+  rules:
+    - host: traefik.query-forge-dev.ualtarh.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik-service-dashboard
+                port:
+                  number: 8080
