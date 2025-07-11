@@ -4,7 +4,7 @@
       <FormField name="search">
         <FormItem class="flex flex-col items-center lg:flex-row justify-center gap-8 w-full">
           <FormLabel :class="cn('text-6xl font-bold animate-fade-left transition-all ease-in-out duration-300 whitespace-nowrap')">
-            <span class="bg-gradient-to-tl from-slate-300 via-emerald-400 to-slate-400 bg-clip-text text-transparent">Gogole</span>
+            <span class="bg-gradient-to-tl from-slate-300 via-emerald-400 to-slate-400 bg-clip-text text-transparent">Query Forge Dev</span>
             <br/>
             Search Engine
           </FormLabel>

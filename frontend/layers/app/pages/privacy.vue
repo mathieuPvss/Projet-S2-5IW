@@ -7,7 +7,7 @@
     <p>Dernière mise à jour : 17 juin 2025</p>
 
     <p>
-      Cette politique de confidentialité explique comment Gogole Inc. collecte, utilise et protège vos données personnelles lorsque vous utilisez notre service.
+      Cette politique de confidentialité explique comment Query Forge Dev collecte, utilise et protège vos données personnelles lorsque vous utilisez notre service.
     </p>
 
     <h2 class="text-xl font-semibold text-primary">1. Données collectées</h2>
@@ -22,17 +22,17 @@
     <h2 class="text-xl font-semibold text-primary">4. Vos droits</h2>
     <p>Vous avez le droit de demander l'accès, la rectification ou la suppression de vos données personnelles.</p>
 
-    <p>Pour toute question, veuillez nous contacter <a class="text-primary underline" href="mailto:support@gogole.inc">support@gogole.inc</a>.</p>
+    <p>Pour toute question, veuillez nous contacter <a class="text-primary underline" href="mailto:support@queryforgedev.com">support@queryforgedev.com</a>.</p>
   </div>
 </template>
 
 <script setup lang="ts">
 useHead({
-  title: 'Politique de Confidentialité - Gogole Inc.',
+  title: 'Politique de Confidentialité - Query Forge Dev',
   meta: [
     {
       name: 'description',
-      content: 'Découvrez la politique de confidentialité de Gogole Inc. et comment vos données sont collectées, utilisées et protégées.',
+      content: 'Découvrez la politique de confidentialité de Query Forge Dev et comment vos données sont collectées, utilisées et protégées.',
     },
   ],
 });

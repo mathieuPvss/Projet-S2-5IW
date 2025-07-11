@@ -6,8 +6,8 @@
     )"
   >
     <NuxtLink href="/" class="flex items-center">
-      <SiteIcon height="24" width="48" />
-      <span class="ml-2 font-bold">Gogole</span>
+      <SiteIcon height="24" width="48"/>
+      <span class="ml-2 font-bold">Query Forge Dev</span>
     </NuxtLink>
 
     <div class="flex items-center gap-4">
