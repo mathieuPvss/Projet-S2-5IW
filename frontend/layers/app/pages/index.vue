@@ -86,6 +86,10 @@
 </template>
 
 <script lang="ts" setup>
+definePageMeta({
+  middleware: 'auth'
+})
+
 import { ShieldCheck, FileText } from 'lucide-vue-next'
 import { FormItem, FormLabel } from "@ui/components/form";
 import { Input } from "@ui/components/input";
