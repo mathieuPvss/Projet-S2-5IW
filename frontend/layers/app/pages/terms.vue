@@ -9,7 +9,7 @@
     </button>
     <h1 class="text-3xl font-bold mb-4">Conditions d'utilisation</h1>
     <p>
-      Bienvenue chez Gogole Inc. En utilisant notre application, vous acceptez les présentes conditions...
+      Bienvenue chez Query Forge Dev En utilisant notre application, vous acceptez les présentes conditions...
     </p>
     <p>
       Ces conditions peuvent être modifiées à tout moment sans préavis. Il est de votre responsabilité...
@@ -20,7 +20,7 @@
       <li>Respecter la législation en vigueur</li>
     </ul>
     <p>
-      Pour toute question, contactez-nous à <a class="text-primary underline" href="mailto:support@gogole.inc">support@gogole.inc</a>.
+      Pour toute question, contactez-nous à <a class="text-primary underline" href="mailto:support@queryforgedev.com">support@queryforgedev.com</a>.
     </p>
   </div>
 </template>
@@ -31,11 +31,11 @@ const goBack = () => {
 };
 
 useHead({
-  title: 'Conditions d’utilisation | Gogole Inc.',
+  title: 'Conditions d’utilisation | Query Forge Dev',
   meta: [
     {
       name: 'description',
-      content: 'Découvrez les conditions générales d’utilisation de Gogole Inc. et les règles régissant l’utilisation de notre plateforme.'
+      content: 'Découvrez les conditions générales d’utilisation de Query Forge Dev et les règles régissant l’utilisation de notre plateforme.'
     },
     {
       name: 'robots',
@@ -43,7 +43,7 @@ useHead({
     },
     {
       property: 'og:title',
-      content: 'Conditions d’utilisation | Gogole Inc.'
+      content: 'Conditions d’utilisation | Query Forge Dev'
     },
     {
       property: 'og:description',

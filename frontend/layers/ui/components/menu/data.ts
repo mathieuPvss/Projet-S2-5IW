@@ -1,5 +1,5 @@
-import type {MenuItem} from "@/types/MenuItem";
-import {MenuPermissionsEnum} from "@/enums";
+import type { MenuItem } from "@/types/MenuItem";
+import { MenuPermissionsEnum } from "@/enums";
 export const menuItems: MenuItem[] = [
   {
     title: "Accueil",
@@ -24,7 +24,7 @@ export const menuItems: MenuItem[] = [
         description: "Data visualization and analysis.",
         icon: "ic:outline-space-dashboard",
       },
-    ]
+    ],
   },
   {
     title: "Favoris",
@@ -33,4 +33,3 @@ export const menuItems: MenuItem[] = [
     permission: MenuPermissionsEnum.ALL,
   },
 ];
-
