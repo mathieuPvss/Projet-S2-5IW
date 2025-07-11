@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { jwtDecode } from "jwt-decode";
-import type { DecodedToken } from "@/dto/decodedToken.dto";
+import type { DecodedToken } from "@/dto";
 import { toast } from "@ui/components/toast";
 import { navigateTo } from 'nuxt/app';
 export const useAuthStore = defineStore('auth', {

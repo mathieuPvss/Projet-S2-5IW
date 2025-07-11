@@ -81,7 +81,7 @@ import {menuItems} from "@ui/components/menu/data";
 import { Icon } from "@iconify/vue";
 import { useAuthStore } from "@/stores/auth";
 import type { MenuItem } from "@/types/MenuItem";
-import { MenuPermissions } from "@/enum/MenuPermissions";
+import { MenuPermissionsEnum } from "@/enums";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@ui/components/collapsible";
 import { MobileMenuHeader, MobileMenuFooter } from "@ui/components/menu";
 import { Matrix } from "@ui/components/matrix";
@@ -91,11 +91,11 @@ const user = computed(() => auth.user ? auth.user : null);
 const emit = defineEmits(['toggle']);
 
 function hasPermission(menuItem: MenuItem) {
-  if(!menuItem.permission || menuItem.permission === MenuPermissions.ALL)
+  if(!menuItem.permission || menuItem.permission === MenuPermissionsEnum.ALL)
     return true;
   if(!user.value)
     return false;
-  if(menuItem.permission === MenuPermissions.ADMIN)
+  if(menuItem.permission === MenuPermissionsEnum.ADMIN)
     return user.value.isAdmin;
 }
 

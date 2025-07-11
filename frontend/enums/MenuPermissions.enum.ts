@@ -1,4 +1,4 @@
-export enum MenuPermissions {
+export enum MenuPermissionsEnum {
   ADMIN = "admin",
   USER = "user",
   ALL = "all",

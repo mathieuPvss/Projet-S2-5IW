@@ -1,16 +1,16 @@
-import type {MenuItem} from "@/types/MenuItem";
-import {MenuPermissions} from "@/enum/MenuPermissions";
+import type { MenuItem } from "@/types/MenuItem";
+import { MenuPermissionsEnum } from "@/enums";
 export const menuItems: MenuItem[] = [
   {
     title: "Accueil",
     href: "/",
     icon: "ic:baseline-home",
-    permission: MenuPermissions.ALL,
+    permission: MenuPermissionsEnum.ALL,
   },
   {
     title: "Admin",
     icon: "ic:baseline-admin-panel-settings",
-    permission: MenuPermissions.ADMIN,
+    permission: MenuPermissionsEnum.ADMIN,
     children: [
       {
         title: "Projects",
@@ -24,7 +24,12 @@ export const menuItems: MenuItem[] = [
         description: "Data visualization and analysis.",
         icon: "ic:outline-space-dashboard",
       },
-    ]
+    ],
+  },
+  {
+    title: "Favoris",
+    href: "/favorites",
+    icon: "ic:baseline-photo-library",
+    permission: MenuPermissionsEnum.ALL,
   },
 ];
-

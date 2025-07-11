@@ -28,9 +28,11 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
       - JWT_SECRET=${JWT_SECRET}
       - NEST_PORT=${NEST_PORT}
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
     entrypoint: ["sh", "./entrypoint.sh"]
     depends_on:
       - postgres
+      - elasticsearch
 
   adminer:
     image: adminer:latest

@@ -12,6 +12,8 @@ import { ContentSourcesModule } from './modules/content-sources/content-sources.
 import { QuestionUsagesModule } from './modules/question-usages/question-usages.module';
 import { LoginGuard } from './common/guard/login.guard';
 import { RoleGuard } from './common/guard/role.guard';
+import { Report } from './modules/reports/entities/report.entity';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -22,7 +24,7 @@ import { RoleGuard } from './common/guard/role.guard';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [User, ContentSource, QuestionUsage, Question],
+      entities: [User, ContentSource, QuestionUsage, Question, Report],
       synchronize: true,
     }),
     UsersModule,
@@ -30,6 +32,7 @@ import { RoleGuard } from './common/guard/role.guard';
     ContentSourcesModule,
     QuestionUsagesModule,
     SeederModule,
+    ReportsModule,
   ],
   controllers: [],
   providers: [
