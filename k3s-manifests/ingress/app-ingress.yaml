@@ -36,7 +36,7 @@ spec:
     - host: api.query-forge-dev.ualtarh.com
       http:
         paths:
-          - path: /
+          - path: /api
             pathType: Prefix
             backend:
               service:
@@ -48,7 +48,7 @@ spec:
     - host: auth.query-forge-dev.ualtarh.com
       http:
         paths:
-          - path: /
+          - path: /auth
             pathType: Prefix
             backend:
               service:
@@ -60,7 +60,7 @@ spec:
     - host: agent.query-forge-dev.ualtarh.com
       http:
         paths:
-          - path: /
+          - path: /app
             pathType: Prefix
             backend:
               service:
@@ -72,7 +72,7 @@ spec:
     - host: scraping.query-forge-dev.ualtarh.com
       http:
         paths:
-          - path: /
+          - path: /api
             pathType: Prefix
             backend:
               service:
