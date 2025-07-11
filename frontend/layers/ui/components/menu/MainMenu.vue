@@ -67,7 +67,7 @@ import {
 import { Icon } from "@iconify/vue";
 import { menuItems } from "@ui/components/menu/data";
 import { useAuthStore} from "@/stores/auth";
-import { MenuPermissions} from "@/enum/MenuPermissions";
+import { MenuPermissionsEnum} from "@/enums";
 import type {MenuItem} from "@/types/MenuItem";
 import { AccountMenu } from "@ui/components/menu/index";
 
@@ -75,11 +75,11 @@ const auth = useAuthStore();
 const user = computed(() => auth.user ? auth.user : null);
 
 function hasPermission(menuItem: MenuItem) {
-  if(!menuItem.permission || menuItem.permission === MenuPermissions.ALL)
+  if(!menuItem.permission || menuItem.permission === MenuPermissionsEnum.ALL)
     return true;
   if(!user.value)
     return false;
-  if(menuItem.permission === MenuPermissions.ADMIN)
+  if(menuItem.permission === MenuPermissionsEnum.ADMIN)
     return user.value.isAdmin;
 }
 
