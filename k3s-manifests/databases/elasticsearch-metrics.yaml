@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: elasticsearch-metrics-exporter
-          image: prometheuscommunity/elasticsearch-exporter:latest
+          image: prometheuscommunity/elasticsearch-exporter:v1.9.0
           ports:
             - containerPort: 9108
           args:

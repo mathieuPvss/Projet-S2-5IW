@@ -71,5 +71,5 @@ spec:
   selector:
     app: frontend
   ports:
-    - port: 80 # TODO: change peut etre
+    - port: 80
       targetPort: 4444
