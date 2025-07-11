@@ -13,6 +13,7 @@ import {
   type SidebarProps,
 } from '@ui/components/sidebar'
 import {
+  Flag,
   Home,
   SquareTerminal,
 } from 'lucide-vue-next'
@@ -34,6 +35,12 @@ const data = {
       title: 'Dashboard',
       url: '/dashboard',
       icon: SquareTerminal,
+      isActive: true,
+    },
+    {
+      title: 'Reports',
+      url: '/admin/reports',
+      icon: Flag,
       isActive: true,
     }
   ],
@@ -58,7 +65,7 @@ const data = {
                 <SiteIcon />
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold">Gogole Inc</span>
+                <span class="truncate font-semibold">Query Forge Dev</span>
                 <span class="truncate text-xs">Enterprise</span>
               </div>
             </a>

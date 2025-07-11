@@ -23,6 +23,7 @@ import axios from 'axios'
 import type { ProjectDto } from "@/dto/project.dto";
 import { getProjects } from "@/layers/app/api";
 import { filterParams } from "@lib/utils";
+import { toast } from "@ui/components/toast/use-toast";
 
 interface Technology {
   name: string
@@ -39,13 +40,7 @@ const filters = ref({
 });
 
 onMounted(async () => {
-    await loadProjects(1);
-  try {
-    const response = await axios.get<Technology[]>('http://localhost:3001/api/technos/technologies')
-    data.value = response.data
-  } catch (error) {
-    console.error('Erreur lors du fetch des technologies', error)
-  }
+
 })
 
 async function loadProjects(page?: number) {

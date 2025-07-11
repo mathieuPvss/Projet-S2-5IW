@@ -10,26 +10,6 @@
     </CardHeader>
     <CardContent>
       <form class="grid gap-4" @submit="onSubmit">
-        <div class="grid grid-cols-2 gap-4 items-start">
-          <FormField v-slot="{ componentField }" name="firstname">
-            <FormItem v-auto-animate class="grid gap-2">
-              <FormLabel>Prénom </FormLabel>
-              <FormControl>
-                <Input id="firstname" placeholder="Prénom" v-bind="componentField"/>
-              </FormControl>
-              <FormMessage class="inline-block"/>
-            </FormItem>
-          </FormField>
-          <FormField v-slot="{ componentField }" name="lastname">
-            <FormItem v-auto-animate class="grid gap-2">
-              <FormLabel>Nom </FormLabel>
-              <FormControl>
-                <Input id="lastname" placeholder="Nom" v-bind="componentField"/>
-              </FormControl>
-              <FormMessage class="inline-block"/>
-            </FormItem>
-          </FormField>
-        </div>
         <FormField v-slot="{ componentField }" name="email">
           <FormItem v-auto-animate class="grid gap-2">
             <FormLabel>Email</FormLabel>
@@ -81,8 +61,6 @@ import {useForm} from "vee-validate";
 const emit = defineEmits(["changeTab", "submit"]);
 
 const formSchema = toTypedSchema(z.object({
-  firstname: z.string().min(2).max(50),
-  lastname: z.string().min(2).max(50),
   email: z.string().email(),
   password: z.string().min(8).max(50).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character.'),
 }))

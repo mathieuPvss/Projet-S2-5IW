@@ -13,6 +13,8 @@ import { QuestionUsagesModule } from './modules/question-usages/question-usages.
 import { MetricsModule } from './modules/metrics/metrics.module';
 import { LoginGuard } from './common/guard/login.guard';
 import { RoleGuard } from './common/guard/role.guard';
+import { Report } from './modules/reports/entities/report.entity';
+import { ReportsModule } from './modules/reports/reports.module';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { AppController } from './app.controller';
 
@@ -25,7 +27,7 @@ import { AppController } from './app.controller';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [User, ContentSource, QuestionUsage, Question],
+      entities: [User, ContentSource, QuestionUsage, Question, Report],
       synchronize: true,
     }),
     UsersModule,
@@ -33,6 +35,7 @@ import { AppController } from './app.controller';
     ContentSourcesModule,
     QuestionUsagesModule,
     SeederModule,
+    ReportsModule,
     MetricsModule,
   ],
   controllers: [AppController],

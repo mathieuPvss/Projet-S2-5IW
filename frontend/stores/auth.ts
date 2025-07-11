@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { jwtDecode } from "jwt-decode";
-import type { DecodedToken } from "@/dto/decodedToken.dto";
+import type { DecodedToken } from "@/dto";
 import { toast } from "@ui/components/toast";
-
+import { navigateTo } from 'nuxt/app';
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: null as string | null,
@@ -21,7 +21,9 @@ export const useAuthStore = defineStore('auth', {
       try {
         this.token = storageToken;
         this.user = jwtDecode(storageToken);
-        localStorage.setItem('token', storageToken);
+        if (process.client) {
+          localStorage.setItem('token', storageToken);
+        }
       } catch (error) {
         this.logout();
       }
@@ -34,10 +36,14 @@ export const useAuthStore = defineStore('auth', {
       });
       this.token = null;
       this.user = null;
-      localStorage.removeItem('token');
-      await navigateTo('/');
+      if (process.client) {
+        localStorage.removeItem('token');
+      }
+      await navigateTo('/authentication');
     },
     init() {
+      if (!process.client) return; // on ne fait rien côté serveur
+
       const storageToken = localStorage.getItem('token');
       if (storageToken && typeof storageToken === 'string') {
         try {

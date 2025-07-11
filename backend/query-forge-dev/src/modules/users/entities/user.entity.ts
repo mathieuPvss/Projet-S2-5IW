@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Report } from '../../reports/entities/report.entity';
 
 export enum Role {
   'USER' = 'user',
@@ -22,4 +29,8 @@ export class User {
     default: Role.USER,
   })
   role: Role;
+
+  @OneToMany(() => Report, (report) => report.user)
+  @JoinColumn({ name: 'report_id' })
+  reports: Report[];
 }
