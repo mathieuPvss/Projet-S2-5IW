@@ -7,7 +7,7 @@ import * as csv from 'csv-parse/sync';
 export const seedQuestions = async (dataSource: DataSource) => {
   const questionRepository = dataSource.getRepository(Question);
 
-  const csvFilePath = path.join(process.cwd(), 'questions_programming.csv');
+  const csvFilePath = path.join(process.cwd(), 'question.csv');
   const fileContent = fs.readFileSync(csvFilePath, 'utf-8');
   const records = csv.parse(fileContent, {
     columns: true,
@@ -20,18 +20,15 @@ export const seedQuestions = async (dataSource: DataSource) => {
   for (const record of records) {
     // Vérifier si la question existe déjà
     const existingQuestion = await questionRepository.findOne({
-      where: {
-        technologie: record.technologie,
-        category: record.type,
-        content: record.question,
-      },
+      where: { id: record.id },
     });
 
     if (!existingQuestion) {
       const question = new Question();
+      question.id = record.id;
       question.technologie = record.technologie;
-      question.category = record.type;
-      question.content = record.question;
+      question.category = record.category;
+      question.content = record.content;
       await questionRepository.save(question);
       questionsCreated++;
     } else {
