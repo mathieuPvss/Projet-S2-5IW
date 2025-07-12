@@ -83,6 +83,11 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: NEST_PORT
+            - name: ELASTICSEARCH_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: ELASTICSEARCH_HOSTS
 ---
 apiVersion: v1
 kind: Service

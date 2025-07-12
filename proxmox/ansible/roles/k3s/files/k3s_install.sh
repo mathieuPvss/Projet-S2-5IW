@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 K3S_VERSION="v1.31.6+k3s1"
-METALLB_VERSION="v0.14.9"
-LB_RANGE="192.168.1.181-192.168.1.199"  # À adapter selon ton réseau
 
 echo "Vérification de la présence d'une ancienne installation K3s..."
 if systemctl is-active --quiet k3s; then
@@ -53,35 +51,6 @@ echo "Attente de la disponibilité du cluster..."
 sleep 15
 sudo kubectl get nodes -o wide
 
-echo "Installation de MetalLB..."
-kubectl apply -f \
-  "https://raw.githubusercontent.com/metallb/metallb/${METALLB_VERSION}/config/manifests/metallb-native.yaml"
-
-echo "Attente du déploiement de MetalLB (pods Running)..."
-while [[ $(kubectl get pods -n metallb-system --no-headers 2>/dev/null | grep -c "Running") -lt 2 ]]; do
-  echo "En attente que les pods MetalLB soient prêts..."
-  sleep 30
-done
-
-echo "Configuration de la plage IP pour MetalLB..."
-cat <<EOF | kubectl apply -f -
-apiVersion: metallb.io/v1beta1
-kind: IPAddressPool
-metadata:
-  name: default-pool
-  namespace: metallb-system
-spec:
-  addresses:
-  - $LB_RANGE
----
-apiVersion: metallb.io/v1beta1
-kind: L2Advertisement
-metadata:
-  name: default
-  namespace: metallb-system
-EOF
-
 echo "Installation terminée !"
 echo "Kubeconfig : /etc/rancher/k3s/k3s.yaml"
 echo "Pour vérifier le cluster : kubectl get nodes && kubectl get pods -A"
-echo "Le Load Balancer (MetalLB) est actif avec la plage IP : $LB_RANGE"

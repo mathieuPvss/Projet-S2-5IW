@@ -1,17 +1,17 @@
 #!/bin/bash
 set -e
 
-echo "🔍 Installation et configuration d'Elasticsearch 8..."
+echo "🔍 Installation et configuration d'Elasticsearch 9..."
 
 # Mise à jour du système
 apt update && apt upgrade -y
 
-# Installation de Java 17 (requis pour Elasticsearch 8)
+# Installation de Java 17 (requis pour Elasticsearch 9)
 apt install -y openjdk-17-jdk curl gpg
 
 # Ajout du repository Elasticsearch
 curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" > /etc/apt/sources.list.d/elastic-8.x.list
+echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/9.x/apt stable main" > /etc/apt/sources.list.d/elastic-9.x.list
 
 # Installation d'Elasticsearch
 apt update
@@ -64,6 +64,6 @@ sleep 30
 # Vérification
 curl -X GET "localhost:9200/_cluster/health?pretty"
 
-echo "✅ Elasticsearch 8 installé et configuré"
+echo "✅ Elasticsearch 9 installé et configuré"
 echo "🔌 Accessible sur: $(hostname -I | awk '{print $1}'):9200"
 echo "📊 Cluster: queryforge-cluster"

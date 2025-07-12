@@ -9,6 +9,7 @@ RUN npm i
 COPY . .
 
 RUN chmod +x entrypoint.sh
+RUN chmod +x entrypoint.prod.sh
 
 EXPOSE 4000
 
