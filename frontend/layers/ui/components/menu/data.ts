@@ -26,10 +26,4 @@ export const menuItems: MenuItem[] = [
       },
     ],
   },
-  {
-    title: "Favoris",
-    href: "/favorites",
-    icon: "ic:baseline-photo-library",
-    permission: MenuPermissionsEnum.ALL,
-  },
 ];
