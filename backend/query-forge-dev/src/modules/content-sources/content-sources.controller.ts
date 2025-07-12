@@ -14,11 +14,15 @@ import { CreateContentSourceDto } from './dto/create-content-source.dto';
 import { UpdateContentSourceDto } from './dto/update-content-source.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ContentSource } from './entities/content-source.entity';
+import { MetricsService } from '../metrics/metrics.service';
 
 @ApiTags('content-sources')
 @Controller('content-sources')
 export class ContentSourcesController {
-  constructor(private readonly contentSourcesService: ContentSourcesService) {}
+  constructor(
+    private readonly contentSourcesService: ContentSourcesService,
+    private readonly metricsService: MetricsService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer une nouvelle source de contenu' })
@@ -27,8 +31,12 @@ export class ContentSourcesController {
     description: 'La source de contenu a été créée avec succès.',
     type: ContentSource,
   })
-  create(@Body() createContentSourceDto: CreateContentSourceDto) {
-    return this.contentSourcesService.create(createContentSourceDto);
+  async create(@Body() createContentSourceDto: CreateContentSourceDto) {
+    const result = await this.contentSourcesService.create(
+      createContentSourceDto,
+    );
+    this.metricsService.incrementContentSources('create');
+    return result;
   }
 
   @Get()
@@ -38,8 +46,10 @@ export class ContentSourcesController {
     description: 'Liste de toutes les sources de contenu.',
     type: [ContentSource],
   })
-  findAll() {
-    return this.contentSourcesService.findAll();
+  async findAll() {
+    const result = await this.contentSourcesService.findAll();
+    this.metricsService.incrementContentSources('findAll');
+    return result;
   }
 
   @Get(':id')
@@ -53,8 +63,10 @@ export class ContentSourcesController {
     status: 404,
     description: 'Source de contenu non trouvée.',
   })
-  findOne(@Param('id') id: string) {
-    return this.contentSourcesService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const result = await this.contentSourcesService.findOne(id);
+    this.metricsService.incrementContentSources('findOne');
+    return result;
   }
 
   @Patch(':id')
@@ -68,11 +80,16 @@ export class ContentSourcesController {
     status: 404,
     description: 'Source de contenu non trouvée.',
   })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateContentSourceDto: UpdateContentSourceDto,
   ) {
-    return this.contentSourcesService.update(id, updateContentSourceDto);
+    const result = await this.contentSourcesService.update(
+      id,
+      updateContentSourceDto,
+    );
+    this.metricsService.incrementContentSources('update');
+    return result;
   }
 
   @Delete(':id')
@@ -86,7 +103,9 @@ export class ContentSourcesController {
     status: 404,
     description: 'Source de contenu non trouvée.',
   })
-  remove(@Param('id') id: string) {
-    return this.contentSourcesService.remove(id);
+  async remove(@Param('id') id: string) {
+    const result = await this.contentSourcesService.remove(id);
+    this.metricsService.incrementContentSources('remove');
+    return result;
   }
 }

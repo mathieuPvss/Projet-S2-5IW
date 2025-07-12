@@ -12,11 +12,14 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
 
   nestjs:
-    image: node:23-alpine
+    build:
+      context: ./backend/query-forge-dev
+      dockerfile: Dockerfile
     container_name: nestjs-query-forge-dev
     working_dir: /app
     volumes:
       - ./backend/query-forge-dev:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
     ports:
       - 3000:${NEST_PORT}
       - 9229:9229
@@ -111,11 +114,14 @@ services:
       - elasticsearch
 
   agent-ia-service:
-    image: node:23-alpine
+    build:
+      context: ./backend/agent-ia-service
+      dockerfile: Dockerfile
     container_name: agent-ia-service-query-forge-dev
     working_dir: /app
     volumes:
       - ./backend/agent-ia-service:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
     ports:
       - ${AGENT_AI_PORT}:${AGENT_AI_PORT}
     environment:
@@ -124,14 +130,16 @@ services:
       - AGENT_AI_PORT=${AGENT_AI_PORT}
       - AGENT_AI_REQUIRE_AUTH=${AGENT_AI_REQUIRE_AUTH}
       - JWT_SECRET=${JWT_SECRET}
-    entrypoint: ["sh", "./entrypoint.sh"]
 
   auth-service:
-    image: node:23-alpine
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
     container_name: auth-service-query-forge-dev
     working_dir: /app
     volumes:
       - ./backend/auth-service:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
     ports:
       - 4000:4000
     environment:
@@ -144,7 +152,6 @@ services:
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
       - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN}
       - PORT=${AUTH_PORT}
-    entrypoint: ["sh", "./entrypoint.sh"]
     depends_on:
       - postgres
 
@@ -157,6 +164,7 @@ services:
       - ${SCRAPING_SERVICE_PORT}:${SCRAPING_SERVICE_PORT}
     volumes:
       - ./backend/scraping-service:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
     environment:
       - SCRAPING_SERVICE_PORT=${SCRAPING_SERVICE_PORT}
     cap_add:
@@ -165,6 +173,25 @@ services:
     working_dir: /app
     security_opt:
       - seccomp:unconfined
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    container_name: frontend-query-forge-dev
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
+    environment:
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=4444
+    ports:
+      - 4444:4444
+    depends_on:
+      - nestjs
+      - auth-service
+      - agent-ia-service
 
 volumes:
   postgres-query-forge-dev:

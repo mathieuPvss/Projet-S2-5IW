@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: query-forge-dev
+data:
+  # Database
+  POSTGRES_HOST: "postgres-service-external"
+  POSTGRES_PORT: "5432"
+
+  # Elasticsearch
+  ELASTICSEARCH_HOSTS: "http://elasticsearch-service-external:9200"
+  ES_PORT: "9200"
+  EL_DISCOVERY_TYPE: "single-node"
+  ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+
+  # Services URLs
+  SCRAPER_SERVICE_URL: "http://scraping-service:3001" # utiliser le nom du service scraping-service pour l'url
+
+  # Ports
+  NEST_PORT: "3000"
+  AUTH_PORT: "4000"
+  AGENT_AI_PORT: "8088"
+  SCRAPING_SERVICE_PORT: "3001"
+  KIBANA_PORT: "5601"
+  SYNC_PORT: "3333"
+  FRONTEND_PORT: "4444"
+
+  # JWT
+  JWT_EXPIRES_IN: "1h"
+  REFRESH_TOKEN_EXPIRES_IN: "7d"
+
+  # Agent IA
+  AGENT_AI_REQUIRE_AUTH: "true"
+
+  # Stack version
+  STACK_VERSION: "8.12.0"
+
+  # Frontend
+  NUXT_HOST: "0.0.0.0"

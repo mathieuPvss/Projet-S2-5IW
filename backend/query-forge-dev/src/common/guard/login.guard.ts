@@ -12,7 +12,6 @@ import { Reflector } from '@nestjs/core';
 @Injectable()
 export class LoginGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),

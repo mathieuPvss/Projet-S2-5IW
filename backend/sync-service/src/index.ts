@@ -5,6 +5,15 @@ import { YouTubeService } from "./services/youtube.service";
 import { Content } from "./interfaces/content.interface";
 import { TiktokService } from "./services/tiktok.service";
 import { ScraperService } from "./services/scraper.service";
+import { startMetricsServer } from "./server";
+import {
+  syncOperationsCounter,
+  syncDurationHistogram,
+  pendingQuestionsGauge,
+  youtubeApiCallsGauge,
+  indexedContentsCounter,
+  errorCounter,
+} from "./services/metrics.service";
 
 export interface ScrapeConfig {
   startUrl: string;
@@ -65,9 +74,20 @@ async function updateQuestionUsageStatus(
           reason ? ` - ${reason}` : ""
         }`
       );
+
+      // Mise à jour des métriques
+      syncOperationsCounter.inc({
+        operation_type: "question_usage_update",
+        source_type: "database",
+        status,
+      });
     }
   } catch (error) {
     console.error("Erreur lors de la mise à jour du statut:", error);
+    errorCounter.inc({
+      error_type: "question_usage_update",
+      source_type: "database",
+    });
   }
 }
 
@@ -76,6 +96,11 @@ async function processYouTubeQuestions(
   questions: Array<{ id: string; content: string; technologie: string }>,
   sourceId: string
 ): Promise<void> {
+  const timer = syncDurationHistogram.startTimer({
+    operation_type: "youtube_questions",
+    source_type: "youtube",
+  });
+
   for (const question of questions) {
     if (youtubeApiCallCount >= YOUTUBE_DAILY_LIMIT) {
       console.log("Limite quotidienne d'appels API YouTube atteinte");
@@ -84,6 +109,8 @@ async function processYouTubeQuestions(
 
     try {
       youtubeApiCallCount++;
+      youtubeApiCallsGauge.set(youtubeApiCallCount);
+
       console.log(
         `Recherche YouTube pour la question: ${question.content} de la technologie: ${question.technologie} (Appel ${youtubeApiCallCount}/${YOUTUBE_DAILY_LIMIT})`
       );
@@ -110,8 +137,14 @@ async function processYouTubeQuestions(
           };
 
           await elasticsearchService.indexContent(content);
+          indexedContentsCounter.inc({ source_type: "youtube" });
         }
         await updateQuestionUsageStatus(question.id, sourceId, "success");
+        syncOperationsCounter.inc({
+          operation_type: "youtube_search",
+          source_type: "youtube",
+          status: "success",
+        });
       } else {
         await updateQuestionUsageStatus(
           question.id,
@@ -119,6 +152,11 @@ async function processYouTubeQuestions(
           "error",
           "Aucune vidéo trouvée"
         );
+        syncOperationsCounter.inc({
+          operation_type: "youtube_search",
+          source_type: "youtube",
+          status: "error",
+        });
       }
     } catch (error) {
       console.error(
@@ -131,8 +169,14 @@ async function processYouTubeQuestions(
         "error",
         "Erreur technique"
       );
+      errorCounter.inc({
+        error_type: "youtube_search",
+        source_type: "youtube",
+      });
     }
   }
+
+  timer();
 }
 
 async function processTiktokQuestions(
@@ -141,6 +185,11 @@ async function processTiktokQuestions(
   }>,
   sourceId: string
 ): Promise<void> {
+  const timer = syncDurationHistogram.startTimer({
+    operation_type: "tiktok_questions",
+    source_type: "tiktok",
+  });
+
   for (const techno of technologies) {
     console.log(
       `Traitement de la technologie: ${techno.technologie} pour tiktok`
@@ -157,15 +206,26 @@ async function processTiktokQuestions(
       if (tiktokContents.length > 0) {
         for (const content of tiktokContents) {
           await elasticsearchService.indexContent(content);
+          indexedContentsCounter.inc({ source_type: "tiktok" });
         }
 
         for (const questionId of questionsIds.rows) {
           await updateQuestionUsageStatus(questionId.id, sourceId, "success");
         }
+        syncOperationsCounter.inc({
+          operation_type: "tiktok_search",
+          source_type: "tiktok",
+          status: "success",
+        });
       } else {
         for (const questionId of questionsIds.rows) {
           await updateQuestionUsageStatus(questionId.id, sourceId, "error");
         }
+        syncOperationsCounter.inc({
+          operation_type: "tiktok_search",
+          source_type: "tiktok",
+          status: "error",
+        });
       }
     } catch (error) {
       console.error(
@@ -175,8 +235,11 @@ async function processTiktokQuestions(
       for (const questionId of questionsIds.rows) {
         await updateQuestionUsageStatus(questionId.id, sourceId, "error");
       }
+      errorCounter.inc({ error_type: "tiktok_search", source_type: "tiktok" });
     }
   }
+
+  timer();
 }
 
 async function processScraper(
@@ -184,6 +247,11 @@ async function processScraper(
   sourceName: string,
   sourceConfig: ScrapeConfig
 ): Promise<void> {
+  const timer = syncDurationHistogram.startTimer({
+    operation_type: "scraper",
+    source_type: "scraper",
+  });
+
   try {
     let newContents = await scraperService.scrapeContent(
       sourceName,
@@ -191,23 +259,45 @@ async function processScraper(
     );
     if (newContents.length > 0) {
       await elasticsearchService.indexBulkContent(newContents);
+      indexedContentsCounter.inc(
+        { source_type: "scraper" },
+        newContents.length
+      );
 
       await pool.query(
         "UPDATE content_source SET enabled = false WHERE id = $1",
         [sourceId]
       );
+      syncOperationsCounter.inc({
+        operation_type: "scraper",
+        source_type: "scraper",
+        status: "success",
+      });
+    } else {
+      syncOperationsCounter.inc({
+        operation_type: "scraper",
+        source_type: "scraper",
+        status: "error",
+      });
     }
   } catch (error) {
     console.error(
       `Erreur lors du traitement de la source "${sourceName}":`,
       error
     );
+    errorCounter.inc({ error_type: "scraper", source_type: "scraper" });
   }
+
+  timer();
 }
 
 // Fonction principale de synchronisation
 async function syncContent(): Promise<void> {
   console.log("Début de la synchronisation...");
+  const timer = syncDurationHistogram.startTimer({
+    operation_type: "sync_content",
+    source_type: "all",
+  });
 
   try {
     // Récupération des content sources
@@ -252,6 +342,16 @@ async function syncContent(): Promise<void> {
       GROUP BY q.technologie
       `);
 
+    // Mise à jour des métriques pour les questions en attente
+    pendingQuestionsGauge.set(
+      { source_type: "youtube" },
+      questionsResultForYoutube.rows.length
+    );
+    pendingQuestionsGauge.set(
+      { source_type: "tiktok" },
+      questionsResultForTiktok.rows.length
+    );
+
     // Traitement par source
     for (const source of contentSourcesResult.rows) {
       console.log(`Traitement de la source: ${source.name}`);
@@ -267,19 +367,21 @@ async function syncContent(): Promise<void> {
             case "youtube":
               if (source.enabled) {
                 console.log("youtube test");
-                await processYouTubeQuestions(
-                  questionsResultForYoutube.rows,
-                  source.id
-                );
+                // await processYouTubeQuestions(
+                //   questionsResultForYoutube.rows,
+                //   source.id
+                // );
+                console.log("youtube test 2");
               }
               break;
             case "tiktok":
               if (source.enabled) {
                 console.log("tiktok test");
-                await processTiktokQuestions(
-                  questionsResultForTiktok.rows,
-                  source.id
-                );
+                // await processTiktokQuestions(
+                //   questionsResultForTiktok.rows,
+                //   source.id
+                // );
+                console.log("tiktok test 2");
               }
               break;
             default:
@@ -292,9 +394,17 @@ async function syncContent(): Promise<void> {
     }
 
     console.log("Synchronisation terminée");
+    syncOperationsCounter.inc({
+      operation_type: "sync_content",
+      source_type: "all",
+      status: "success",
+    });
   } catch (error) {
     console.error("Erreur lors de la synchronisation:", error);
+    errorCounter.inc({ error_type: "sync_content", source_type: "all" });
   }
+
+  timer();
 }
 
 // Planification de la tâche (tous les jours à minuit)
@@ -303,6 +413,7 @@ async function syncContent(): Promise<void> {
 // Exécution de la synchronisation tous les jours à 18h00
 cron.schedule("0 18 * * *", () => {
   youtubeApiCallCount = 0;
+  youtubeApiCallsGauge.set(youtubeApiCallCount);
   console.log(
     "Compteur d'appels API YouTube réinitialisé : ",
     youtubeApiCallCount
@@ -311,8 +422,24 @@ cron.schedule("0 18 * * *", () => {
   syncContent();
 });
 
-// Première exécution au démarrage
+// Fonction d'initialisation
+async function initializeService(): Promise<void> {
+  try {
+    // Démarrage du serveur de métriques
+    await startMetricsServer();
 
-console.log("Service de synchronisation démarré");
+    // Initialisation des métriques
+    youtubeApiCallsGauge.set(youtubeApiCallCount);
 
-syncContent();
+    console.log("Service de synchronisation démarré");
+
+    // Première exécution au démarrage
+    await syncContent();
+  } catch (error) {
+    console.error("Erreur lors de l'initialisation du service:", error);
+    process.exit(1);
+  }
+}
+
+// Lancement du service
+initializeService();

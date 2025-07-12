@@ -10,6 +10,22 @@ import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
 import { getAgent, getAgentsMetadata } from "./agents-registry.mts";
 import jwt from "jsonwebtoken";
+import { metricsMiddleware } from "./middleware/metrics.middleware.mts";
+import {
+  getMetrics,
+  incrementAgentOperation,
+  recordAgentDuration,
+  incrementStreamingSession,
+  decrementStreamingSession,
+  incrementStreamingEvent,
+  recordStreamingDuration,
+  incrementConversationOperation,
+  setActiveConversations,
+  recordConversationMessages,
+  incrementToolExecution,
+  recordToolDuration,
+  incrementAgentError,
+} from "./metrics.service.mts";
 
 declare module "express-serve-static-core" {
   interface Request {
@@ -119,6 +135,9 @@ function addMessageToConversation(threadId: string, message: ChatMessage) {
   const conversation = getOrCreateConversation(threadId);
   conversation.messages.push(message);
   conversation.updated_at = new Date().toISOString();
+
+  // Métriques de conversations
+  setActiveConversations(conversations.size);
 }
 
 // Create Express app
@@ -137,6 +156,9 @@ app.use(
 app.use(express.json());
 app.use(express.text());
 
+// Middleware de métriques (avant les autres routes)
+app.use(metricsMiddleware);
+
 // Middleware d'authentification
 function jwtAuthMiddleware(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers["authorization"];
@@ -154,10 +176,18 @@ function jwtAuthMiddleware(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-// Avant toutes tes routes :
-app.use(jwtAuthMiddleware);
+// Route pour les métriques Prometheus (avant l'auth middleware)
+app.get("/metrics", async (req: Request, res: Response) => {
+  try {
+    const metrics = await getMetrics();
+    res.set("Content-Type", "text/plain");
+    res.send(metrics);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des métriques:", error);
+    res.status(500).send("Erreur interne du serveur");
+  }
+});
 
-// Routes
 app.get("/health", async (req: Request, res: Response) => {
   try {
     const agents = await loadAgentsConfig();
@@ -183,7 +213,9 @@ app.get("/health", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/agents", async (req: Request, res: Response) => {
+app.use(jwtAuthMiddleware);
+
+app.get("/app/agents", async (req: Request, res: Response) => {
   try {
     const agents = await loadAgentsConfig();
     res.json(agents);
@@ -196,9 +228,10 @@ app.get("/agents", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/:agentId/invoke", async (req: Request, res: Response) => {
+app.post("/app/:agentId/invoke", async (req: Request, res: Response) => {
   const { agentId } = req.params;
   const userInput: UserInput = req.body;
+  const startTime = Date.now();
 
   try {
     console.log(
@@ -252,9 +285,28 @@ app.post("/:agentId/invoke", async (req: Request, res: Response) => {
       run_id: runId,
     };
 
+    // Métriques de succès
+    const duration = (Date.now() - startTime) / 1000;
+    recordAgentDuration(agentId, "invoke", "POST", duration);
+    incrementAgentOperation(agentId, "invoke", "success", "POST");
+
+    // Mettre à jour le nombre de conversations actives
+    setActiveConversations(conversations.size);
+
     res.json(agentResponse);
   } catch (error) {
     console.error("❌ Erreur lors de l'invocation:", error);
+
+    // Métriques d'erreur
+    const duration = (Date.now() - startTime) / 1000;
+    recordAgentDuration(agentId, "invoke", "POST", duration);
+    incrementAgentOperation(agentId, "invoke", "error", "POST");
+    incrementAgentError(
+      agentId,
+      "invoke",
+      (error as Error).name || "unknown_error"
+    );
+
     res.status(500).json({
       error: "Erreur lors de l'invocation de l'agent",
       message: (error as Error).message,
@@ -262,9 +314,10 @@ app.post("/:agentId/invoke", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/:agentId/stream", async (req: Request, res: Response) => {
+app.post("/app/:agentId/stream", async (req: Request, res: Response) => {
   const { agentId } = req.params;
   const userInput: UserInput = req.body;
+  const streamStartTime = Date.now();
 
   try {
     console.log(
@@ -275,6 +328,9 @@ app.post("/:agentId/stream", async (req: Request, res: Response) => {
 
     const threadId = userInput.thread_id || uuidv4();
     const runId = uuidv4();
+
+    // Incrémenter les sessions de streaming actives
+    incrementStreamingSession(agentId);
 
     // Récupérer l'agent depuis le registre
     const agent = getAgent(agentId);
@@ -296,6 +352,9 @@ app.post("/:agentId/stream", async (req: Request, res: Response) => {
         res.write(`data: ${JSON.stringify(data)}\n`);
       }
       res.write("\n");
+
+      // Compter les événements de streaming
+      incrementStreamingEvent(agentId, event);
     };
 
     // Ajouter le message utilisateur à la conversation
@@ -354,6 +413,9 @@ app.post("/:agentId/stream", async (req: Request, res: Response) => {
                       params: toolCall.args || {},
                       id: toolCall.id,
                     });
+
+                    // Métriques d'outils
+                    incrementToolExecution(agentId, toolCall.name, "success");
                   }
                 }
 
@@ -415,12 +477,29 @@ app.post("/:agentId/stream", async (req: Request, res: Response) => {
 
       // Terminer le streaming
       sendSSE("stream_end", { thread_id: threadId });
+
+      // Métriques de succès
+      const streamDuration = (Date.now() - streamStartTime) / 1000;
+      recordStreamingDuration(agentId, streamDuration);
+      incrementAgentOperation(agentId, "stream", "success", "POST");
     } catch (error) {
       console.error("❌ Erreur pendant le streaming:", error);
       sendSSE("error", (error as Error).message);
+
+      // Métriques d'erreur
+      const streamDuration = (Date.now() - streamStartTime) / 1000;
+      recordStreamingDuration(agentId, streamDuration);
+      incrementAgentOperation(agentId, "stream", "error", "POST");
+      incrementAgentError(
+        agentId,
+        "stream",
+        (error as Error).name || "unknown_error"
+      );
     } finally {
       // Nettoyer
       activeGenerations.delete(threadId);
+      decrementStreamingSession(agentId);
+      setActiveConversations(conversations.size);
       res.end();
     }
 
@@ -431,6 +510,18 @@ app.post("/:agentId/stream", async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("❌ Erreur lors du streaming:", error);
+
+    // Métriques d'erreur
+    const streamDuration = (Date.now() - streamStartTime) / 1000;
+    recordStreamingDuration(agentId, streamDuration);
+    incrementAgentOperation(agentId, "stream", "error", "POST");
+    incrementAgentError(
+      agentId,
+      "stream",
+      (error as Error).name || "unknown_error"
+    );
+    decrementStreamingSession(agentId);
+
     res.status(500).json({
       error: "Erreur lors du streaming avec l'agent",
       message: (error as Error).message,
@@ -438,7 +529,7 @@ app.post("/:agentId/stream", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/:agentId/stop", async (req: Request, res: Response) => {
+app.post("/app/:agentId/stop", async (req: Request, res: Response) => {
   const { agentId } = req.params;
   const { thread_id } = req.body;
 
@@ -451,11 +542,18 @@ app.post("/:agentId/stop", async (req: Request, res: Response) => {
       activeGenerations.set(thread_id, false);
       setTimeout(() => activeGenerations.delete(thread_id), 1000); // Nettoyer après 1 seconde
 
+      // Métriques de succès
+      incrementAgentOperation(agentId, "stop", "success", "POST");
+      decrementStreamingSession(agentId);
+
       res.json({
         status: "success",
         message: "Génération arrêtée avec succès",
       });
     } else {
+      // Métriques de succès (aucune génération active)
+      incrementAgentOperation(agentId, "stop", "success", "POST");
+
       res.json({
         status: "success",
         message: "Aucune génération active à arrêter",
@@ -463,6 +561,15 @@ app.post("/:agentId/stop", async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error("❌ Erreur lors de l'arrêt:", error);
+
+    // Métriques d'erreur
+    incrementAgentOperation(agentId, "stop", "error", "POST");
+    incrementAgentError(
+      agentId,
+      "stop",
+      (error as Error).name || "unknown_error"
+    );
+
     res.status(500).json({
       error: "Erreur lors de l'arrêt de la génération",
       message: (error as Error).message,
@@ -471,17 +578,22 @@ app.post("/:agentId/stop", async (req: Request, res: Response) => {
 });
 
 // Route pour obtenir l'historique d'une conversation
-app.get("/conversations/:threadId", async (req: Request, res: Response) => {
+app.get("/app/conversations/:threadId", async (req: Request, res: Response) => {
   const { threadId } = req.params;
 
   try {
     const conversation = conversations.get(threadId);
     if (!conversation) {
+      incrementConversationOperation("get_conversation", "error");
       return res.status(404).json({
         error: "Conversation non trouvée",
         message: `Aucune conversation trouvée pour le thread ${threadId}`,
       });
     }
+
+    // Métriques de succès
+    incrementConversationOperation("get_conversation", "success");
+    recordConversationMessages(conversation.messages.length);
 
     res.json(conversation);
   } catch (error) {
@@ -489,6 +601,10 @@ app.get("/conversations/:threadId", async (req: Request, res: Response) => {
       "❌ Erreur lors de la récupération de la conversation:",
       error
     );
+
+    // Métriques d'erreur
+    incrementConversationOperation("get_conversation", "error");
+
     res.status(500).json({
       error: "Erreur lors de la récupération de la conversation",
       message: (error as Error).message,
@@ -497,7 +613,7 @@ app.get("/conversations/:threadId", async (req: Request, res: Response) => {
 });
 
 // Route pour lister toutes les conversations
-app.get("/conversations", async (req: Request, res: Response) => {
+app.get("/app/conversations", async (req: Request, res: Response) => {
   try {
     const conversationList = Array.from(conversations.values()).map((conv) => ({
       thread_id: conv.thread_id,
@@ -509,12 +625,20 @@ app.get("/conversations", async (req: Request, res: Response) => {
         "Aucun message",
     }));
 
+    // Métriques de succès
+    incrementConversationOperation("list_conversations", "success");
+    setActiveConversations(conversations.size);
+
     res.json(conversationList);
   } catch (error) {
     console.error(
       "❌ Erreur lors de la récupération des conversations:",
       error
     );
+
+    // Métriques d'erreur
+    incrementConversationOperation("list_conversations", "error");
+
     res.status(500).json({
       error: "Erreur lors de la récupération des conversations",
       message: (error as Error).message,
@@ -548,16 +672,20 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log("🚀 Serveur Agent CLI démarré !");
       console.log(`📡 Port: ${PORT}`);
-      console.log(`🌐 URL: http://localhost:${PORT}`);
+      console.log(`🌐 URL: http://localhost:${PORT}/app`);
       console.log(`📋 Health check: http://localhost:${PORT}/health`);
-      console.log(`🤖 Agents: http://localhost:${PORT}/agents`);
+      console.log(`🤖 Agents: http://localhost:${PORT}/app/agents`);
       console.log("");
       console.log("📚 Endpoints disponibles:");
       console.log("  GET  /health                     - Vérification de santé");
       console.log("  GET  /agents                     - Liste des agents");
-      console.log("  POST /:agentId/invoke            - Invocation directe");
-      console.log("  POST /:agentId/stream            - Streaming SSE");
-      console.log("  POST /:agentId/stop              - Arrêter la génération");
+      console.log(
+        "  POST /app/:agentId/invoke            - Invocation directe"
+      );
+      console.log("  POST /app/:agentId/stream            - Streaming SSE");
+      console.log(
+        "  POST /app/:agentId/stop              - Arrêter la génération"
+      );
       console.log(
         "  GET  /conversations              - Liste des conversations"
       );

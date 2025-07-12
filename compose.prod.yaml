@@ -4,6 +4,8 @@ services:
       context: ./backend/sync-service
       dockerfile: Dockerfile
     container_name: sync-service-query-forge-dev
+    ports:
+      - ${SYNC_PORT}:${SYNC_PORT}
     volumes:
       - ./backend/sync-service/src:/app/src
     environment:
@@ -16,5 +18,6 @@ services:
       - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
       - APIFY_API_TOKEN=${APIFY_API_TOKEN}
       - SCRAPER_SERVICE_URL=${SCRAPER_SERVICE_URL}
+      - SYNC_PORT=${SYNC_PORT}
 
     restart: unless-stopped

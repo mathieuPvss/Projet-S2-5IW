@@ -14,11 +14,15 @@ import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Question } from './entities/question.entity';
+import { MetricsService } from '../metrics/metrics.service';
 
 @ApiTags('questions')
 @Controller('questions')
 export class QuestionsController {
-  constructor(private readonly questionsService: QuestionsService) {}
+  constructor(
+    private readonly questionsService: QuestionsService,
+    private readonly metricsService: MetricsService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer une nouvelle question' })
@@ -27,8 +31,10 @@ export class QuestionsController {
     description: 'La question a été créée avec succès.',
     type: Question,
   })
-  create(@Body() createQuestionDto: CreateQuestionDto) {
-    return this.questionsService.create(createQuestionDto);
+  async create(@Body() createQuestionDto: CreateQuestionDto) {
+    const result = await this.questionsService.create(createQuestionDto);
+    this.metricsService.incrementQuestions('create');
+    return result;
   }
 
   @Get()
@@ -38,8 +44,10 @@ export class QuestionsController {
     description: 'Liste de toutes les questions.',
     type: [Question],
   })
-  findAll() {
-    return this.questionsService.findAll();
+  async findAll() {
+    const result = await this.questionsService.findAll();
+    this.metricsService.incrementQuestions('findAll');
+    return result;
   }
 
   @Get(':id')
@@ -53,8 +61,10 @@ export class QuestionsController {
     status: 404,
     description: 'Question non trouvée.',
   })
-  findOne(@Param('id') id: string) {
-    return this.questionsService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const result = await this.questionsService.findOne(id);
+    this.metricsService.incrementQuestions('findOne');
+    return result;
   }
 
   @Patch(':id')
@@ -68,11 +78,13 @@ export class QuestionsController {
     status: 404,
     description: 'Question non trouvée.',
   })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateQuestionDto: UpdateQuestionDto,
   ) {
-    return this.questionsService.update(id, updateQuestionDto);
+    const result = await this.questionsService.update(id, updateQuestionDto);
+    this.metricsService.incrementQuestions('update');
+    return result;
   }
 
   @Delete(':id')
@@ -86,7 +98,9 @@ export class QuestionsController {
     status: 404,
     description: 'Question non trouvée.',
   })
-  remove(@Param('id') id: string) {
-    return this.questionsService.remove(id);
+  async remove(@Param('id') id: string) {
+    const result = await this.questionsService.remove(id);
+    this.metricsService.incrementQuestions('remove');
+    return result;
   }
 }
