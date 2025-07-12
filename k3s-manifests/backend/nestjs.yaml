@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: nestjs
-          image: votre-registry/query-forge-nestjs:latest # TODO: change
+          image: mathieuvss/query-forge-nestjs:latest
           ports:
             - containerPort: 3000
           resources:
