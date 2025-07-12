@@ -40,4 +40,4 @@ data:
   NUXT_HOST: "0.0.0.0"
 
   # Node env
-  NEST_ENV: "production"
+  NEST_ENV: "development"
