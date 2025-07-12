@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: nestjs
-          image: votre-registry/query-forge-nestjs:latest # TODO: change
+          image: mathieuvss/query-forge-nestjs:latest
           ports:
             - containerPort: 3000
           resources:
@@ -83,6 +83,16 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: NEST_PORT
+            - name: ELASTICSEARCH_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: ELASTICSEARCH_HOSTS
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: NEST_ENV
 ---
 apiVersion: v1
 kind: Service

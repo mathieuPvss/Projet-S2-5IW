@@ -7,3 +7,14 @@ output "k3s_hosts" {
     }
   }
 }
+
+output "database_lxc" {
+  value = {
+    for name, lxc in module.database_lxc :
+    name => {
+      name = lxc.name
+      ip   = lxc.ip_address
+      vmid = lxc.vmid
+    }
+  }
+}

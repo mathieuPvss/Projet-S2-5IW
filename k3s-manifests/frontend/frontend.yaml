@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: votre-registry/query-forge-frontend:latest # TODO: change
+          image: mathieuvss/query-forge-frontend:latest
           env:
             - name: NUXT_HOST
               valueFrom:

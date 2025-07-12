@@ -9,87 +9,40 @@ import * as csv from 'csv-parse/sync';
 
 export const seedQuestionUsages = async (dataSource: DataSource) => {
   const questionUsageRepository = dataSource.getRepository(QuestionUsage);
-  const questionRepository = dataSource.getRepository(Question);
-  const contentSourceRepository = dataSource.getRepository(ContentSource);
 
-  const csvFilePath = path.join(process.cwd(), 'tags_tiktok.csv');
+  const csvFilePath = path.join(process.cwd(), 'question_usage.csv');
   const fileContent = fs.readFileSync(csvFilePath, 'utf-8');
-  const tiktokTags = csv.parse(fileContent, {
+  const records = csv.parse(fileContent, {
     columns: true,
     skip_empty_lines: true,
   });
 
-  const questions = await questionRepository.find();
-  const youtube = await contentSourceRepository.findOne({
-    where: { name: 'youtube' },
-  });
-  const tiktok = await contentSourceRepository.findOne({
-    where: { name: 'tiktok' },
-  });
+  let usagesCreated = 0;
+  let usagesSkipped = 0;
 
-  if (!youtube) {
-    throw new Error("La source YouTube n'a pas été trouvée");
-  }
-
-  if (!tiktok) {
-    throw new Error("La source TikTok n'a pas été trouvée");
-  }
-
-  // Traitement pour YouTube
-  let youtubeUsagesCreated = 0;
-  for (const question of questions) {
+  for (const record of records) {
+    // Vérifier si l'usage existe déjà
     const existingUsage = await questionUsageRepository.findOne({
-      where: {
-        question_id: question.id,
-        content_source_id: youtube.id,
-      },
+      where: { id: record.id },
     });
 
     if (!existingUsage) {
       const usage = new QuestionUsage();
-      usage.question_id = question.id;
-      usage.content_source_id = youtube.id;
-      usage.used_at = null;
-      usage.status = QuestionUsageStatus.PENDING;
-      usage.response_size = 0;
+      usage.id = record.id;
+      usage.question_id = record.question_id;
+      usage.content_source_id = record.content_source_id;
+      usage.used_at = record.used_at ? new Date(record.used_at) : null;
+      usage.status = record.status as QuestionUsageStatus;
+      usage.response_size = parseInt(record.response_size);
       await questionUsageRepository.save(usage);
-      youtubeUsagesCreated++;
-    }
-  }
-
-  // Traitement pour TikTok
-  let tiktokUsagesCreated = 0;
-  for (const record of tiktokTags) {
-    const matchingQuestions = questions.filter(
-      (question) =>
-        question.technologie.toLowerCase() === record.tag.toLowerCase(),
-    );
-
-    for (const question of matchingQuestions) {
-      const existingUsage = await questionUsageRepository.findOne({
-        where: {
-          question_id: question.id,
-          content_source_id: tiktok.id,
-        },
-      });
-
-      if (!existingUsage) {
-        const usage = new QuestionUsage();
-        usage.question_id = question.id;
-        usage.content_source_id = tiktok.id;
-        usage.used_at = null;
-        usage.status = QuestionUsageStatus.PENDING;
-        usage.response_size = 0;
-        await questionUsageRepository.save(usage);
-        tiktokUsagesCreated++;
-      }
+      usagesCreated++;
+    } else {
+      usagesSkipped++;
     }
   }
 
   console.log(
-    `${youtubeUsagesCreated} question usages YouTube ont été créés avec succès.`,
+    `${usagesCreated} nouveaux usages de questions ont été importés avec succès.`,
   );
-  console.log(
-    `${tiktokUsagesCreated} question usages TikTok ont été créés avec succès.`,
-  );
+  console.log(`${usagesSkipped} usages de questions existants ont été ignorés.`);
 };

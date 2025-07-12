@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: scraping
-          image: votre-registry/scraping-service:latest # TODO: change
+          image: mathieuvss/scraping-service:latest
           env:
             - name: SCRAPING_SERVICE_PORT
               valueFrom:

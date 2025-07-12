@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: agent-ai
-          image: votre-registry/agent-ai-service:latest # TODO: change
+          image: mathieuvss/agent-ai-service:latest
           env:
             - name: ELASTICSEARCH_HOSTS
               valueFrom:
