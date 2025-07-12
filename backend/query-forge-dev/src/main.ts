@@ -4,13 +4,18 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const migrationsPath = isProduction
+    ? ['dist/migrations/*.js']
+    : ['src/migrations/*.ts'];
+
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('Is Production:', isProduction);
+  console.log('Migrations Path:', migrationsPath);
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api', {
-    exclude: [
-      'health',
-      'metrics',
-    ],
+    exclude: ['health', 'metrics'],
   });
 
   app.enableCors({

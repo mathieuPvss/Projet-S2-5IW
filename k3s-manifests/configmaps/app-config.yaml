@@ -38,3 +38,6 @@ data:
 
   # Frontend
   NUXT_HOST: "0.0.0.0"
+
+  # Node env
+  NEST_ENV: "production"

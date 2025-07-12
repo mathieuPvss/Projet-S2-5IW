@@ -88,6 +88,11 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: ELASTICSEARCH_HOSTS
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: NEST_ENV
 ---
 apiVersion: v1
 kind: Service
