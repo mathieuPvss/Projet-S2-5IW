@@ -7,7 +7,8 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 export default defineNuxtConfig({
   runtimeConfig: {
     public: {
-      apiBaseUrl: "",
+      nestBaseUrl: process.env.NEST_BASE_URL,
+      authBaseUrl: process.env.AUTH_BASE_URL,
     },
   },
   devtools: { enabled: true },

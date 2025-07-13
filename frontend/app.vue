@@ -5,13 +5,20 @@
   </NuxtLayout>
 </template>
 <script setup lang="ts">
-import { useAuthStore} from "@/stores/auth";
+import { useAuthStore } from "./stores/auth";
+
+const authStore = useAuthStore();
+
+onMounted(() => {
+  authStore.init();
+});
+
 useHead({
   link: [
     {
-      rel: 'stylesheet',
-      href: '/output.css'
-    }
+      rel: "stylesheet",
+      href: "/output.css",
+    },
   ],
   /*meta: [
     {
@@ -19,10 +26,5 @@ useHead({
       content: 'user-scalable=0'
     },
   ]*/
-});
-
-const auth = useAuthStore();
-onBeforeMount(async () => {
-  auth.init();
 });
 </script>

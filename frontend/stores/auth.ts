@@ -1,20 +1,22 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
 import { jwtDecode } from "jwt-decode";
 import type { DecodedToken } from "@/dto";
 import { toast } from "@ui/components/toast";
-import { navigateTo } from 'nuxt/app';
-export const useAuthStore = defineStore('auth', {
+import { navigateTo } from "nuxt/app";
+
+export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: null as string | null,
     user: null as DecodedToken | null,
+    isInitialized: false,
   }),
   actions: {
     login(storageToken: string) {
-      if (typeof storageToken !== 'string') {
+      if (typeof storageToken !== "string") {
         toast({
-          title: 'Erreur',
-          description: 'Token invalide.',
-          variant: 'destructive',
+          title: "Erreur",
+          description: "Token invalide.",
+          variant: "destructive",
         });
         return;
       }
@@ -22,7 +24,7 @@ export const useAuthStore = defineStore('auth', {
         this.token = storageToken;
         this.user = jwtDecode(storageToken);
         if (process.client) {
-          localStorage.setItem('token', storageToken);
+          localStorage.setItem("token", storageToken);
         }
       } catch (error) {
         this.logout();
@@ -37,15 +39,15 @@ export const useAuthStore = defineStore('auth', {
       this.token = null;
       this.user = null;
       if (process.client) {
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
       }
-      await navigateTo('/authentication');
+      await navigateTo("/authentication");
     },
     init() {
       if (!process.client) return; // on ne fait rien côté serveur
 
-      const storageToken = localStorage.getItem('token');
-      if (storageToken && typeof storageToken === 'string') {
+      const storageToken = localStorage.getItem("token");
+      if (storageToken && typeof storageToken === "string") {
         try {
           this.token = storageToken;
           this.user = jwtDecode(storageToken);
@@ -53,6 +55,7 @@ export const useAuthStore = defineStore('auth', {
           this.logout();
         }
       }
+      this.isInitialized = true;
     },
   },
 });

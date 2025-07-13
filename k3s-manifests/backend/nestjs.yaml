@@ -93,6 +93,21 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: NEST_ENV
+            - name: EMAIL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: EMAIL_USER
+            - name: EMAIL_PASS
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: EMAIL_PASS
+            - name: FRONTEND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: FRONTEND_HOST
 ---
 apiVersion: v1
 kind: Service

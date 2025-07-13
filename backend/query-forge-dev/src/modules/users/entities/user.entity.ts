@@ -30,6 +30,18 @@ export class User {
   })
   role: Role;
 
+  @Column({ default: false })
+  verified: boolean;
+
+  @Column({ nullable: true })
+  resetPasswordToken?: string;
+
+  @Column({ nullable: true })
+  resetPasswordExpires?: Date;
+
+  @Column({ nullable: true })
+  passwordExpiresAt?: Date;
+
   @OneToMany(() => Report, (report) => report.user)
   @JoinColumn({ name: 'report_id' })
   reports: Report[];

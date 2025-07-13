@@ -9,13 +9,16 @@ data:
   POSTGRES_PORT: "5432"
 
   # Elasticsearch
-  ELASTICSEARCH_HOSTS: "http://elasticsearch-service-external:9200"
   ES_PORT: "9200"
   EL_DISCOVERY_TYPE: "single-node"
   ES_JAVA_OPTS: "-Xms512m -Xmx512m"
 
-  # Services URLs
+  # Kubernetes Services URLs
+  ELASTICSEARCH_HOSTS: "http://elasticsearch-service-external:9200"
   SCRAPER_SERVICE_URL: "http://scraping-service:3001" # utiliser le nom du service scraping-service pour l'url
+  AUTH_BASE_URL: "http://auth-service:4000"
+  NEST_BASE_URL: "http://nestjs-service:3000"
+  FRONTEND_URL: "http://frontend-service:4444"
 
   # Ports
   NEST_PORT: "3000"
@@ -41,3 +44,14 @@ data:
 
   # Node env
   NEST_ENV: "development"
+
+  # Email
+  EMAIL_USER: "mathieupannetrat5@gmail.com"
+  EMAIL_PASS: "sdxe etuu uknr hmnu"
+
+  # domaine url
+  FRONTEND_HOST: "query-forge-dev.ualtarh.com"
+  AUTH_HOST: "auth.query-forge-dev.ualtarh.com"
+  NEST_HOST: "api.query-forge-dev.ualtarh.com"
+  SCRAPING_HOST: "scraping.query-forge-dev.ualtarh.com"
+  AGENT_IA_HOST: "agent.query-forge-dev.ualtarh.com"
