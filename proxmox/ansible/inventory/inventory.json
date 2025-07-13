@@ -1,1 +1,2 @@
-{"master-0":{"ip":"192.168.1.181","name":"master-0"},"worker-0":{"ip":"192.168.1.182","name":"worker-0"},"worker-1":{"ip":"192.168.1.183","name":"worker-1"}}
+{"master-0":{"ip":"192.168.1.184","name":"master-0"},"worker-0":{"ip":"192.168.1.185","name":"worker-0"},"worker-1":{"ip":"192.168.1.186","name":"worker-1"}}
+{"elasticsearch-db":{"ip":"192.168.1.144","name":"elasticsearch-db","vmid":144},"postgres-db":{"ip":"192.168.1.142","name":"postgres-db","vmid":142}}

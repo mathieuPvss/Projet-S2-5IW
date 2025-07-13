@@ -66,7 +66,12 @@ Après avoir déployé les VM via Terraform, lancer la commande suivant pour ins
 cd ../ansible
 ansible-playbook playbook.yml --vault-password-file group_vars/all/.vault_pass.txt
 ```
+## Vault
 
+```bash
+ansible-vault encrypt group_vars/all/vault.yml
+ansible-vault edit group_vars/all/vault.yml
+```
 # Cleanup
 
 ```bash
@@ -86,6 +91,7 @@ rm -rf .terraform .terraform.lock.hcl
 # list nodes
 kubectl get ndoes -o wide
 
-#afficher des informations plus détaillées sur un noeud
+# afficher des informations plus détaillées sur un noeud
 kubectl describe node <node_name>
-```
+
+

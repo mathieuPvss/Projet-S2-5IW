@@ -26,7 +26,7 @@ resource "proxmox_lxc" "this" {
   hostname     = var.name
   target_node  = var.target_node
   vmid         = var.vmid
-  template     = var.template
+  ostemplate   = var.template
   unprivileged = true
   onboot       = true
   start        = true

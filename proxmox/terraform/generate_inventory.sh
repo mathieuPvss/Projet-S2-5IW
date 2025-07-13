@@ -51,7 +51,7 @@ echo "✅ Inventory and SSH keys prepared."
 
   echo ""
   echo "[databases]"
-  terraform output -json database_lxc | jq -r 'to_entries[] | "\(.value.ip)"'
+  terraform output -json database_lxc >> "$TF_OUTPUT_JSON"
 
   echo ""
   echo "[all:vars]"
@@ -62,3 +62,12 @@ echo "✅ Inventory and SSH keys prepared."
   echo "ansible_user=root"
   echo "lxc_password=YOUR_LXC_PASSWORD_HERE"
 } > "$HOSTS_INI"
+
+# Preload SSH host keys
+echo "Preloading SSH host keys..."
+jq -r 'to_entries[] | .value.ip' "$TF_OUTPUT_JSON" | while read -r ip; do
+  echo "  - $ip"
+  ssh-keyscan -H "$ip" >> "$KNOWN_HOSTS" 2>/dev/null || echo "Failed to scan $ip"
+done
+
+echo "✅ Inventory and SSH keys prepared."

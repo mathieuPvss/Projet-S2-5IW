@@ -95,7 +95,7 @@ module "k3s_nodes" {
 
 # Variables pour LXC
 variable "lxc_template" {
-  default = "debian-12-standard_12.7-1_amd64.tar.zst"
+  default = "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
 }
 
 variable "lxc_password" {
