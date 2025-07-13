@@ -1,24 +1,11 @@
 <template>
-  <section
-    class="container overflow-hidden min-h-screen flex flex-col items-center justify-center"
-  >
+  <section class="container overflow-hidden min-h-screen flex flex-col items-center justify-center gap-8">
     <form class="w-full">
       <FormField name="search">
-        <FormItem
-          class="flex flex-col items-center lg:flex-row justify-center gap-8 w-full"
-        >
-          <FormLabel
-            :class="
-              cn(
-                'text-6xl font-bold animate-fade-left transition-all ease-in-out duration-300 whitespace-nowrap',
-              )
-            "
-          >
-            <span
-              class="bg-gradient-to-tl from-slate-300 via-emerald-400 to-slate-400 bg-clip-text text-transparent"
-              >Query Forge Dev</span
-            >
-            <br />
+        <FormItem class="flex flex-col items-center lg:flex-row justify-center gap-8 w-full">
+          <FormLabel :class="cn('text-4xl md:text-6xl font-bold animate-fade-left transition-all ease-in-out duration-300 whitespace-nowrap')">
+            <span class="bg-gradient-to-tl from-slate-300 via-emerald-400 to-slate-400 bg-clip-text text-transparent">Query Forge Dev</span>
+            <br/>
             Search Engine
           </FormLabel>
           <FormControl>
@@ -38,6 +25,7 @@
                 @focus="searchFocus = true"
                 @focusout="searchFocus = false"
                 v-model:model-value="searchText"
+                @update:model-value="handleSearchChange"
               />
               <span
                 class="absolute start-0 inset-y-0 flex items-center justify-start w-full overflow-hidden px-2 z-0"
@@ -61,109 +49,23 @@
     </form>
 
     <!-- Résultats -->
-    <div
-      v-if="searchFocus && searchText.length > 0"
-      class="w-full mt-12 flex flex-col items-center gap-6"
-    >
+    <div v-if="searchText.length > 0" class="w-full mt-12 flex flex-col items-center gap-6">
       <!-- Résultats textuels -->
-      <div
-        v-for="result in searchResults"
-        :key="result.id"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-4xl"
-      >
-        <div class="flex justify-between items-start">
-          <div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-              {{ result.title }}
-            </h3>
-            <p class="text-gray-600 dark:text-gray-300 mt-2 text-sm">
-              {{ result.description }}
-            </p>
-            <div
-              class="mt-4 text-xs text-gray-500 dark:text-gray-400 flex flex-wrap gap-4"
-            >
-              <span
-                >Source :
-                <a :href="result.link" class="underline" target="_blank">{{
-                  result.link
-                }}</a></span
-              >
-              <span
-                >Dernière mise à jour : {{ result.updatedAt || "N/A" }}</span
-              >
-              <span v-if="result.tags"
-                >Tags : {{ result.tags.join(", ") }}</span
-              >
-            </div>
-          </div>
-          <div class="flex flex-col items-center gap-2 ml-4">
-            <span
-              class="text-yellow-500 font-semibold border border-yellow-500 px-2 py-0.5 rounded-full text-xs"
-              >Vérifié</span
-            >
-            <div class="flex flex-col gap-1">
-              <button class="text-green-500 hover:text-green-600">
-                <ThumbsUp class="text-green-500 w-5 h-5" />
-              </button>
-              <button class="text-red-500 hover:text-red-600">
-                <ThumbsDown class="text-red-500 w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Résultats vidéos -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
-        <div
-          v-for="video in videoResults"
-          :key="video.id"
-          class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 text-center"
-        >
-          <img
-            :src="video.thumbnail"
-            alt="thumbnail"
-            class="w-full h-40 object-cover rounded mb-4"
-          />
-          <h4 class="text-md font-semibold text-gray-800 dark:text-white">
-            {{ video.title }}
-          </h4>
-          <p class="text-sm text-gray-500">{{ video.source }}</p>
-        </div>
-      </div>
+      <Result v-for="result in searchResults" :key="result.id" :result="result"/>
+      <Result v-for="video in videoResults" :key="video.id" :result="video"/>
     </div>
   </section>
-
-  <div
-    class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm"
-  >
-    <p>© 2025 Query Forge Dev. Tous droits réservés.</p>
-    <div class="flex items-center gap-4">
-      <NuxtLink to="/privacy" class="flex items-center gap-1 hover:underline">
-        <ShieldCheck class="w-4 h-4" />
-        Politique de confidentialité
-      </NuxtLink>
-      <NuxtLink to="/terms" class="flex items-center gap-1 hover:underline">
-        <FileText class="w-4 h-4" />
-        Conditions d’utilisation
-      </NuxtLink>
-    </div>
-  </div>
 </template>
-
 <script lang="ts" setup>
-definePageMeta({
-  middleware: "auth",
-});
-
-import { ShieldCheck, FileText } from "lucide-vue-next";
-import { FormItem, FormLabel } from "@ui/components/form";
+import {invokeAgent} from "@/layers/app/pages/api";
+import { FormItem, FormLabel, FormControl, FormField } from "@ui/components/form";
 import { Input } from "@ui/components/input";
 import { Search } from "lucide-vue-next";
 import { Typewriter } from "@ui/components/typewriter";
 import { cn } from "@lib/utils";
-import { ThumbsUp, ThumbsDown } from "lucide-vue-next";
-import { ref, watch } from "vue";
+import { ref } from 'vue';
+import type {SearchResult} from "@/dto/searchResult.dto";
+import Result from './components/Result.vue'
 
 const displayedText = ref([
   "How to make a loop in Golang",
@@ -182,25 +84,47 @@ const searchText = ref("");
 const searchFocus = ref(false);
 const searchResults = ref<any[]>([]);
 const videoResults = ref<any[]>([]);
+const threadId = ref<string>();
 
-watch(searchText, async (val) => {
-  if (val.trim().length === 0) {
+async function handleSearchChange (value: string) {
+  console.log('Search text changed:', value);
+  console.log('Search text:', searchText.value, searchFocus.value);
+  if (value.trim().length === 0) {
     searchResults.value = [];
     videoResults.value = [];
     return;
   }
-
   try {
-    const res = await fetch(
-      `http://localhost:3000/api/search?q=${encodeURIComponent(val)}`,
-    );
+    const res = await invokeAgent(value, threadId.value);
     const data = await res.json();
-    searchResults.value = data.texts || [];
-    videoResults.value = data.videos || [];
+    const results:SearchResult[] = data.content.videos || [];
+    videoResults.value = results.filter((video) => video.thumbnail || video.channel);
+    videoResults.value.push(
+      {
+        "id": "p6zu-JcBSVkGGfy5K74Z",
+        "score": 19.500927,
+        "source": "stackoverflow",
+        "title": "How to Measure Memory Usage Per Test Case in Jest?",
+        "description": "I'm looking to track the memory consumption of each test case during execution, not just the overall heap size reported after the test run using the --logHeapUsage flag. Is there a reliable way to capture per-test memory metrics in Jest?\nI have tried using --logHeapUsage only I want to find out exact memory usage of test case, is there a way to do it?",
+        "url": "https://stackoverflow.com/questions/79697877/how-to-measure-memory-usage-per-test-case-in-jest",
+        "thumbnail": "https://i.stack.imgur.com/4b0d1.png",
+        "channel": "Square Stack",
+        "published_at": "2025-07-11 05:38:29Z",
+        "language": "",
+        "tags": [
+          "ts-jest",
+          "ts-jest"
+        ]
+      }
+    )
+    searchResults.value = results.filter((result) => !result.thumbnail && !result.channel !== null);
+    threadId.value = data.content.threadId || undefined;
+    console.log('Search results:', searchResults.value);
+    console.log('Video results:', videoResults.value);
   } catch (e) {
     console.error("Erreur lors de la recherche :", e);
   }
-});
+}
 </script>
 
 <style scoped>

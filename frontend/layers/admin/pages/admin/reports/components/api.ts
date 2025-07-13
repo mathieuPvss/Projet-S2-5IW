@@ -1,9 +1,18 @@
 import type {CreateReportDto, UpdateReportsStatusDto} from "@/dto";
+import { useAuthStore } from "@/stores/auth";
 
-const baseUrl = 'http://localhost:3001';
 export const Api = {
   getReports: async () => {
-    const response = await fetch(baseUrl+'/reports');
+    const config = useRuntimeConfig();
+    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const auth = useAuthStore();
+    
+    const response = await fetch(baseUrl+'/api/reports', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`,
+      },
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch reports');
     }
@@ -11,10 +20,15 @@ export const Api = {
   },
 
   createReport: async (reportData: CreateReportDto) => {
-    const response = await fetch(baseUrl+'/reports', {
+    const config = useRuntimeConfig();
+    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const auth = useAuthStore();
+    
+    const response = await fetch(baseUrl+'/api/reports', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`,
       },
       body: JSON.stringify(reportData),
     });
@@ -25,14 +39,19 @@ export const Api = {
   },
 
   updateReportsStatus: async (reports: UpdateReportsStatusDto) => {
+    const config = useRuntimeConfig();
+    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const auth = useAuthStore();
+    
     const queryParams = new URLSearchParams({
       status: reports.status,
       report_ids: reports.report_ids.join(',')
     });
-    const response = await fetch(baseUrl+`/reports?${queryParams}`, {
+    const response = await fetch(baseUrl+`/api/reports?${queryParams}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`,
       },
     });
     if (!response.ok) {
@@ -42,8 +61,15 @@ export const Api = {
   },
 
   deleteReport: async (id: string) => {
-    const response = await fetch(baseUrl+`/reports/${id}`, {
+    const config = useRuntimeConfig();
+    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const auth = useAuthStore();
+    
+    const response = await fetch(baseUrl+`/api/reports/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${auth.token}`,
+      },
     });
     if (!response.ok) {
       throw new Error('Failed to delete report');
@@ -51,7 +77,15 @@ export const Api = {
   },
 
   getUser: async (userId: string) => {
-    const response = await fetch(baseUrl+`/users/id/${userId}`);
+    const config = useRuntimeConfig();
+    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const auth = useAuthStore();
+    
+    const response = await fetch(baseUrl+`/api/users/id/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${auth.token}`,
+      },
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch user');
     }
@@ -59,7 +93,15 @@ export const Api = {
   },
 
   getSource: async (sourceId: string) => {
-    const response = await fetch(baseUrl+`/reports/source/${sourceId}`);
+    const config = useRuntimeConfig();
+    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const auth = useAuthStore();
+    
+    const response = await fetch(baseUrl+`/api/reports/source/${sourceId}`, {
+      headers: {
+        'Authorization': `Bearer ${auth.token}`,
+      },
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch source');
     }

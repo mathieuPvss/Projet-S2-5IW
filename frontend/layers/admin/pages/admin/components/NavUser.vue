@@ -48,7 +48,6 @@ const { isMobile } = useSidebar()
               </AvatarFallback>
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
-              <span class="truncate font-semibold">{{ computedAuth.user.firstname }}</span>
               <span class="truncate text-xs">{{ computedAuth.user.email }}</span>
             </div>
             <ChevronsUpDown class="ml-auto size-4" />
@@ -68,7 +67,6 @@ const { isMobile } = useSidebar()
                 </AvatarFallback>
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold">{{ computedAuth.user.firstname }}</span>
                 <span class="truncate text-xs">{{ computedAuth.user.email }}</span>
               </div>
             </div>

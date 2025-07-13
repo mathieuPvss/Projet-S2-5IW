@@ -249,7 +249,7 @@ router.post("/refresh", (req: Request, res: Response) => {
         const newPayload = { sub: user.id, email: user.email, role: user.role };
         const jwtSecret = process.env.JWT_SECRET as Secret;
         const signOptions: SignOptions = {
-          expiresIn: (process.env.JWT_EXPIRES_IN || "15m") as any,
+          expiresIn: (process.env.JWT_EXPIRES_IN || "45m") as any,
         };
         const refreshOptions: SignOptions = {
           expiresIn: (process.env.REFRESH_TOKEN_EXPIRES_IN || "7d") as any,
