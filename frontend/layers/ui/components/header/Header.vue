@@ -51,7 +51,7 @@
 
   <!-- Menu mobile si connecté -->
   <MobileMenu
-    v-if="auth.token && isTablet && isToggled"
+    v-if="isTablet && isToggled"
     @toggle="handleToggleMenu"
   />
 </template>

@@ -2,7 +2,7 @@
   <div v-if="user" class="flex flex-col justify-center items-center gap-4 p-2 w-full">
     <Avatar size="lg" class="mt-8 bg-background">
       <AvatarFallback class="rounded-lg">
-        {{ user.firstname.charAt(0).toUpperCase() + user.firstname.charAt(1).toUpperCase() }}
+        {{ user.email.split('@')[0].slice(0,4) }}
       </AvatarFallback>
     </Avatar>
     <div class="grid flex-1 text-center text-sm leading-tight">

@@ -36,7 +36,7 @@ import {toast} from "@ui/components/toast";
 import { useAuthStore} from "@/stores/auth";
 
 const activeTab = ref<string>('login');
-const baseUrl = useRuntimeConfig().public.apiBaseUrl
+const authApiUrl = useRuntimeConfig().public.authApiUrl || 'http://localhost:4000';
 const auth = useAuthStore();
 
 const handleChangeTab = (tab: string) => {
@@ -45,7 +45,7 @@ const handleChangeTab = (tab: string) => {
 
 const handleRegister = async (values: Record<string, string>) => {
   try {
-    const response = await fetch(baseUrl + '/auth/register', {
+    const response = await fetch(authApiUrl + '/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ const handleRegister = async (values: Record<string, string>) => {
 
 const handleLogin = async (values: Record<string, string>) => {
   try {
-    const response = await fetch(baseUrl + '/auth/login', {
+    const response = await fetch(authApiUrl + '/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ const handleLogin = async (values: Record<string, string>) => {
       }),
     });
 
-   
+
     const data: { access_token?: string; message?: string } = await response.json();
 
     if (!response.ok) {
@@ -124,7 +124,7 @@ const handleLogin = async (values: Record<string, string>) => {
       return;
     }
 
-    
+
     if (data.access_token) {
       auth.login(data.access_token);
     } else {
