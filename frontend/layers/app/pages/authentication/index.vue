@@ -57,7 +57,6 @@ const handleChangeTab = (tab: string) => {
 };
 
 const handleRegister = async (values: Record<string, string>) => {
-  console.log(baseUrl);
   try {
     const response = await fetch(baseUrl + "/auth/register", {
       method: "POST",
@@ -112,8 +111,11 @@ const handleLogin = async (values: Record<string, string>) => {
       }),
     });
 
-    const data: { access_token?: string; message?: string } =
-      await response.json();
+    const data: {
+      access_token?: string;
+      message?: string;
+      passwordExpired?: boolean;
+    } = await response.json();
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -125,6 +127,17 @@ const handleLogin = async (values: Record<string, string>) => {
         return;
       }
       if (response.status === 403) {
+        // Vérifier si c'est un mot de passe expiré
+        if (data.passwordExpired) {
+          toast({
+            title: "Mot de passe expiré 🔐",
+            description:
+              "Votre mot de passe a expiré. Un email de réinitialisation a été envoyé à votre adresse.",
+            variant: "destructive",
+          });
+          return;
+        }
+        // Sinon, c'est un email non confirmé
         toast({
           title: "Email non confirmé 📧",
           description:
@@ -178,6 +191,7 @@ const handleLogin = async (values: Record<string, string>) => {
 onMounted(() => {
   auth.init();
   if (auth.token) {
+    console.log("BBBBBBBBBB");
     navigateTo("/");
   }
 });

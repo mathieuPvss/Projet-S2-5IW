@@ -33,6 +33,9 @@ services:
       - NEST_PORT=${NEST_PORT}
       - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
       - NODE_ENV=${NEST_ENV}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
       - postgres
       - elasticsearch
@@ -110,6 +113,7 @@ services:
       - EMAIL_USER=${EMAIL_USER}
       - EMAIL_PASS=${EMAIL_PASS}
       - FRONTEND_URL=${FRONTEND_URL}
+      - NEST_BASE_URL=${NEST_BASE_URL}
     depends_on:
       - postgres
 

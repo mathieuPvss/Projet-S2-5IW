@@ -18,6 +18,7 @@ export interface User {
   password: string;
   role: "user" | "admin";
   verified: boolean;
+  passwordExpiresAt?: Date;
 }
 
 export async function findUserByEmail(email: string): Promise<User | null> {
@@ -35,6 +36,45 @@ export async function findUserByEmail(email: string): Promise<User | null> {
     recordDatabaseDuration("findUserByEmail", "user", duration);
     incrementDatabaseOperation("findUserByEmail", "user", "error");
     throw error;
+  }
+}
+
+export async function checkPasswordExpiry(user: User): Promise<boolean> {
+  // Si pas de date d'expiration définie, considérer comme expiré
+  if (!user.passwordExpiresAt) {
+    return true;
+  }
+
+  const expiryDate = new Date(user.passwordExpiresAt);
+  return expiryDate < new Date();
+}
+
+export async function sendPasswordResetRequest(email: string): Promise<void> {
+  try {
+    // Appel au service query-forge-dev pour déclencher l'envoi de l'email
+    const nestBaseUrl = process.env.NEST_BASE_URL || "http://nestjs:3000";
+    const response = await fetch(
+      `${nestBaseUrl}/api/users/request-password-reset`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+
+    if (!response.ok) {
+      console.error(
+        "Erreur lors de l'envoi de l'email de reset:",
+        response.statusText
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Erreur lors de l'appel au service de reset password:",
+      error
+    );
   }
 }
 

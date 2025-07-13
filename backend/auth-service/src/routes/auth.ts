@@ -7,6 +7,8 @@ import {
   findUserByEmail,
   User,
   verifyUser,
+  checkPasswordExpiry,
+  sendPasswordResetRequest,
 } from "../services/user.service";
 import { sendConfirmationEmail } from "../services/email.service";
 import {
@@ -129,7 +131,7 @@ router.post("/login", (req: Request, res: Response, next) => {
   passport.authenticate(
     "local",
     { session: false },
-    (err: any, user: User, info: { message: any }) => {
+    async (err: any, user: User, info: { message: any }) => {
       const duration = (Date.now() - startTime) / 1000;
 
       if (err || !user) {
@@ -146,11 +148,29 @@ router.post("/login", (req: Request, res: Response, next) => {
         recordAuthDuration("login", "POST", duration);
         incrementAuthOperation("login", "error", "POST");
         incrementAuthFailure("login", "email_not_verified");
-        return res
-          .status(403)
-          .json({
-            message: "Veuillez confirmer votre email avant de vous connecter",
+        return res.status(403).json({
+          message: "Veuillez confirmer votre email avant de vous connecter",
+        });
+      }
+
+      // Vérifier si le mot de passe est expiré pour les users classique
+      if (user.role === "user") {
+        const isPasswordExpired = await checkPasswordExpiry(user);
+        if (isPasswordExpired) {
+          // Envoyer l'email de reset password de manière asynchrone
+          sendPasswordResetRequest(user.email).catch((error) => {
+            console.error("Erreur lors de l'envoi de l'email de reset:", error);
           });
+
+          recordAuthDuration("login", "POST", duration);
+          incrementAuthOperation("login", "error", "POST");
+          incrementAuthFailure("login", "password_expired");
+          return res.status(403).json({
+            message:
+              "Votre mot de passe a expiré. Un email de réinitialisation a été envoyé.",
+            passwordExpired: true,
+          });
+        }
       }
 
       try {
