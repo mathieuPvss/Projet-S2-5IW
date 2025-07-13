@@ -31,6 +31,16 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: FRONTEND_PORT
+            - name: AUTH_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: AUTH_HOST
+            - name: NEST_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: NEST_HOST
           ports:
             - containerPort: 4444
           resources:
