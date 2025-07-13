@@ -144,7 +144,7 @@ router.post("/login", (req: Request, res: Response, next) => {
       }
 
       // Vérifier si l'utilisateur a confirmé son email
-      if (!user.verified) {
+      if (!user.verified && user.role === "user") {
         recordAuthDuration("login", "POST", duration);
         incrementAuthOperation("login", "error", "POST");
         incrementAuthFailure("login", "email_not_verified");

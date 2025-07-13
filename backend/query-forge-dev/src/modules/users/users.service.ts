@@ -7,12 +7,13 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { ResetPasswordRequestDto } from './dto/reset-password-request.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserRepository } from './users.repository';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { User } from './entities/user.entity';
+import { User, Role } from './entities/user.entity';
 import { EmailService } from './services/email.service';
 
 @Injectable()
@@ -55,6 +56,20 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 
+    // Interdire la modification des utilisateurs admin
+    if (user.role === Role.ADMIN) {
+      throw new ForbiddenException(
+        'Impossible de modifier un utilisateur administrateur',
+      );
+    }
+
+    // Interdire la modification des emails
+    if (updateUserDto.email) {
+      throw new ForbiddenException(
+        "La modification de l'email n'est pas autorisée",
+      );
+    }
+
     const updateUserData: Partial<User> = {};
     if (updateUserDto.oldPassword && updateUserDto.newPassword) {
       const isPasswordValid = await bcrypt.compare(
@@ -76,8 +91,42 @@ export class UsersService {
       updateUserData.passwordExpiresAt = passwordExpiresAt;
     }
 
-    if (updateUserDto.email) {
-      updateUserData.email = updateUserDto.email;
+    return this.userRepository.updateUser(user.id, updateUserData);
+  }
+
+  async adminUpdate(
+    id: string,
+    adminUpdateUserDto: AdminUpdateUserDto,
+  ): Promise<User> {
+    const user = await this.findOne(id);
+
+    // Interdire la modification des utilisateurs admin
+    if (user.role === Role.ADMIN) {
+      throw new ForbiddenException(
+        'Impossible de modifier un utilisateur administrateur',
+      );
+    }
+
+    const updateUserData: Partial<User> = {};
+
+    if (adminUpdateUserDto.password) {
+      updateUserData.password = await bcrypt.hash(
+        adminUpdateUserDto.password,
+        10,
+      );
+
+      // Définir une nouvelle date d'expiration pour le mot de passe
+      const passwordExpiresAt = new Date();
+      passwordExpiresAt.setDate(passwordExpiresAt.getDate() + 90);
+      updateUserData.passwordExpiresAt = passwordExpiresAt;
+    }
+
+    if (adminUpdateUserDto.role !== undefined) {
+      updateUserData.role = adminUpdateUserDto.role;
+    }
+
+    if (adminUpdateUserDto.verified !== undefined) {
+      updateUserData.verified = adminUpdateUserDto.verified;
     }
 
     return this.userRepository.updateUser(user.id, updateUserData);
@@ -95,6 +144,14 @@ export class UsersService {
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
+
+    // Interdire la suppression des utilisateurs admin
+    if (user.role === Role.ADMIN) {
+      throw new ForbiddenException(
+        'Impossible de supprimer un utilisateur administrateur',
+      );
+    }
+
     await this.userRepository.deleteUser(user.id);
   }
 

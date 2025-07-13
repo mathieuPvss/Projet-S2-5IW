@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Patch,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -16,6 +17,7 @@ import {
 import { Public } from 'src/common/decorator/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { ResetPasswordRequestDto } from './dto/reset-password-request.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Role, User } from './entities/user.entity';
@@ -38,7 +40,8 @@ export class UsersController {
     description: 'Utilisateur créé avec succès.',
     type: User,
   })
-  @Public()
+  @ApiBearerAuth('access-token')
+  @Roles(Role.ADMIN)
   async create(@Body() createUserDto: CreateUserDto) {
     const result = await this.usersService.create(createUserDto);
     this.metricsService.incrementDbOperations('create', 'user', 'success');
@@ -82,6 +85,26 @@ export class UsersController {
   @ApiBearerAuth('access-token')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const result = await this.usersService.update(id, updateUserDto);
+    this.metricsService.incrementDbOperations('update', 'user', 'success');
+    return result;
+  }
+
+  @Patch('admin/:id')
+  @ApiOperation({ summary: 'Mettre à jour un utilisateur (admin)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Utilisateur mis à jour par un admin.',
+    type: User,
+  })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé.' })
+  @ApiResponse({ status: 403, description: 'Impossible de modifier un admin.' })
+  @ApiBearerAuth('access-token')
+  @Roles(Role.ADMIN)
+  async adminUpdate(
+    @Param('id') id: string,
+    @Body() adminUpdateUserDto: AdminUpdateUserDto,
+  ) {
+    const result = await this.usersService.adminUpdate(id, adminUpdateUserDto);
     this.metricsService.incrementDbOperations('update', 'user', 'success');
     return result;
   }

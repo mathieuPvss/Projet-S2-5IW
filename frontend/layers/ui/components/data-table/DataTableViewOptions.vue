@@ -1,17 +1,13 @@
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <Button
-        variant="outline"
-        size="sm"
-        class="hidden h-8 ml-auto lg:flex"
-      >
+      <Button variant="outline" size="sm" class="hidden h-8 ml-auto lg:flex">
         <Settings2 class="w-4 h-4 mr-2" />
-        View
+        Filtrer
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" class="w-[150px]">
-      <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+      <DropdownMenuLabel>Colonnes</DropdownMenuLabel>
       <DropdownMenuSeparator />
 
       <DropdownMenuCheckboxItem
@@ -27,11 +23,11 @@
   </DropdownMenu>
 </template>
 <script setup lang="ts" generic="TData, TValue">
-import type { Table } from '@tanstack/vue-table';
-import { computed } from 'vue';
-import { Settings2 } from 'lucide-vue-next';
+import type { Table } from "@tanstack/vue-table";
+import { computed } from "vue";
+import { Settings2 } from "lucide-vue-next";
 
-import { Button } from '@ui/components/button';
+import { Button } from "@ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -39,7 +35,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@ui/components/dropdown-menu';
+} from "@ui/components/dropdown-menu";
 
 interface DataTableViewOptionsProps {
   table: Table<TData>;
@@ -47,11 +43,12 @@ interface DataTableViewOptionsProps {
 
 const props = defineProps<DataTableViewOptionsProps>();
 
-const columns = computed(() => props.table.getAllColumns()
-  .filter(
-    column =>
-      typeof column.accessorFn !== 'undefined' && column.getCanHide(),
-  ));
+const columns = computed(() =>
+  props.table
+    .getAllColumns()
+    .filter(
+      (column) =>
+        typeof column.accessorFn !== "undefined" && column.getCanHide(),
+    ),
+);
 </script>
-
-
