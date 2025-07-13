@@ -3,47 +3,50 @@ import {
   ContentSource,
   ScrapeConfig,
 } from '../modules/content-sources/entities/content-source.entity';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as csv from 'csv-parse/sync';
 
 export const seedContentSources = async (dataSource: DataSource) => {
   const contentSourceRepository = dataSource.getRepository(ContentSource);
 
-  // Vérifier et créer YouTube
-  let youtube = await contentSourceRepository.findOne({
-    where: { name: 'youtube' },
+  // Lire le fichier CSV des content sources
+  const csvFilePath = path.join(process.cwd(), 'content_source.csv');
+  const fileContent = fs.readFileSync(csvFilePath, 'utf-8');
+  const records = csv.parse(fileContent, {
+    columns: true,
+    skip_empty_lines: true,
   });
-  if (!youtube) {
-    youtube = new ContentSource();
-    youtube.name = 'youtube';
-    youtube.enabled = true;
-    youtube.type = 'api';
-    youtube.config = null;
-    await contentSourceRepository.save(youtube);
-    console.log('Content source YouTube a été créée avec succès.');
-  } else {
-    console.log('Content source YouTube existe déjà.');
+
+  let sourcesCreated = 0;
+  let sourcesSkipped = 0;
+
+  for (const record of records) {
+    // Vérifier si la source existe déjà
+    const existingSource = await contentSourceRepository.findOne({
+      where: { id: record.id },
+    });
+
+    if (!existingSource) {
+      const contentSource = new ContentSource();
+      contentSource.id = record.id;
+      contentSource.name = record.name;
+      contentSource.enabled = record.enabled === 'true';
+      contentSource.type = record.type as 'scraper' | 'api';
+      contentSource.config = record.config === 'null' ? null : JSON.parse(record.config);
+      await contentSourceRepository.save(contentSource);
+      sourcesCreated++;
+    } else {
+      sourcesSkipped++;
+    }
   }
 
-  // Vérifier et créer TikTok
-  let tiktok = await contentSourceRepository.findOne({
-    where: { name: 'tiktok' },
-  });
-  if (!tiktok) {
-    tiktok = new ContentSource();
-    tiktok.name = 'tiktok';
-    tiktok.enabled = true;
-    tiktok.type = 'api';
-    tiktok.config = null;
-    await contentSourceRepository.save(tiktok);
-    console.log('Content source TikTok a été créée avec succès.');
-  } else {
-    console.log('Content source TikTok existe déjà.');
-  }
-
-  // Vérifier et créer stackoverflow scraper
-  let stackoverflow = await contentSourceRepository.findOne({
+  // Ajouter StackOverflow avec sa configuration si pas déjà présent
+  const stackOverflowExists = await contentSourceRepository.findOne({
     where: { name: 'stackoverflow' },
   });
-  if (!stackoverflow) {
+
+  if (!stackOverflowExists) {
     const config: ScrapeConfig = {
       startUrl: 'https://stackoverflow.com/questions',
       followLinks: {
@@ -59,17 +62,22 @@ export const seedContentSources = async (dataSource: DataSource) => {
       nextPageSelector: "a.s-pagination--item[rel='next']",
       maxPages: 10,
     };
-    // avec cette config va prendre environ 3H pour avoir 3818 questions de stackoverflow :(
-    stackoverflow = new ContentSource();
+    
+    const stackoverflow = new ContentSource();
     stackoverflow.name = 'stackoverflow';
     stackoverflow.enabled = true;
     stackoverflow.type = 'scraper';
     stackoverflow.config = config;
     await contentSourceRepository.save(stackoverflow);
     console.log('Content source StackOverflow a été créée avec succès.');
+    sourcesCreated++;
   } else {
     console.log('Content source StackOverflow existe déjà.');
+    sourcesSkipped++;
   }
+
+  console.log(`${sourcesCreated} nouvelles sources de contenu ont été importées avec succès.`);
+  console.log(`${sourcesSkipped} sources de contenu existantes ont été ignorées.`);
 
   return;
 };

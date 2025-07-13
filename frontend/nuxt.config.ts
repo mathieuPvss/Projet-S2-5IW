@@ -27,9 +27,9 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      nestApiUrl: process.env.NUXT_PUBLIC_NEST_API_URL || "http://localhost:3000",
-      authApiUrl: process.env.NUXT_PUBLIC_AUTH_API_URL || "http://localhost:4000",
       aiApiUrl: process.env.NUXT_PUBLIC_AI_API_URL || "http://localhost:8088",
+      nestBaseUrl: process.env.NEST_BASE_URL,
+      authBaseUrl: process.env.AUTH_BASE_URL,
     },
   },
   devtools: { enabled: true },

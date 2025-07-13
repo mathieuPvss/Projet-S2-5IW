@@ -5,10 +5,13 @@ WORKDIR /app
 COPY package*.json tsconfig.json nodemon.json ./
 RUN npm install
 
-COPY src/ ./src/
-# RUN npm run build
+COPY . .
 
-# Exposition du port des métriques
+RUN npm run build
+
+RUN chmod +x entrypoint.sh
+RUN chmod +x entrypoint.prod.sh
+
 EXPOSE 3333
 
-ENTRYPOINT ["npm", "run", "dev"]
+CMD ["/bin/sh", "./entrypoint.sh"] 

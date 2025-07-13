@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: sync
-          image: votre-registry/sync-service:latest # TODO: change
+          image: mathieuvss/sync-service:latest
           ports:
             - containerPort: 3333
           env:

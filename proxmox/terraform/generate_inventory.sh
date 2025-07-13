@@ -39,3 +39,26 @@ jq -r 'to_entries[] | .value.ip' "$TF_OUTPUT_JSON" | while read -r ip; do
 done
 
 echo "✅ Inventory and SSH keys prepared."
+
+# Create INI-style inventory
+{
+  echo "[master]"
+  jq -r 'to_entries[] | select(.key | test("master")) | "\(.value.ip)"' "$TF_OUTPUT_JSON"
+
+  echo ""
+  echo "[worker]"
+  jq -r 'to_entries[] | select(.key | test("worker")) | "\(.value.ip)"' "$TF_OUTPUT_JSON"
+
+  echo ""
+  echo "[databases]"
+  terraform output -json database_lxc | jq -r 'to_entries[] | "\(.value.ip)"'
+
+  echo ""
+  echo "[all:vars]"
+  echo "ansible_user=k3s"
+  echo "ansible_ssh_pass=YOUR_PASSWORD_HERE"
+  echo ""
+  echo "[databases:vars]"
+  echo "ansible_user=root"
+  echo "lxc_password=YOUR_LXC_PASSWORD_HERE"
+} > "$HOSTS_INI"

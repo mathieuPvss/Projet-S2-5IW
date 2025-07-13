@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: kibana
-          image: docker.elastic.co/kibana/kibana:9.0.0 # ne pas oublier de mettre la meme version sur elastic search dans le lxc
+          image: docker.elastic.co/kibana/kibana:9.0.0
           env:
             - name: ELASTICSEARCH_HOSTS
               valueFrom:

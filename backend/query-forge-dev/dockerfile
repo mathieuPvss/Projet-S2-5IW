@@ -4,11 +4,14 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm i
+RUN npm ci --include=dev
 
 COPY . .
 
+RUN npm run build
+
 RUN chmod +x entrypoint.sh
+RUN chmod +x entrypoint.prod.sh
 
 EXPOSE 3000
 

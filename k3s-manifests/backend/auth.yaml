@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: votre-registry/auth-service:latest # TODO: change
+          image: mathieuvss/auth-service:latest
           ports:
             - containerPort: 4000
           resources:
@@ -93,6 +93,26 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: AUTH_PORT
+            - name: EMAIL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: EMAIL_USER
+            - name: EMAIL_PASS
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: EMAIL_PASS
+            - name: FRONTEND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: FRONTEND_HOST
+            - name: NEST_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: NEST_BASE_URL
 
 ---
 apiVersion: v1

@@ -88,3 +88,54 @@ module "k3s_nodes" {
   cipassword   = var.vm_cipassword
   ssh_pubkey   = file("~/.ssh/id_rsa.pub")
 }
+
+
+
+
+
+# Variables pour LXC
+variable "lxc_template" {
+  default = "debian-12-standard_12.7-1_amd64.tar.zst"
+}
+
+variable "lxc_password" {
+  description = "Password for LXC root user"
+  sensitive   = true
+}
+
+# Configuration des LXC de base de données
+locals {
+  database_lxc = {
+    "postgres-db" = {
+      vmid        = 142  # IP finale: 192.168.1.42
+      memory      = 2048
+      cpu_cores   = 2
+      rootfs_size = "30G"
+      db_type     = "postgres"
+    }
+    "elasticsearch-db" = {
+      vmid        = 144  # IP finale: 192.168.1.44
+      memory      = 3072
+      cpu_cores   = 2
+      rootfs_size = "50G"
+      db_type     = "elasticsearch"
+    }
+  }
+}
+
+# Créer les LXC pour les bases de données
+module "database_lxc" {
+  source = "./modules/database_lxc"
+  for_each = local.database_lxc
+
+  name         = each.key
+  target_node  = var.node_name
+  vmid         = each.value.vmid
+  template     = var.lxc_template
+  memory       = each.value.memory
+  cpu_cores    = each.value.cpu_cores
+  rootfs_size  = each.value.rootfs_size
+  ip_address   = "${local.base_ip}${each.value.vmid}"
+  ssh_pubkey   = file("~/.ssh/id_rsa.pub")
+  database_type = each.value.db_type
+}

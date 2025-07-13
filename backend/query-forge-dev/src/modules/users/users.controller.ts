@@ -16,6 +16,8 @@ import {
 import { Public } from 'src/common/decorator/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ResetPasswordRequestDto } from './dto/reset-password-request.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Role, User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { Roles } from 'src/common/decorator/roles.decorator';
@@ -94,5 +96,36 @@ export class UsersController {
     const result = await this.usersService.remove(id);
     this.metricsService.incrementDbOperations('delete', 'user', 'success');
     return result;
+  }
+
+  @Post('request-password-reset')
+  @ApiOperation({ summary: 'Demander une réinitialisation de mot de passe' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email de réinitialisation envoyé.',
+  })
+  @Public()
+  async requestPasswordReset(
+    @Body() resetPasswordRequestDto: ResetPasswordRequestDto,
+  ) {
+    await this.usersService.requestPasswordReset(resetPasswordRequestDto);
+    this.metricsService.incrementDbOperations('update', 'user', 'success');
+    return {
+      message: 'Si cet email existe, un lien de réinitialisation a été envoyé.',
+    };
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Réinitialiser le mot de passe avec un token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Mot de passe réinitialisé avec succès.',
+  })
+  @ApiResponse({ status: 400, description: 'Token invalide ou expiré.' })
+  @Public()
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    await this.usersService.resetPassword(resetPasswordDto);
+    this.metricsService.incrementDbOperations('update', 'user', 'success');
+    return { message: 'Mot de passe réinitialisé avec succès.' };
   }
 }

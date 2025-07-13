@@ -43,6 +43,10 @@ echo "⚙️ Phase 4.3: Agent IA"
 kubectl apply -f ../backend/agent-ai.yaml
 echo "⚙️ Phase 4.4: Scraping"
 kubectl apply -f ../backend/scraping.yaml
+
+echo "⏳ Attente avant de démarrer le sync car le nest doit faire ses migrations + seed "
+sleep 60
+
 echo "⚙️ Phase 4.5: Sync"
 kubectl apply -f ../backend/sync.yaml
 

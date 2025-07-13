@@ -2,7 +2,15 @@ import { Router, Request, Response } from "express";
 import passport from "passport";
 import bcrypt from "bcryptjs";
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
-import { createUser, findUserByEmail, User } from "../services/user.service";
+import {
+  createUser,
+  findUserByEmail,
+  User,
+  verifyUser,
+  checkPasswordExpiry,
+  sendPasswordResetRequest,
+} from "../services/user.service";
+import { sendConfirmationEmail } from "../services/email.service";
 import {
   incrementAuthOperation,
   recordAuthDuration,
@@ -39,12 +47,34 @@ router.post("/register", async (req: Request, res: Response) => {
 
     const user = await createUser(email, hash);
 
+    // Générer token de confirmation
+    const confirmationToken = jwt.sign(
+      { email: user.email },
+      process.env.JWT_SECRET as Secret,
+      { expiresIn: "24h" }
+    );
+
+    // Envoyer email de confirmation
+    try {
+      await sendConfirmationEmail(user.email, confirmationToken);
+    } catch (emailError) {
+      console.error("Erreur lors de l'envoi de l'email:", emailError);
+      // On continue même si l'email échoue
+    }
+
     const duration = (Date.now() - startTime) / 1000;
     recordAuthDuration("register", "POST", duration);
     incrementAuthOperation("register", "success", "POST");
     incrementRegisteredUser(user.role);
 
-    res.status(201).json({ id: user.id, email: user.email, role: user.role });
+    res.status(201).json({
+      message:
+        "Inscription réussie. Vérifiez votre email pour confirmer votre compte.",
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      verified: user.verified,
+    });
   } catch (error) {
     const duration = (Date.now() - startTime) / 1000;
     recordAuthDuration("register", "POST", duration);
@@ -55,13 +85,53 @@ router.post("/register", async (req: Request, res: Response) => {
   }
 });
 
+// Confirmation d'email
+router.get("/confirm", async (req: Request, res: Response) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ message: "Token manquant" });
+    }
+
+    try {
+      const decoded = jwt.verify(
+        token as string,
+        process.env.JWT_SECRET as Secret
+      ) as { email: string };
+
+      const user = await findUserByEmail(decoded.email);
+      if (!user) {
+        return res.status(404).json({ message: "Utilisateur introuvable" });
+      }
+
+      if (user.verified) {
+        return res.status(200).json({ message: "Compte déjà confirmé" });
+      }
+
+      const verifiedUser = await verifyUser(decoded.email);
+
+      res.status(200).json({
+        message:
+          "Email confirmé avec succès. Vous pouvez maintenant vous connecter.",
+        verified: true,
+      });
+    } catch (jwtError) {
+      return res.status(400).json({ message: "Token invalide ou expiré" });
+    }
+  } catch (error) {
+    console.error("Erreur lors de la confirmation:", error);
+    res.status(500).json({ message: "Erreur interne du serveur" });
+  }
+});
+
 // Connexion
 router.post("/login", (req: Request, res: Response, next) => {
   const startTime = Date.now();
   passport.authenticate(
     "local",
     { session: false },
-    (err: any, user: User, info: { message: any }) => {
+    async (err: any, user: User, info: { message: any }) => {
       const duration = (Date.now() - startTime) / 1000;
 
       if (err || !user) {
@@ -71,6 +141,36 @@ router.post("/login", (req: Request, res: Response, next) => {
         return res
           .status(401)
           .json({ message: info?.message || "Identifiants invalides" });
+      }
+
+      // Vérifier si l'utilisateur a confirmé son email
+      if (!user.verified) {
+        recordAuthDuration("login", "POST", duration);
+        incrementAuthOperation("login", "error", "POST");
+        incrementAuthFailure("login", "email_not_verified");
+        return res.status(403).json({
+          message: "Veuillez confirmer votre email avant de vous connecter",
+        });
+      }
+
+      // Vérifier si le mot de passe est expiré pour les users classique
+      if (user.role === "user") {
+        const isPasswordExpired = await checkPasswordExpiry(user);
+        if (isPasswordExpired) {
+          // Envoyer l'email de reset password de manière asynchrone
+          sendPasswordResetRequest(user.email).catch((error) => {
+            console.error("Erreur lors de l'envoi de l'email de reset:", error);
+          });
+
+          recordAuthDuration("login", "POST", duration);
+          incrementAuthOperation("login", "error", "POST");
+          incrementAuthFailure("login", "password_expired");
+          return res.status(403).json({
+            message:
+              "Votre mot de passe a expiré. Un email de réinitialisation a été envoyé.",
+            passwordExpired: true,
+          });
+        }
       }
 
       try {
@@ -93,7 +193,12 @@ router.post("/login", (req: Request, res: Response, next) => {
         res.json({
           access_token: accessToken,
           refresh_token: refreshToken,
-          user: { id: user.id, email: user.email, role: user.role },
+          user: {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            verified: user.verified,
+          },
         });
       } catch (tokenError) {
         recordAuthDuration("login", "POST", duration);

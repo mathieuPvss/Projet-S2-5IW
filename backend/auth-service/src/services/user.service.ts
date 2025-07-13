@@ -17,6 +17,8 @@ export interface User {
   email: string;
   password: string;
   role: "user" | "admin";
+  verified: boolean;
+  passwordExpiresAt?: Date;
 }
 
 export async function findUserByEmail(email: string): Promise<User | null> {
@@ -34,6 +36,45 @@ export async function findUserByEmail(email: string): Promise<User | null> {
     recordDatabaseDuration("findUserByEmail", "user", duration);
     incrementDatabaseOperation("findUserByEmail", "user", "error");
     throw error;
+  }
+}
+
+export async function checkPasswordExpiry(user: User): Promise<boolean> {
+  // Si pas de date d'expiration définie, considérer comme expiré
+  if (!user.passwordExpiresAt) {
+    return true;
+  }
+
+  const expiryDate = new Date(user.passwordExpiresAt);
+  return expiryDate < new Date();
+}
+
+export async function sendPasswordResetRequest(email: string): Promise<void> {
+  try {
+    // Appel au service query-forge-dev pour déclencher l'envoi de l'email
+    const nestBaseUrl = process.env.NEST_BASE_URL || "http://nestjs:3000";
+    const response = await fetch(
+      `${nestBaseUrl}/api/users/request-password-reset`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+
+    if (!response.ok) {
+      console.error(
+        "Erreur lors de l'envoi de l'email de reset:",
+        response.statusText
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Erreur lors de l'appel au service de reset password:",
+      error
+    );
   }
 }
 
@@ -61,8 +102,8 @@ export async function createUser(
   const startTime = Date.now();
   try {
     const res = await pool.query(
-      'INSERT INTO "user" (email, password, role) VALUES ($1, $2, $3) RETURNING *',
-      [email, password, role]
+      'INSERT INTO "user" (email, password, role, verified) VALUES ($1, $2, $3, $4) RETURNING *',
+      [email, password, role, false]
     );
     const duration = (Date.now() - startTime) / 1000;
     recordDatabaseDuration("createUser", "user", duration);
@@ -72,6 +113,25 @@ export async function createUser(
     const duration = (Date.now() - startTime) / 1000;
     recordDatabaseDuration("createUser", "user", duration);
     incrementDatabaseOperation("createUser", "user", "error");
+    throw error;
+  }
+}
+
+export async function verifyUser(email: string): Promise<User | null> {
+  const startTime = Date.now();
+  try {
+    const res = await pool.query(
+      'UPDATE "user" SET verified = true WHERE email = $1 RETURNING *',
+      [email]
+    );
+    const duration = (Date.now() - startTime) / 1000;
+    recordDatabaseDuration("verifyUser", "user", duration);
+    incrementDatabaseOperation("verifyUser", "user", "success");
+    return res.rows[0] || null;
+  } catch (error) {
+    const duration = (Date.now() - startTime) / 1000;
+    recordDatabaseDuration("verifyUser", "user", duration);
+    incrementDatabaseOperation("verifyUser", "user", "error");
     throw error;
   }
 }
