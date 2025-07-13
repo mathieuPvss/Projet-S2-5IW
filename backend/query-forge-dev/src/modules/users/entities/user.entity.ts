@@ -30,6 +30,9 @@ export class User {
   })
   role: Role;
 
+  @Column({ default: false })
+  verified: boolean;
+
   @OneToMany(() => Report, (report) => report.user)
   @JoinColumn({ name: 'report_id' })
   reports: Report[];

@@ -1,8 +1,13 @@
 <template>
-  <div v-if="auth.token === null" class="flex min-h-svh w-full flex-col items-center gap-6 p-6 md:p-10">
+  <div
+    v-if="auth.token === null"
+    class="flex min-h-svh w-full flex-col items-center gap-6 p-6 md:p-10"
+  >
     <a class="flex items-center gap-2 self-center font-medium" href="#">
-      <div class="flex h-8 w-8 p-1 items-center justify-center rounded-md bg-primary text-primary-foreground">
-        <SiteIcon color="white"/>
+      <div
+        class="flex h-8 w-8 p-1 items-center justify-center rounded-md bg-primary text-primary-foreground"
+      >
+        <SiteIcon color="white" />
       </div>
       Query Forge Dev
     </a>
@@ -16,27 +21,35 @@
         </TabsTrigger>
       </TabsList>
       <TabsContent value="login" class="animate-fade-left">
-        <Login @change-tab="handleChangeTab('register')" @submit="handleLogin"/>
+        <Login
+          @change-tab="handleChangeTab('register')"
+          @submit="handleLogin"
+        />
       </TabsContent>
       <TabsContent value="register" class="animate-fade-left">
-        <Register @change-tab="handleChangeTab('login')" @submit="handleRegister" />
+        <Register
+          @change-tab="handleChangeTab('login')"
+          @submit="handleRegister"
+        />
       </TabsContent>
       <div
-        class="mt-6 text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary">
-        By clicking continue, you agree to our <NuxtLink to="/terms">Terms of Service</NuxtLink>
-        and <NuxtLink to="/privacy">Privacy Policy</NuxtLink>.
+        class="mt-6 text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary"
+      >
+        By clicking continue, you agree to our
+        <NuxtLink to="/terms">Terms of Service</NuxtLink> and
+        <NuxtLink to="/privacy">Privacy Policy</NuxtLink>.
       </div>
     </Tabs>
   </div>
 </template>
 <script lang="ts" setup>
-import { ref } from 'vue';
-import {Login, Register} from '@ui/components/auth';
-import {toast} from "@ui/components/toast";
-import { useAuthStore} from "@/stores/auth";
+import { ref } from "vue";
+import { Login, Register } from "@ui/components/auth";
+import { toast } from "@ui/components/toast";
+import { useAuthStore } from "@/stores/auth";
 
-const activeTab = ref<string>('login');
-const baseUrl = useRuntimeConfig().public.apiBaseUrl
+const activeTab = ref<string>("login");
+const baseUrl = useRuntimeConfig().public.authBaseUrl;
 const auth = useAuthStore();
 
 const handleChangeTab = (tab: string) => {
@@ -44,11 +57,12 @@ const handleChangeTab = (tab: string) => {
 };
 
 const handleRegister = async (values: Record<string, string>) => {
+  console.log(baseUrl);
   try {
-    const response = await fetch(baseUrl + '/auth/register', {
-      method: 'POST',
+    const response = await fetch(baseUrl + "/auth/register", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         email: values.email,
@@ -56,39 +70,41 @@ const handleRegister = async (values: Record<string, string>) => {
       }),
     });
 
-    const data: Record<string, string>[] = await response.json();
+    const data: { message?: string } = await response.json();
 
     if (!response.ok) {
       toast({
-        title: 'Erreur',
-        description: data.message || 'Une erreur est survenue lors de l\'inscription.',
-        variant: 'destructive',
+        title: "Erreur",
+        description:
+          data.message || "Une erreur est survenue lors de l'inscription.",
+        variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: 'Inscription réussie !',
-      description: 'Vous pouvez maintenant vous connecter.',
+      title: "Inscription réussie ! 📧",
+      description:
+        "Un email de confirmation vous a été envoyé. Vérifiez votre boîte mail pour activer votre compte.",
+      variant: "default",
     });
 
-    handleChangeTab('login');
-
+    handleChangeTab("login");
   } catch (error) {
     toast({
-      title: 'Erreur',
-      description: error.message || 'Une erreur est survenue.',
-      variant: 'destructive',
+      title: "Erreur",
+      description: (error as Error).message || "Une erreur est survenue.",
+      variant: "destructive",
     });
   }
 };
 
 const handleLogin = async (values: Record<string, string>) => {
   try {
-    const response = await fetch(baseUrl + '/auth/login', {
-      method: 'POST',
+    const response = await fetch(baseUrl + "/auth/login", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         email: values.email,
@@ -96,66 +112,73 @@ const handleLogin = async (values: Record<string, string>) => {
       }),
     });
 
-   
-    const data: { access_token?: string; message?: string } = await response.json();
+    const data: { access_token?: string; message?: string } =
+      await response.json();
 
     if (!response.ok) {
-      if(response.status === 401) {
+      if (response.status === 401) {
         toast({
-          title: 'Erreur',
-          description: 'Le mot de passe et/ou l\'email sont incorrects.',
-          variant: 'destructive',
+          title: "Erreur",
+          description: "Le mot de passe et/ou l'email sont incorrects.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (response.status === 403) {
+        toast({
+          title: "Email non confirmé 📧",
+          description:
+            "Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte mail.",
+          variant: "destructive",
         });
         return;
       }
       if (response.status === 400) {
         toast({
-          title: 'Erreur',
-          description: 'Tous les champs sont obligatoires.',
-          variant: 'destructive',
+          title: "Erreur",
+          description: "Tous les champs sont obligatoires.",
+          variant: "destructive",
         });
         return;
       }
       toast({
-        title: 'Erreur',
-        description: data.message || 'Une erreur est survenue lors de la connexion.',
-        variant: 'destructive',
+        title: "Erreur",
+        description:
+          data.message || "Une erreur est survenue lors de la connexion.",
+        variant: "destructive",
       });
       return;
     }
 
-    
     if (data.access_token) {
       auth.login(data.access_token);
     } else {
       toast({
-        title: 'Erreur',
-        description: 'Le token est manquant dans la réponse.',
-        variant: 'destructive',
+        title: "Erreur",
+        description: "Le token est manquant dans la réponse.",
+        variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: 'Connexion réussie !',
-      description: 'Bienvenue !',
+      title: "Connexion réussie !",
+      description: "Bienvenue !",
     });
-    await navigateTo('/');
-
+    await navigateTo("/");
   } catch (error) {
     toast({
-      title: 'Erreur',
-      description: (error as Error).message || 'Une erreur est survenue.',
-      variant: 'destructive',
+      title: "Erreur",
+      description: (error as Error).message || "Une erreur est survenue.",
+      variant: "destructive",
     });
   }
 };
 
-
 onMounted(() => {
   auth.init();
   if (auth.token) {
-    navigateTo('/');
+    navigateTo("/");
   }
 });
 </script>

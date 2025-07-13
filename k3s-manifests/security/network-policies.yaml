@@ -165,90 +165,90 @@ spec:
           port: 5432
 ---
 # ------------------------ACCESS FROM FRONTEND---------------------------------
----
-# permet au pod frontend de se connecter à nestjs sur le port 3000
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-frontend-to-backend
-  namespace: query-forge-dev
-spec:
-  podSelector:
-    matchLabels:
-      app: nestjs
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app: frontend
-      ports:
-        - protocol: TCP
-          port: 3000
----
-# permet au pod frontend de se connecter à auth sur le port 4000
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-frontend-to-auth
-  namespace: query-forge-dev
-spec:
-  podSelector:
-    matchLabels:
-      app: auth
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app: frontend
-      ports:
-        - protocol: TCP
-          port: 4000
----
-# permet au pod frontend de se connecter à scraper sur le port 3001
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-frontend-to-scraper
-  namespace: query-forge-dev
-spec:
-  podSelector:
-    matchLabels:
-      app: scraper
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app: frontend
-      ports:
-        - protocol: TCP
-          port: 3001
----
-# permet au pod frontend de se connecter à agent-ai sur le port 8088
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-frontend-to-agent-ai
-  namespace: query-forge-dev
-spec:
-  podSelector:
-    matchLabels:
-      app: agent-ai
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app: frontend
-      ports:
-        - protocol: TCP
-          port: 8088
+# Pas besoin de ses regles car la communication se fait depuis l'exterieur via les hotes de mes sous-domaines et donc passe par traefik et on a une regle dans ce fichier pour permettre a traefik dacceder aux services kubernetes
+# # permet au pod frontend de se connecter à nestjs sur le port 3000
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-frontend-to-backend
+#   namespace: query-forge-dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: nestjs
+#   policyTypes:
+#     - Ingress
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: frontend
+#       ports:
+#         - protocol: TCP
+#           port: 3000
+# ---
+# # permet au pod frontend de se connecter à auth sur le port 4000
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-frontend-to-auth
+#   namespace: query-forge-dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: auth
+#   policyTypes:
+#     - Ingress
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: frontend
+#       ports:
+#         - protocol: TCP
+#           port: 4000
+# ---
+# # permet au pod frontend de se connecter à scraper sur le port 3001
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-frontend-to-scraper
+#   namespace: query-forge-dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: scraper
+#   policyTypes:
+#     - Ingress
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: frontend
+#       ports:
+#         - protocol: TCP
+#           port: 3001
+# ---
+# # permet au pod frontend de se connecter à agent-ai sur le port 8088
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-frontend-to-agent-ai
+#   namespace: query-forge-dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: agent-ai
+#   policyTypes:
+#     - Ingress
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: frontend
+#       ports:
+#         - protocol: TCP
+#           port: 8088
 
 # ------------------------ACCESS FROM AGENT-AI---------------------------------
 ---
@@ -320,6 +320,30 @@ spec:
       ports:
         - protocol: TCP
           port: 3001
+
+---
+# ------------------------ACCESS FROM AUTH ---------------------------------
+# permet au pod auth de se connecter à l'extérieur (notamment pour l'envoi d'email avec gmail)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-auth-to-external
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: auth
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
 
 # ------------------------ACCESS FROM PROMETHEUS ---------------------------------
 ---

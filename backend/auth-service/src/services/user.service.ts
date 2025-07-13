@@ -17,6 +17,7 @@ export interface User {
   email: string;
   password: string;
   role: "user" | "admin";
+  verified: boolean;
 }
 
 export async function findUserByEmail(email: string): Promise<User | null> {
@@ -61,8 +62,8 @@ export async function createUser(
   const startTime = Date.now();
   try {
     const res = await pool.query(
-      'INSERT INTO "user" (email, password, role) VALUES ($1, $2, $3) RETURNING *',
-      [email, password, role]
+      'INSERT INTO "user" (email, password, role, verified) VALUES ($1, $2, $3, $4) RETURNING *',
+      [email, password, role, false]
     );
     const duration = (Date.now() - startTime) / 1000;
     recordDatabaseDuration("createUser", "user", duration);
@@ -72,6 +73,25 @@ export async function createUser(
     const duration = (Date.now() - startTime) / 1000;
     recordDatabaseDuration("createUser", "user", duration);
     incrementDatabaseOperation("createUser", "user", "error");
+    throw error;
+  }
+}
+
+export async function verifyUser(email: string): Promise<User | null> {
+  const startTime = Date.now();
+  try {
+    const res = await pool.query(
+      'UPDATE "user" SET verified = true WHERE email = $1 RETURNING *',
+      [email]
+    );
+    const duration = (Date.now() - startTime) / 1000;
+    recordDatabaseDuration("verifyUser", "user", duration);
+    incrementDatabaseOperation("verifyUser", "user", "success");
+    return res.rows[0] || null;
+  } catch (error) {
+    const duration = (Date.now() - startTime) / 1000;
+    recordDatabaseDuration("verifyUser", "user", duration);
+    incrementDatabaseOperation("verifyUser", "user", "error");
     throw error;
   }
 }

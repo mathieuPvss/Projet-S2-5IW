@@ -7,26 +7,31 @@ const users: Partial<User>[] = [
     email: 'admin@example.com',
     password: bcrypt.hashSync('password123', 10),
     role: Role.ADMIN,
+    verified: true,
   },
   {
     email: 'user@example.com',
     password: bcrypt.hashSync('password123', 10),
     role: Role.USER,
+    verified: true,
   },
   {
     email: 'jean.dupont@example.com',
     password: bcrypt.hashSync('password123', 10),
     role: Role.USER,
+    verified: true,
   },
   {
     email: 'marie.curie@example.com',
     password: bcrypt.hashSync('password123', 10),
     role: Role.USER,
+    verified: true,
   },
   {
     email: 'pierre.durand@example.com',
     password: bcrypt.hashSync('password123', 10),
     role: Role.USER,
+    verified: true,
   },
 ];
 
