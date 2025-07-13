@@ -33,7 +33,6 @@ services:
       - NEST_PORT=${NEST_PORT}
       - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
       - NODE_ENV=${NEST_ENV}
-    entrypoint: ["sh", "./entrypoint.sh"]
     depends_on:
       - postgres
       - elasticsearch
@@ -58,51 +57,6 @@ services:
       - xpack.security.enabled=false
     volumes:
       - esdata:/usr/share/elasticsearch/data
-
-  elasticsearch-init:
-    image: curlimages/curl:8.6.0
-    container_name: elasticsearch-init
-    depends_on:
-      - elasticsearch
-    entrypoint: >
-      sh -c '
-        echo "⏳ Attente d Elasticsearch..."
-        until curl -s http://elasticsearch:9200 >/dev/null; do
-          echo "🔁 Elasticsearch pas encore prêt, retry..."
-          sleep 2
-        done
-        echo "✅ Elasticsearch disponible !"
-
-        # Vérifier si l'index existe
-        if curl -s -f "http://elasticsearch:9200/contents" > /dev/null; then
-          echo "ℹ️ L'index contents existe déjà."
-        else
-          echo "🔄 Création de l'index..."
-          curl -X PUT "http://elasticsearch:9200/contents" -H "Content-Type: application/json" -d "{
-            \"settings\": {
-              \"number_of_shards\": 1,
-              \"number_of_replicas\": 0
-            },
-            \"mappings\": {
-              \"properties\": {
-                \"source\": { \"type\": \"keyword\" },
-                \"source_id\": { \"type\": \"keyword\" },
-                \"url\": { \"type\": \"keyword\" },
-                \"title\": { \"type\": \"text\" },
-                \"description\": { \"type\": \"text\" },
-                \"thumbnail\": { \"type\": \"keyword\" },
-                \"channel\": { \"type\": \"keyword\" },
-                \"published_at\": { \"type\": \"date\" },
-                \"language\": { \"type\": \"keyword\" },
-                \"tags\": { \"type\": \"keyword\" },
-                \"origin_question\": { \"type\": \"text\" },
-                \"created_at\": { \"type\": \"date\" }
-              }
-            }
-          }"
-          echo "✅ Index créé avec succès."
-        fi
-      '
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
