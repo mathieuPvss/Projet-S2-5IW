@@ -149,7 +149,7 @@ services:
       - NUXT_HOST=${NUXT_HOST}
       - NUXT_PORT=${NUXT_PORT}
       - AUTH_BASE_URL=${AUTH_BASE_URL}
-      - NEST_BASE_URL=${NEST_BASE_URL}
+      - NEST_BASE_URL=${NEST_LOCAL_URL}
     ports:
       - 4444:4444
     depends_on:

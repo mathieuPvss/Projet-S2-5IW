@@ -29,8 +29,8 @@
 
     </CardDescription>
     <CardContent class="relative">
-      <CardThumbnail v-if="result.thumbnail" :src="result.thumbnail" alt="Thumbnail"/>
-      <p v-if="result.channel">Chaîne : {{ result.channel }}</p>
+      <CardThumbnail v-if="result.thumbnail" :src="result.thumbnail" alt="Thumbnail" class="mb-4"/>
+      <p v-if="result.channel">Chaîne : @{{ result.channel }}</p>
       <p class="text-gray-600 dark:text-gray-300 mt-2 text-sm">{{ result.description }}</p>
     </CardContent>
     <CardFooter>

@@ -53,6 +53,7 @@ export async function sendPasswordResetRequest(email: string): Promise<void> {
   try {
     // Appel au service query-forge-dev pour déclencher l'envoi de l'email
     const nestBaseUrl = process.env.NEST_BASE_URL || "http://nestjs:3000";
+    console.log('Envoi de la requête de réinitialisation du mot de passe à:', nestBaseUrl);
     const response = await fetch(
       `${nestBaseUrl}/api/users/request-password-reset`,
       {
@@ -102,8 +103,8 @@ export async function createUser(
   const startTime = Date.now();
   try {
     const res = await pool.query(
-      'INSERT INTO "user" (email, password, role, verified) VALUES ($1, $2, $3, $4) RETURNING *',
-      [email, password, role, false]
+      'INSERT INTO "user" (email, password, role, verified, "resetPasswordToken", "resetPasswordExpires", "passwordExpiresAt") VALUES ($1, $2, $3, $4, null, null, $5) RETURNING *',
+      [email, password, role, false, new Date(Date.now() + 1000 * 60 * 60 * 24 * 90)]
     );
     const duration = (Date.now() - startTime) / 1000;
     recordDatabaseDuration("createUser", "user", duration);
