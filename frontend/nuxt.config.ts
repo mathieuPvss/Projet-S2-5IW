@@ -31,9 +31,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       aiApiUrl: process.env.NUXT_PUBLIC_AI_API_URL || "http://localhost:8088",
-      nestBaseUrl: process.env.NEST_BASE_URL,
-      authBaseUrl: process.env.AUTH_BASE_URL,
-      scrapingServiceUrl: process.env.SCRAPER_LOCAL_URL,
+      nestBaseUrl: process.env.NEST_BASE_URL || "http://localhost:3001",
+      authBaseUrl: process.env.AUTH_BASE_URL || "http://localhost:4000",
+      scrapingServiceUrl: process.env.SCRAPER_LOCAL_URL || "http://localhost:3003",
     },
   },
   devtools: { enabled: true },
@@ -87,6 +87,10 @@ export default defineNuxtConfig({
      */
     componentDir: "./layers/ui/components",
   },
+
+  // Ensure toast components are properly handled
+  ssr: true,
+  
   components: [
     {
       path: join(currentDir, "./layers/ui"),

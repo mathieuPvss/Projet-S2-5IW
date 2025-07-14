@@ -4,9 +4,23 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 
+# Define build arguments
+ARG AUTH_BASE_URL
+ARG NEST_BASE_URL
+ARG SCRAPER_LOCAL_URL
+ARG NUXT_PUBLIC_AI_API_URL
+
+# Set environment variables for build
+ENV AUTH_BASE_URL=$AUTH_BASE_URL
+ENV NEST_BASE_URL=$NEST_BASE_URL
+ENV SCRAPER_LOCAL_URL=$SCRAPER_LOCAL_URL
+ENV NUXT_PUBLIC_AI_API_URL=$NUXT_PUBLIC_AI_API_URL
+
 COPY . .
 
 RUN pnpm install
+
+RUN pnpm run build
 
 RUN chmod +x entrypoint.sh
 

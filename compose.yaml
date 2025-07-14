@@ -140,10 +140,15 @@ services:
     build:
       context: ./frontend
       dockerfile: dockerfile
+      args:
+        - AUTH_BASE_URL=${AUTH_BASE_URL}
+        - NEST_BASE_URL=${NEST_LOCAL_URL}
+        - SCRAPER_LOCAL_URL=${SCRAPER_LOCAL_URL}
+        - NUXT_PUBLIC_AI_API_URL=${NUXT_PUBLIC_AI_API_URL}
     container_name: frontend-query-forge-dev
     working_dir: /app
     volumes:
-      - ./frontend:/app
+      # - ./frontend:/app
       - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
     environment:
       - NUXT_HOST=${NUXT_HOST}

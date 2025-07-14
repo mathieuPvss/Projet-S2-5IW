@@ -8,7 +8,9 @@
     "dev:prepare": "nuxt prepare .playground",
     "build": "nuxt build .playground",
     "generate": "nuxt generate .playground",
-    "preview": "nuxt preview .playground",
+    "preview": "nuxt preview .playground --port 4444",
+    "start": "NUXT_PORT=4444 NUXT_HOST=0.0.0.0 node .playground/.output/server/index.mjs",
+    "start:prod": "node start-prod.js",
     "lint": "eslint .",
     "sass": "sass --no-source-map --watch layers/base/assets/scss/input.scss/:layers/app/public/output.css"
   },
@@ -44,6 +46,7 @@
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "formdata-polyfill": "^4.0.10",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.487.0",
     "lucide-vue-next": "^0.487.0",

@@ -47,6 +47,7 @@ import { ref } from "vue";
 import { Login, Register } from "@ui/components/auth";
 import { toast } from "@ui/components/toast";
 import { useAuthStore } from "@/stores/auth";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@ui/components/tabs";
 
 const activeTab = ref<string>("login");
 const baseUrl = useRuntimeConfig().public.authBaseUrl;
