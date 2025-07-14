@@ -4,9 +4,9 @@ import { useAuthStore } from "@/stores/auth";
 export const Api = {
   getReports: async () => {
     const config = useRuntimeConfig();
-    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const baseUrl = config.public.nestBaseUrl || 'http://localhost:3000';
     const auth = useAuthStore();
-    
+
     const response = await fetch(baseUrl+'/api/reports', {
       headers: {
         'Content-Type': 'application/json',
@@ -21,9 +21,9 @@ export const Api = {
 
   createReport: async (reportData: CreateReportDto) => {
     const config = useRuntimeConfig();
-    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const baseUrl = config.public.nestBaseUrl || 'http://localhost:3000';
     const auth = useAuthStore();
-    
+
     const response = await fetch(baseUrl+'/api/reports', {
       method: 'POST',
       headers: {
@@ -40,9 +40,9 @@ export const Api = {
 
   updateReportsStatus: async (reports: UpdateReportsStatusDto) => {
     const config = useRuntimeConfig();
-    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const baseUrl = config.public.nestBaseUrl || 'http://localhost:3000';
     const auth = useAuthStore();
-    
+
     const queryParams = new URLSearchParams({
       status: reports.status,
       report_ids: reports.report_ids.join(',')
@@ -62,9 +62,9 @@ export const Api = {
 
   deleteReport: async (id: string) => {
     const config = useRuntimeConfig();
-    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const baseUrl = config.public.nestBaseUrl || 'http://localhost:3000';
     const auth = useAuthStore();
-    
+
     const response = await fetch(baseUrl+`/api/reports/${id}`, {
       method: 'DELETE',
       headers: {
@@ -78,9 +78,9 @@ export const Api = {
 
   getUser: async (userId: string) => {
     const config = useRuntimeConfig();
-    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const baseUrl = config.public.nestBaseUrl || 'http://localhost:3000';
     const auth = useAuthStore();
-    
+
     const response = await fetch(baseUrl+`/api/users/id/${userId}`, {
       headers: {
         'Authorization': `Bearer ${auth.token}`,
@@ -94,9 +94,9 @@ export const Api = {
 
   getSource: async (sourceId: string) => {
     const config = useRuntimeConfig();
-    const baseUrl = config.public.nestApiUrl || 'http://localhost:3000';
+    const baseUrl = config.public.nestBaseUrl || 'http://localhost:3000';
     const auth = useAuthStore();
-    
+
     const response = await fetch(baseUrl+`/api/reports/source/${sourceId}`, {
       headers: {
         'Authorization': `Bearer ${auth.token}`,

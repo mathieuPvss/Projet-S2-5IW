@@ -65,7 +65,7 @@ import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 import { useForm } from "vee-validate";
-import {FormMessage} from "@ui/components/form";
+import {FormMessage, FormField, FormControl, FormLabel, FormItem} from "@ui/components/form";
 
 const emit = defineEmits(["changeTab", "submit"]);
 

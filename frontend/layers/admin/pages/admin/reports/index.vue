@@ -10,7 +10,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
-              Gestion des Rapports
+              Gestion des Signalements
             </h1>
             <p class="text-slate-600 dark:text-slate-300 mt-2">
               Administrez et modérez les signalements de contenu
@@ -23,17 +23,17 @@
     <!-- Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
       <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div
           class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 h-full w-full">
             <div class="bg-orange-100 dark:bg-orange-900 p-3 rounded-full">
               <FileText class="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
-            <div>
+            <div class="flex flex-col justify-center items-start h-full w-full">
               <p class="text-sm text-slate-600 dark:text-slate-400">
-                Total Rapports
+                Total Signalements
               </p>
               <p class="text-2xl font-bold text-slate-900 dark:text-white">
                 {{ data.length }}
@@ -45,11 +45,11 @@
         <div
           class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 h-full w-full">
             <div class="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-full">
               <Clock class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
             </div>
-            <div>
+            <div class="flex flex-col justify-center items-start h-full w-full">
               <p class="text-sm text-slate-600 dark:text-slate-400">
                 En Attente
               </p>
@@ -63,11 +63,11 @@
         <div
           class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 h-full w-full">
             <div class="bg-green-100 dark:bg-green-900 p-3 rounded-full">
               <CheckCircle class="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
-            <div>
+            <div class="flex flex-col justify-center items-start h-full w-full">
               <p class="text-sm text-slate-600 dark:text-slate-400">
                 Approuvés
               </p>
@@ -81,11 +81,11 @@
         <div
           class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 h-full w-full">
             <div class="bg-red-100 dark:bg-red-900 p-3 rounded-full">
               <XCircle class="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
-            <div>
+            <div class="flex flex-col justify-center items-start h-full w-full">
               <p class="text-sm text-slate-600 dark:text-slate-400">Rejetés</p>
               <p class="text-2xl font-bold text-slate-900 dark:text-white">
                 {{ data.filter((r) => r.status === "rejected").length }}
@@ -217,7 +217,16 @@ import { FileText, Clock, CheckCircle, XCircle } from "lucide-vue-next";
 import { ReportStatus } from "@/enums";
 import UserModal from "./components/User.modal.vue";
 import SourceModal from "./components/Source.modal.vue";
-import { AlertDialog } from "@ui/components/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel
+} from "@ui/components/alert-dialog";
 import type { CreateReportDto, UpdateReportsStatusDto } from "@/dto";
 import { toast } from "@ui/components/toast";
 

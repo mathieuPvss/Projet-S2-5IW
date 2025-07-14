@@ -7,9 +7,9 @@ echo "🐘 Installation et configuration de PostgreSQL 16..."
 apt update && apt upgrade -y
 
 # Installation de PostgreSQL 16
-apt install -y wget ca-certificates
-wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+apt install -y wget ca-certificates gnupg lsb-release
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.gpg] http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 apt update
 apt install -y postgresql-16 postgresql-client-16 postgresql-contrib-16
 
