@@ -30,7 +30,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      aiApiUrl: process.env.NUXT_PUBLIC_AI_API_URL || "http://localhost:8088",
+      aiApiUrl: process.env.AGENT_IA_HOST || "http://localhost:8088",
       nestBaseUrl: process.env.NEST_BASE_URL,
       authBaseUrl: process.env.AUTH_BASE_URL,
       scrapingServiceUrl: process.env.SCRAPER_LOCAL_URL,

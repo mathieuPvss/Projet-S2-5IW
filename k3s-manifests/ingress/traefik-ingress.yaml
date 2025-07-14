@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - traefik.query-forge-dev.ualtarh.com
+        - traefik.ualtarh.com
       secretName: traefik-dashboard-tls
   rules:
-    - host: traefik.query-forge-dev.ualtarh.com
+    - host: traefik.ualtarh.com
       http:
         paths:
           - path: /
