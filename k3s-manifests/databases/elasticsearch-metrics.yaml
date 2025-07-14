@@ -14,19 +14,18 @@ spec:
         app: elasticsearch-metrics
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "9108"
+        prometheus.io/port: "9114"
         prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: elasticsearch-metrics-exporter
           image: prometheuscommunity/elasticsearch-exporter:v1.9.0
           ports:
-            - containerPort: 9108
+            - containerPort: 9114
           args:
             - "--es.uri=http://192.168.1.144:9200"
             - "--es.all"
             - "--es.indices"
-            - "--es.snapshots"
 ---
 apiVersion: v1
 kind: Service
@@ -40,5 +39,5 @@ spec:
     app: elasticsearch-metrics
   ports:
     - name: elasticsearch-metrics
-      port: 9108
-      targetPort: 9108
+      port: 9114
+      targetPort: 9114
