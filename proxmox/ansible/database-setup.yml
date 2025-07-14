@@ -1,5 +1,5 @@
 - name: Setup PostgreSQL LXC
-  hosts: 192.168.1.42
+  hosts: postgres-db
   become: true
   vars:
     ansible_user: root
@@ -25,7 +25,7 @@
       shell: /tmp/install_postgresql.sh
 
 - name: Setup Elasticsearch LXC
-  hosts: 192.168.1.44
+  hosts: elasticsearch-db
   become: true
   vars:
     ansible_user: root
