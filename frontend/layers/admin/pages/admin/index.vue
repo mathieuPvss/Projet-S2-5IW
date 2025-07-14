@@ -305,6 +305,7 @@
 
         <div
           class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow cursor-pointer"
+          @click="navigateToReports"
         >
           <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">
             Gestion des rapports des utilisateurs
@@ -412,5 +413,9 @@ const navigateToSourceApi = () => {
 
 const navigateToContentSources = () => {
   router.push("/admin/new-content-source");
+};
+
+const navigateToReports = () => {
+  router.push("/admin/reports");
 };
 </script>

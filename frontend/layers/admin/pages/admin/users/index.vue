@@ -1,63 +1,148 @@
 <template>
-  <div class="container py-10 mx-auto">
-    <DataTable
-      :columns="columns"
-      :data="data"
-      ref="tableRef"
-      :loading="loading"
-      @update:row-selection="handleSelectChange"
+  <div
+    class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800"
+  >
+    <!-- Header -->
+    <div
+      class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 mb-8"
     >
-      <template #header>
-        <nav class="flex items-center justify-between w-full">
-          <div class="flex items-center justify-start gap-4">
-            <Button variant="outline" @click="openCreateModal" class="h-8">
-              <Icon icon="ic:outline-add" />
-              Ajouter un utilisateur
-            </Button>
-            <Button
-              v-if="selectedRows.length > 0"
-              variant="destructive"
-              @click="handleBatchDelete"
-              class="h-8"
-              :disabled="selectedRows.some((user) => user.role === 'admin')"
-            >
-              <Icon icon="ic:outline-delete" />
-              Supprimer ({{ selectedRows.length }})
-            </Button>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
+              Gestion des Utilisateurs
+            </h1>
+            <p class="text-slate-600 dark:text-slate-300 mt-2">
+              Administrez les comptes utilisateurs et leurs permissions
+            </p>
           </div>
-          <Button variant="outline" @click="loadData" class="h-8">
-            <Icon icon="ic:outline-refresh" />
-          </Button>
-        </nav>
-      </template>
-      <template #search>
-        <div class="flex items-center relative" v-if="tableRef">
-          <Select
-            :model-value="
-              tableRef.table.getColumn('role')?.getFilterValue() as string
-            "
-            @update:model-value="
-              tableRef.table.getColumn('role')?.setFilterValue($event)
-            "
-          >
-            <SelectTrigger class="w-[280px] h-8">
-              <SelectValue placeholder="Tous les rôles" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="user">Utilisateur</SelectItem>
-                <SelectItem value="admin">Administrateur</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <Icon
-            icon="ic:outline-close"
-            class="absolute right-8 top-1/2 transform -translate-y-1/2 cursor-pointer text-muted hover:text-foreground"
-            @click="tableRef.table.getColumn('role')?.setFilterValue('')"
-          />
         </div>
-      </template>
-    </DataTable>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6"
+        >
+          <div class="flex items-center gap-3">
+            <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+              <Users class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p class="text-sm text-slate-600 dark:text-slate-400">
+                Total Utilisateurs
+              </p>
+              <p class="text-2xl font-bold text-slate-900 dark:text-white">
+                {{ data.length }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6"
+        >
+          <div class="flex items-center gap-3">
+            <div class="bg-purple-100 dark:bg-purple-900 p-3 rounded-full">
+              <Shield class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <p class="text-sm text-slate-600 dark:text-slate-400">
+                Administrateurs
+              </p>
+              <p class="text-2xl font-bold text-slate-900 dark:text-white">
+                {{ data.filter((u) => u.role === "admin").length }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6"
+        >
+          <div class="flex items-center gap-3">
+            <div class="bg-green-100 dark:bg-green-900 p-3 rounded-full">
+              <UserCheck class="w-6 h-6 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <p class="text-sm text-slate-600 dark:text-slate-400">
+                Utilisateurs Standard
+              </p>
+              <p class="text-2xl font-bold text-slate-900 dark:text-white">
+                {{ data.filter((u) => u.role === "user").length }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table Container -->
+      <div
+        class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6"
+      >
+        <DataTable
+          :columns="columns"
+          :data="data"
+          ref="tableRef"
+          :loading="loading"
+          @update:row-selection="handleSelectChange"
+        >
+          <template #header>
+            <nav class="flex items-center justify-between w-full">
+              <div class="flex items-center justify-start gap-4">
+                <Button variant="outline" @click="openCreateModal" class="h-8">
+                  <Icon icon="ic:outline-add" />
+                  Ajouter un utilisateur
+                </Button>
+                <Button
+                  v-if="selectedRows.length > 0"
+                  variant="destructive"
+                  @click="handleBatchDelete"
+                  class="h-8"
+                  :disabled="selectedRows.some((user) => user.role === 'admin')"
+                >
+                  <Icon icon="ic:outline-delete" />
+                  Supprimer ({{ selectedRows.length }})
+                </Button>
+              </div>
+              <Button variant="outline" @click="loadData" class="h-8">
+                <Icon icon="ic:outline-refresh" />
+              </Button>
+            </nav>
+          </template>
+          <template #search>
+            <div class="flex items-center relative" v-if="tableRef">
+              <Select
+                :model-value="
+                  tableRef.table.getColumn('role')?.getFilterValue() as string
+                "
+                @update:model-value="
+                  tableRef.table.getColumn('role')?.setFilterValue($event)
+                "
+              >
+                <SelectTrigger class="w-[280px] h-8">
+                  <SelectValue placeholder="Tous les rôles" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="user">Utilisateur</SelectItem>
+                    <SelectItem value="admin">Administrateur</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Icon
+                icon="ic:outline-close"
+                class="absolute right-8 top-1/2 transform -translate-y-1/2 cursor-pointer text-muted hover:text-foreground"
+                @click="tableRef.table.getColumn('role')?.setFilterValue('')"
+              />
+            </div>
+          </template>
+        </DataTable>
+      </div>
+    </div>
 
     <UserModal
       v-model:is-open="userModalOpen"
@@ -98,6 +183,7 @@ import { DataTable } from "@ui/components/data-table";
 import { Api } from "./components/api";
 import { Icon } from "@iconify/vue";
 import { Button } from "@ui/components/button";
+import { Users, Shield, UserCheck } from "lucide-vue-next";
 import UserModal from "./components/UserModal.vue";
 import {
   AlertDialog,
