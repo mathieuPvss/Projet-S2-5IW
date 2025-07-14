@@ -13,11 +13,24 @@ echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.gpg] http://apt.post
 apt update
 apt install -y postgresql-16 postgresql-client-16 postgresql-contrib-16
 
-# Configuration PostgreSQL
-sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'your_secure_password';"
+# Configuration PostgreSQL - Création de l'utilisateur et de la base de données
+echo "🔧 Configuration de l'utilisateur et de la base de données..."
 
-# Créer la base de données pour l'application
-sudo -u postgres createdb queryforge
+# Créer l'utilisateur query_forge_dev_user
+sudo -u postgres psql -c "CREATE USER query_forge_dev_user WITH PASSWORD 'bfqzefbdifnqdsjignpbqbfgg';"
+
+# Créer la base de données db
+sudo -u postgres psql -c "CREATE DATABASE db OWNER query_forge_dev_user;"
+
+# Donner tous les privilèges à l'utilisateur sur sa base de données
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE db TO query_forge_dev_user;"
+
+# Se connecter à la base de données db et donner les privilèges sur le schéma public
+sudo -u postgres psql -d db -c "GRANT ALL ON SCHEMA public TO query_forge_dev_user;"
+sudo -u postgres psql -d db -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO query_forge_dev_user;"
+sudo -u postgres psql -d db -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO query_forge_dev_user;"
+sudo -u postgres psql -d db -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO query_forge_dev_user;"
+sudo -u postgres psql -d db -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO query_forge_dev_user;"
 
 # Configuration des connexions réseau
 cat >> /etc/postgresql/16/main/postgresql.conf << EOF
@@ -50,9 +63,14 @@ systemctl restart postgresql
 systemctl enable postgresql
 
 # Vérification
+echo "🔍 Vérification de la configuration..."
 sudo -u postgres psql -c "SELECT version();"
+sudo -u postgres psql -c "\du" | grep query_forge_dev_user
+sudo -u postgres psql -c "\l" | grep db
 
 echo "✅ PostgreSQL 16 installé et configuré"
 echo "🔌 Accessible sur: $(hostname -I | awk '{print $1}'):5432"
-echo "🗄️  Base de données: queryforge"
-echo "👤 Utilisateur: postgres"
+echo "🗄️  Base de données: db"
+echo "👤 Utilisateur: query_forge_dev_user"
+echo "🔑 Mot de passe: bfqzefbdifnqdsjignpbqbfgg"
+echo "🔗 URI de connexion: postgresql://query_forge_dev_user:bfqzefbdifnqdsjignpbqbfgg@$(hostname -I | awk '{print $1}'):5432/db?sslmode=disable"
