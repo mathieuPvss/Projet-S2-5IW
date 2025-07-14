@@ -144,7 +144,7 @@ services:
         - AUTH_BASE_URL=${AUTH_BASE_URL}
         - NEST_BASE_URL=${NEST_LOCAL_URL}
         - SCRAPER_LOCAL_URL=${SCRAPER_LOCAL_URL}
-        - NUXT_PUBLIC_AI_API_URL=${NUXT_PUBLIC_AI_API_URL}
+        - AGENT_IA_HOST=${AGENT_IA_HOST}
     container_name: frontend-query-forge-dev
     working_dir: /app
     volumes:
@@ -156,6 +156,7 @@ services:
       - AUTH_BASE_URL=${AUTH_BASE_URL}
       - NEST_BASE_URL=${NEST_LOCAL_URL}
       - SCRAPER_LOCAL_URL=${SCRAPER_LOCAL_URL}
+      - AGENT_IA_HOST=${AGENT_IA_HOST}
     ports:
       - 4444:4444
     depends_on:

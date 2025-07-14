@@ -146,6 +146,8 @@ import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import { toast } from "@ui/components/toast";
 import SiteIcon from "@/layers/base/components/SiteIcon.vue";
+import { Button } from "@ui/components/button";
+import { Card, CardContent } from "@ui/components/card";
 
 definePageMeta({
   layout: false, // Pas de layout par défaut pour cette page

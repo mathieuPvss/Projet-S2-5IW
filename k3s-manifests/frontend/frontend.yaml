@@ -41,6 +41,16 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: NEST_HOST
+            - name: SCRAPER_LOCAL_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SCRAPING_HOST
+            - name: AGENT_IA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: AGENT_IA_HOST
           ports:
             - containerPort: 4444
           resources:
@@ -54,7 +64,7 @@ spec:
             httpGet:
               path: /
               port: 4444
-            initialDelaySeconds: 30
+            initialDelaySeconds: 120
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
@@ -63,7 +73,7 @@ spec:
             httpGet:
               path: /
               port: 4444
-            initialDelaySeconds: 5
+            initialDelaySeconds: 120
             periodSeconds: 5
             successThreshold: 1
             failureThreshold: 3

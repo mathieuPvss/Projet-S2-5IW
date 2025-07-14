@@ -11,11 +11,11 @@ metadata:
 spec:
   tls:
     - hosts:
-        - grafana.query-forge-dev.ualtarh.com
+        - grafana.ualtarh.com
       secretName: monitoring-tls
   rules:
     # Grafana
-    - host: grafana.query-forge-dev.ualtarh.com
+    - host: grafana.ualtarh.com
       http:
         paths:
           - path: /

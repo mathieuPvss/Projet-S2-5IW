@@ -12,12 +12,12 @@ spec:
   tls:
     - hosts:
         - query-forge-dev.ualtarh.com # frontend
-        - api.query-forge-dev.ualtarh.com # nestjs
-        - auth.query-forge-dev.ualtarh.com # auth-service
-        - agent.query-forge-dev.ualtarh.com # agent-ia-service
-        - scraping.query-forge-dev.ualtarh.com # scraping-service
-        - adminer.query-forge-dev.ualtarh.com # adminer
-        - kibana.query-forge-dev.ualtarh.com # kibana
+        - api.ualtarh.com # nestjs
+        - auth.ualtarh.com # auth-service
+        - agent.ualtarh.com # agent-ia-service
+        - scraping.ualtarh.com # scraping-service
+        - adminer.ualtarh.com # adminer
+        - kibana.ualtarh.com # kibana
       secretName: query-forge-tls
   rules:
     # Frontend
@@ -33,7 +33,7 @@ spec:
                   number: 80
 
     # API Backend
-    - host: api.query-forge-dev.ualtarh.com
+    - host: api.ualtarh.com
       http:
         paths:
           - path: /api
@@ -45,7 +45,7 @@ spec:
                   number: 3000
 
     # Auth Service
-    - host: auth.query-forge-dev.ualtarh.com
+    - host: auth.ualtarh.com
       http:
         paths:
           - path: /auth
@@ -57,7 +57,7 @@ spec:
                   number: 4000
 
     # Agent IA Service
-    - host: agent.query-forge-dev.ualtarh.com
+    - host: agent.ualtarh.com
       http:
         paths:
           - path: /app
@@ -69,7 +69,7 @@ spec:
                   number: 8088
 
     # Scraping Service
-    - host: scraping.query-forge-dev.ualtarh.com
+    - host: scraping.ualtarh.com
       http:
         paths:
           - path: /api
@@ -81,7 +81,7 @@ spec:
                   number: 3001
 
     # Adminer
-    - host: adminer.query-forge-dev.ualtarh.com
+    - host: adminer.ualtarh.com
       http:
         paths:
           - path: /
@@ -93,7 +93,7 @@ spec:
                   number: 8080
 
     # Kibana
-    - host: kibana.query-forge-dev.ualtarh.com
+    - host: kibana.ualtarh.com
       http:
         paths:
           - path: /

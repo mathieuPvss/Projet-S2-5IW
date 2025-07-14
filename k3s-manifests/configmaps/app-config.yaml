@@ -51,7 +51,7 @@ data:
 
   # domaine url
   FRONTEND_HOST: "query-forge-dev.ualtarh.com"
-  AUTH_HOST: "auth.query-forge-dev.ualtarh.com"
-  NEST_HOST: "api.query-forge-dev.ualtarh.com"
-  SCRAPING_HOST: "scraping.query-forge-dev.ualtarh.com"
-  AGENT_IA_HOST: "agent.query-forge-dev.ualtarh.com"
+  AUTH_HOST: "auth.ualtarh.com"
+  NEST_HOST: "api.ualtarh.com"
+  SCRAPING_HOST: "scraping.ualtarh.com"
+  AGENT_IA_HOST: "agent.ualtarh.com"

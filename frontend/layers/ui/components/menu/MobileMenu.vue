@@ -1,12 +1,26 @@
 <template>
-  <div class="fixed top-0 left-0 z-50 flex h-screen w-full flex-col items-start justify-start gap-4 bg-background">
-    <Matrix :animation-speed="0" :dot-size="1" :total-size="2" :colors="[[0, 150, 125]]">
+  <div
+    class="fixed top-0 left-0 z-50 flex h-screen w-full flex-col items-start justify-start gap-4 bg-background"
+  >
+    <Matrix
+      :animation-speed="0"
+      :dot-size="1"
+      :total-size="2"
+      :colors="[[0, 150, 125]]"
+    >
       <nav class="relative w-full h-full">
-        <header class="relative flex flex-col justify-center items-start gap-4 w-full mb-6">
-          <MobileMenuHeader/>
-          <div class="h-min absolute top-4 right-4 ">
-            <Button variant="ghost" @click="handleToggleMenu" aria-label="Toggle menu" class="p-4 [&_svg]:size-12 h-full">
-              <Icon icon="ic:round-close" class=""/>
+        <header
+          class="relative flex flex-col justify-center items-start gap-4 w-full mb-6"
+        >
+          <MobileMenuHeader />
+          <div class="h-min absolute top-4 right-4">
+            <Button
+              variant="ghost"
+              @click="handleToggleMenu"
+              aria-label="Toggle menu"
+              class="p-4 [&_svg]:size-12 h-full"
+            >
+              <Icon icon="ic:round-close" class="" />
             </Button>
           </div>
         </header>
@@ -16,16 +30,19 @@
               <li v-if="hasPermission(menuItem)" class="w-full">
                 <Collapsible>
                   <div class="flex items-center first-level-menu-item w-full">
-                    <CollapsibleTrigger class="flex items-center justify-start gap-2 w-full px-4 py-2 hover:bg-background/40 rounded-md">
+                    <CollapsibleTrigger
+                      class="flex items-center justify-start gap-2 w-full px-4 py-2 hover:bg-background/40 rounded-md"
+                    >
                       <Icon v-if="menuItem.icon" :icon="menuItem.icon" />
                       {{ menuItem.title }}
-                      <Icon icon="ic:round-keyboard-arrow-down"/>
+                      <Icon icon="ic:round-keyboard-arrow-down" />
                     </CollapsibleTrigger>
                   </div>
-                  <ul
-                    class="flex flex-col gap-2 pl-4"
-                  >
-                    <template v-for="childItem in menuItem.children" :key="childItem.title">
+                  <ul class="flex flex-col gap-2 pl-4">
+                    <template
+                      v-for="childItem in menuItem.children"
+                      :key="childItem.title"
+                    >
                       <CollapsibleContent v-if="hasPermission(childItem)">
                         <li class="w-full">
                           <a
@@ -66,45 +83,43 @@
             </template>
           </template>
         </ul>
-        <MobileMenuFooter/>
+        <MobileMenuFooter />
       </nav>
     </Matrix>
-
   </div>
-
-
-
 </template>
 <script lang="ts" setup>
-
-import {menuItems} from "@ui/components/menu/data";
+import { menuItems } from "@ui/components/menu/data";
 import { Icon } from "@iconify/vue";
 import { useAuthStore } from "@/stores/auth";
 import type { MenuItem } from "@/types/MenuItem";
 import { MenuPermissionsEnum } from "@/enums";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@ui/components/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@ui/components/collapsible";
 import { MobileMenuHeader, MobileMenuFooter } from "@ui/components/menu";
 import { Matrix } from "@ui/components/matrix";
 
 const auth = useAuthStore();
-const user = computed(() => auth.user ? auth.user : null);
-const emit = defineEmits(['toggle']);
+const user = computed(() => (auth.user ? auth.user : null));
+const emit = defineEmits(["toggle"]);
 
 function hasPermission(menuItem: MenuItem) {
-  if(!menuItem.permission || menuItem.permission === MenuPermissionsEnum.ALL)
+  if (!menuItem.permission || menuItem.permission === MenuPermissionsEnum.ALL)
     return true;
-  if(!user.value)
-    return false;
-  if(menuItem.permission === MenuPermissionsEnum.ADMIN)
-    return user.value.isAdmin;
+  if (!user.value) return false;
+  if (menuItem.permission === MenuPermissionsEnum.ADMIN)
+    return user.value.role === "admin";
 }
 
 function handleToggleMenu() {
-  emit('toggle')
+  emit("toggle");
 }
 </script>
 <style scoped>
 .first-level-menu-item {
-  @apply text-xl font-semibold
+  @apply text-xl font-semibold;
 }
 </style>
