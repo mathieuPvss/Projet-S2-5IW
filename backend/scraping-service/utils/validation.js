@@ -20,7 +20,7 @@ const scrapeConfigSchema = Joi.object({
     nextPageSelector: Joi.string().optional()
         .description('Sélecteur CSS pour le bouton de pagination'),
 
-    maxPages: Joi.number().integer().optional()
+    maxPages: Joi.number().integer().default(1)
         .description('Nombre maximum de pages à traiter'),
 
 });

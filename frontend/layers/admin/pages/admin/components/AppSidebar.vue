@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   type SidebarProps,
 } from "@ui/components/sidebar";
-import { Flag, Home, User, Database } from "lucide-vue-next";
+import { Flag, Home, User, Database, Globe } from "lucide-vue-next";
 import SiteIcon from "@/layers/base/components/SiteIcon.vue";
 
 const props = withDefaults(defineProps<SidebarProps>(), {
@@ -42,6 +42,12 @@ const data = {
       title: "Source API",
       url: "/admin/source-api",
       icon: Database,
+      isActive: true,
+    },
+    {
+      title: "Content Sources",
+      url: "/admin/new-content-source",
+      icon: Globe,
       isActive: true,
     },
   ],

@@ -155,32 +155,132 @@
       </div>
     </div>
 
-    <!-- Section principale avec la galerie -->
+    <!-- Section principale avec les content sources -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div
         class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6"
       >
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-center mb-6">
           <h2 class="text-xl font-semibold text-slate-900 dark:text-white">
-            Gestion des contenus
+            Gestion des Sources de Scraping
           </h2>
-          <div class="flex items-center space-x-3">
-            <button
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-            >
-              Nouveau contenu
-            </button>
-            <button
-              class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors text-sm font-medium"
-            >
-              Filtrer
-            </button>
-          </div>
         </div>
 
-        <!-- Composant Gallery -->
-        <div class="min-h-[400px] bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
-          <Gallery :admin="true" />
+        <!-- Aperçu des sources de contenu -->
+        <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-6 space-y-6">
+          <!-- Section Sources Scraper -->
+          <div class="rounded-lg p-6">
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-3">
+                <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+                  <Globe class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3
+                    class="text-lg font-semibold text-slate-900 dark:text-white"
+                  >
+                    Sources Scraper
+                  </h3>
+                  <p class="text-sm text-slate-600 dark:text-slate-400">
+                    Configuration des scrapers web
+                  </p>
+                </div>
+              </div>
+              <button
+                @click="navigateToContentSources"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                Gérer les scrapers
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div class="bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
+                <div class="flex items-center gap-3">
+                  <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full">
+                    <Globe class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p
+                      class="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wide"
+                    >
+                      Total
+                    </p>
+                    <p class="text-xl font-bold text-slate-900 dark:text-white">
+                      {{ contentSourcesStats.scraper }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
+                <div class="flex items-center gap-3">
+                  <div class="bg-green-100 dark:bg-green-900 p-2 rounded-full">
+                    <CheckCircle
+                      class="w-4 h-4 text-green-600 dark:text-green-400"
+                    />
+                  </div>
+                  <div>
+                    <p
+                      class="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wide"
+                    >
+                      Actifs
+                    </p>
+                    <p class="text-xl font-bold text-slate-900 dark:text-white">
+                      {{
+                        Math.round(
+                          (contentSourcesStats.enabled *
+                            contentSourcesStats.scraper) /
+                            Math.max(contentSourcesStats.total, 1),
+                        )
+                      }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
+                <div class="flex items-center gap-3">
+                  <div class="bg-red-100 dark:bg-red-900 p-2 rounded-full">
+                    <Settings class="w-4 h-4 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div>
+                    <p
+                      class="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wide"
+                    >
+                      Inactifs
+                    </p>
+                    <p class="text-xl font-bold text-slate-900 dark:text-white">
+                      {{
+                        Math.round(
+                          (contentSourcesStats.disabled *
+                            contentSourcesStats.scraper) /
+                            Math.max(contentSourcesStats.total, 1),
+                        )
+                      }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                @click="navigateToContentSources"
+                class="flex items-center gap-2 px-3 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors text-sm"
+              >
+                <Plus class="w-4 h-4" />
+                Nouveau scraper
+              </button>
+              <button
+                @click="navigateToContentSources"
+                class="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-sm"
+              >
+                <Settings class="w-4 h-4" />
+                Configurer
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -244,8 +344,12 @@ import {
   MessageCircle,
   Users,
   FileText,
+  Globe,
+  CheckCircle,
+  Database,
+  Plus,
+  Settings,
 } from "lucide-vue-next";
-import Gallery from "@/layers/app/components/Gallery.vue";
 import { Api } from "@/layers/admin/pages/admin/users/components/api";
 import { Api as QuestionsApi } from "@/layers/admin/pages/admin/source-api/components/api";
 
@@ -304,5 +408,9 @@ const navigateToUsers = () => {
 
 const navigateToSourceApi = () => {
   router.push("/admin/source-api");
+};
+
+const navigateToContentSources = () => {
+  router.push("/admin/new-content-source");
 };
 </script>

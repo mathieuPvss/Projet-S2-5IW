@@ -122,6 +122,7 @@ class ScrapingService {
             await this.followLinksAndScrape();
         } else {
             // Sinon, scraper directement la page actuelle
+            console.log('🔍 Scraping de la page actuelle');
             await this.extractDataFromCurrentPage();
         }
     }
