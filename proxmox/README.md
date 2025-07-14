@@ -112,3 +112,16 @@ kubectl get ndoes -o wide
 kubectl describe node <node_name>
 
 
+
+
+# Proxmox
+
+## Commands
+
+```bash
+#monter les VMs 
+qm list
+qm config <VM_ID>
+mkdir -p /mnt/vm<VM_ID>
+guestmount -a /var/lib/vz/images/<VM_ID>/vm-<VM_ID>-disk-1.raw -i /mnt/vm<VM_ID>
+```
