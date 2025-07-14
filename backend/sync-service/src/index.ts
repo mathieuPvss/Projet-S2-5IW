@@ -367,20 +367,20 @@ async function syncContent(): Promise<void> {
             case "youtube":
               if (source.enabled) {
                 console.log("youtube test");
-                // await processYouTubeQuestions(
-                //   questionsResultForYoutube.rows,
-                //   source.id
-                // );
+                await processYouTubeQuestions(
+                  questionsResultForYoutube.rows,
+                  source.id
+                );
                 console.log("youtube test 2");
               }
               break;
             case "tiktok":
               if (source.enabled) {
                 console.log("tiktok test");
-                // await processTiktokQuestions(
-                //   questionsResultForTiktok.rows,
-                //   source.id
-                // );
+                await processTiktokQuestions(
+                  questionsResultForTiktok.rows,
+                  source.id
+                );
                 console.log("tiktok test 2");
               }
               break;
