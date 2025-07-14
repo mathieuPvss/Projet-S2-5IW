@@ -36,4 +36,8 @@ export class QuestionsRepository extends Repository<Question> {
   async deleteQuestion(id: string): Promise<void> {
     await this.delete(id);
   }
+
+  async countQuestions(): Promise<number> {
+    return await this.count();
+  }
 }

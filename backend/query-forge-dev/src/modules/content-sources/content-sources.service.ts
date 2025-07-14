@@ -60,4 +60,14 @@ export class ContentSourcesService {
     }
     await this.contentSourcesRepository.deleteContentSource(id);
   }
+
+  async getStats(): Promise<{
+    total: number;
+    api: number;
+    scraper: number;
+    enabled: number;
+    disabled: number;
+  }> {
+    return await this.contentSourcesRepository.getContentSourcesStats();
+  }
 }

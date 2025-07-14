@@ -25,7 +25,7 @@ export class CreateContentSourceDto {
   })
   @IsNotEmpty()
   @IsString()
-  type: 'scraper';
+  type: 'scraper' | 'api';
 
   @ApiProperty({
     description: 'Configuration de la source',

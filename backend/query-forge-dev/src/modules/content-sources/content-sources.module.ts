@@ -10,5 +10,6 @@ import { MetricsModule } from '../metrics/metrics.module';
   imports: [TypeOrmModule.forFeature([ContentSource]), MetricsModule],
   controllers: [ContentSourcesController],
   providers: [ContentSourcesService, ContentSourcesRepository],
+  exports: [ContentSourcesService, ContentSourcesRepository],
 })
 export class ContentSourcesModule {}

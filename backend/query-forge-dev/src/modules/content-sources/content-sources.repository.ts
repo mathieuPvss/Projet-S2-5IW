@@ -36,4 +36,26 @@ export class ContentSourcesRepository extends Repository<ContentSource> {
   async deleteContentSource(id: string): Promise<void> {
     await this.delete(id);
   }
+
+  async getContentSourcesStats(): Promise<{
+    total: number;
+    api: number;
+    scraper: number;
+    enabled: number;
+    disabled: number;
+  }> {
+    const total = await this.count();
+    const api = await this.count({ where: { type: 'api' } });
+    const scraper = await this.count({ where: { type: 'scraper' } });
+    const enabled = await this.count({ where: { enabled: true } });
+    const disabled = await this.count({ where: { enabled: false } });
+
+    return {
+      total,
+      api,
+      scraper,
+      enabled,
+      disabled,
+    };
+  }
 }
