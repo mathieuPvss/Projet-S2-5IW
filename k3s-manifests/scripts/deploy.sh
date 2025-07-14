@@ -24,7 +24,7 @@ kubectl apply -f ../databases/postgres-external.yaml
 kubectl apply -f ../databases/elasticsearch-external.yaml
 
 echo "🗄️ Phase 3.1: Set up metrics for postgres and elasticsearch"
-kubectl apply -f ../databases/postgres-metrics.yaml
+kubectl apply -f ../databases/postgres-metricsy.yaml
 kubectl apply -f ../databases/elasticsearch-metrics.yaml
 
 echo "⏳ Attente du démarrage des bases de données... (30s)"
@@ -55,13 +55,13 @@ kubectl apply -f ../frontend/frontend.yaml
 
 echo "📊 Phase 6: Monitoring..."
 echo "⚙️ Phase 6.1: Prometheus"
-kubectl apply -f ../monitoring/prometheus-configmap.yaml
-kubectl apply -f ../monitoring/prometheus-deployment.yaml
+kubectl apply -f ../monitoring/prometheus/prometheus-configmap.yaml
+kubectl apply -f ../monitoring/prometheus/prometheus-deployment.yaml
 echo "⚙️ Phase 6.2: Grafana"
-kubectl apply -f ../monitoring/grafana-configmap.yaml
-kubectl apply -f ../monitoring/grafana-deployment.yaml
+kubectl apply -f ../monitoring/grafana/grafana-configmap.yaml
+kubectl apply -f ../monitoring/grafana/grafana.yaml
 echo "⚙️ Phase 6.3: Kibana"
-kubectl apply -f ../monitoring/kibana.yaml
+kubectl apply -f ../monitoring/kibana/kibana.yaml
 
 
 echo "🛠️ Phase 7: Outils (adminer)"

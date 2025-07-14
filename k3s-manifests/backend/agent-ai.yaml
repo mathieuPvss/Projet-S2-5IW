@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: agent-ai
-          image: mathieuvss/agent-ai-service:latest
+          image: mathieuvss/agent-ia-service:latest
           env:
             - name: ELASTICSEARCH_HOSTS
               valueFrom:

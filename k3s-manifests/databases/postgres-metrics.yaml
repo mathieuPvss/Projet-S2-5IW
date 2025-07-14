@@ -30,7 +30,7 @@ spec:
                   key: POSTGRES_URI_EXTERNAL
           envFrom:
             - secretRef:
-                name: database-secret
+                name: app-secret
 
 ---
 apiVersion: v1
