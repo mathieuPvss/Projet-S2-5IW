@@ -18,7 +18,7 @@
             </Button>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Button variant="ghost" class="hover:fill-foreground/20" @click="openReportModal">
+            <Button variant="ghost" class="hover:fill-foreground/20" @click="isModalOpen = true">
               Signaler<Flag class="w-5 h-5"/>
             </Button>
           </DropdownMenuItem>
@@ -29,8 +29,8 @@
 
     </CardDescription>
     <CardContent class="relative">
-      <CardThumbnail v-if="result.thumbnail" :src="result.thumbnail" alt="Thumbnail" class="mb-4"/>
-      <p v-if="result.channel">Chaîne : @{{ result.channel }}</p>
+      <CardThumbnail v-if="result.thumbnail" :src="result.thumbnail" alt="Thumbnail"/>
+      <p v-if="result.channel">Chaîne : {{ result.channel }}</p>
       <p class="text-gray-600 dark:text-gray-300 mt-2 text-sm">{{ result.description }}</p>
     </CardContent>
     <CardFooter>
@@ -40,34 +40,16 @@
       </div>
     </CardFooter>
   </Card>
-
-  <!-- Report Modal -->
-  <Modal
-    v-model="modal.isOpen.value"
-    :title="modal.config.value.title"
-    :show-footer="modal.config.value.showFooter"
-    :show-cancel-button="modal.config.value.showCancelButton"
-    :show-ok-button="modal.config.value.showOkButton"
-    :cancel-text="modal.config.value.cancelText"
-    :ok-text="modal.config.value.okText"
-    @cancel="handleModalCancel"
-    @ok="handleReport"
+  <Modal @ok="handleReport(result.id)"
+         @cancel="handleModalCancel"
+         v-if="isModalOpen"
   >
-    <div class="space-y-4">
-      <p class="text-sm text-muted-foreground">
-        Décrivez le problème rencontré avec ce document :
-      </p>
-      <Textarea
-        placeholder="Décrivez le problème rencontré avec ce document"
-        class="w-full h-32"
-        v-model="reportDescription"
-      />
-    </div>
+    <Textarea placeholder="Décrivez le problème rencontré avec ce document"
+              class="w-full h-32"
+              v-model="reportDescription"/>
   </Modal>
 </template>
-
 <script setup lang="ts">
-import { ref } from 'vue';
 import {
   Card,
   CardContent,
@@ -81,20 +63,17 @@ import {BookmarkPlus, Flag, MoreVertical} from "lucide-vue-next";
 import {Badge} from "@ui/components/badge";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@ui/components/dropdown-menu";
 import {Button} from "@ui/components/button";
-import {Textarea} from "@ui/components/textarea";
 import {createReport} from "@/layers/app/pages/api";
 import type {CreateReportDto} from "@/dto";
 import {useAuthStore} from "@/stores/auth";
 import {ReportStatus} from "@/enums";
 import {toast} from "@ui/components/toast";
-import {Modal, useFormModal} from "@ui/components/modal";
+import {Modal} from "@ui/components/modal";
 
 const auth = useAuthStore();
 
+const isModalOpen = ref(false);
 const reportDescription = ref<string>('');
-
-// Use the form modal composable
-const modal = useFormModal();
 
 const props = defineProps<{
   result: {
@@ -110,22 +89,12 @@ const props = defineProps<{
   };
 }>();
 
-function openReportModal() {
-  console.log('Opening report modal for document:', auth.user);
-  modal.updateConfig({
-    title: 'Signaler un document',
-    okText: 'Envoyer le signalement',
-    cancelText: 'Annuler'
-  });
-  modal.open();
-}
-
 function handleModalCancel() {
-  modal.close();
+  isModalOpen.value = false;
   reportDescription.value = "";
 }
 
-async function handleReport() {
+async function handleReport(id: string) {
   if (!auth.user) {
     toast({
       title: 'Erreur',
@@ -141,25 +110,22 @@ async function handleReport() {
       description: 'Veuillez fournir une description pour le signalement.',
       variant: 'destructive'
     });
-    return;
   }
 
   const params: CreateReportDto = {
-    document_id: props.result.id,
-    user_id: auth.user?.sub,
+    document_id: id,
+    user_id: auth.user?.id,
     description: reportDescription.value,
     status: ReportStatus.PENDING
   }
-
-  try {
-    const res = await createReport(params);
+  await createReport(params).then((res) => {
     if (res.status === 201) {
       toast({
         title: 'Signalement créé',
         description: 'Votre signalement a été envoyé avec succès.',
         variant: 'default'
       });
-      modal.close();
+      isModalOpen.value = false;
       reportDescription.value = "";
     } else {
       toast({
@@ -168,13 +134,13 @@ async function handleReport() {
         variant: 'destructive'
       });
     }
-  } catch (error) {
+  }).catch((error) => {
     console.error('Error creating report:', error);
     toast({
       title: 'Erreur',
       description: 'Une erreur est survenue lors de la création du signalement.',
       variant: 'destructive'
     });
-  }
+  });
 }
 </script>

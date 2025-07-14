@@ -27,7 +27,7 @@ const data = {
       isActive: true,
     },
     {
-      title: "Rapports",
+      title: "Signalements",
       url: "/admin/reports",
       icon: Flag,
       isActive: true,

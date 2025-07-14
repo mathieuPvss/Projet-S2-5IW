@@ -25,7 +25,7 @@
                 @focus="searchFocus = true"
                 @focusout="searchFocus = false"
                 v-model:model-value="searchText"
-                @update:model-value="handleSearchChange"
+                @update:model-value="(value: string | number) => handleSearchChange(String(value))"
               />
               <span
                 class="absolute start-0 inset-y-0 flex items-center justify-start w-full overflow-hidden px-2 z-0"
@@ -50,9 +50,7 @@
 
     <!-- Résultats -->
     <div v-if="searchText.length > 0" class="w-full mt-12 flex flex-col items-center gap-6">
-      <!-- Résultats textuels -->
-      <Result v-for="result in searchResults" :key="result.id" :result="result"/>
-      <Result v-for="video in videoResults" :key="video.id" :result="video"/>
+      <ResultTabs :text-results="searchResults" :video-results="videoResults"/>
     </div>
   </section>
 </template>
@@ -64,8 +62,12 @@ import { Search } from "lucide-vue-next";
 import { Typewriter } from "@ui/components/typewriter";
 import { cn } from "@lib/utils";
 import { ref } from 'vue';
-import type {SearchResult} from "@/dto/searchResult.dto";
-import Result from './components/Result.vue'
+import type {SearchResult} from "@/dto";
+import ResultTabs from "@/layers/app/pages/components/ResultTabs.vue";
+import {HttpStatusCode} from "axios";
+import {useAuthStore} from "@/stores/auth";
+
+const auth = useAuthStore();
 
 const displayedText = ref([
   "How to make a loop in Golang",
@@ -82,13 +84,11 @@ const displayedText = ref([
 
 const searchText = ref("");
 const searchFocus = ref(false);
-const searchResults = ref<any[]>([]);
-const videoResults = ref<any[]>([]);
+const searchResults = ref<SearchResult[]>([]);
+const videoResults = ref<SearchResult[]>([]);
 const threadId = ref<string>();
 
 async function handleSearchChange (value: string) {
-  console.log('Search text changed:', value);
-  console.log('Search text:', searchText.value, searchFocus.value);
   if (value.trim().length === 0) {
     searchResults.value = [];
     videoResults.value = [];
@@ -97,30 +97,18 @@ async function handleSearchChange (value: string) {
   try {
     const res = await invokeAgent(value, threadId.value);
     const data = await res.json();
+    if(res.status === HttpStatusCode.Unauthorized) {
+      // Check if token is expired and handle it properly
+      const isTokenValid = await auth.checkTokenValidity();
+      if(!isTokenValid) {
+        await auth.handleExpiredToken();
+        return;
+      }
+    }
     const results:SearchResult[] = data.content.videos || [];
     videoResults.value = results.filter((video) => video.thumbnail || video.channel);
-    videoResults.value.push(
-      {
-        "id": "p6zu-JcBSVkGGfy5K74Z",
-        "score": 19.500927,
-        "source": "stackoverflow",
-        "title": "How to Measure Memory Usage Per Test Case in Jest?",
-        "description": "I'm looking to track the memory consumption of each test case during execution, not just the overall heap size reported after the test run using the --logHeapUsage flag. Is there a reliable way to capture per-test memory metrics in Jest?\nI have tried using --logHeapUsage only I want to find out exact memory usage of test case, is there a way to do it?",
-        "url": "https://stackoverflow.com/questions/79697877/how-to-measure-memory-usage-per-test-case-in-jest",
-        "thumbnail": "https://i.stack.imgur.com/4b0d1.png",
-        "channel": "Square Stack",
-        "published_at": "2025-07-11 05:38:29Z",
-        "language": "",
-        "tags": [
-          "ts-jest",
-          "ts-jest"
-        ]
-      }
-    )
     searchResults.value = results.filter((result) => !result.thumbnail && !result.channel !== null);
     threadId.value = data.content.threadId || undefined;
-    console.log('Search results:', searchResults.value);
-    console.log('Video results:', videoResults.value);
   } catch (e) {
     console.error("Erreur lors de la recherche :", e);
   }

@@ -8,7 +8,7 @@ const Api = {
 
 export const getAllUsers = () => {
   const config = useRuntimeConfig();
-  const baseUrl = config.public.nestApiUrl;
+  const baseUrl = config.public.nestBaseUrl;
 
   return fetch(`${baseUrl}${Api.listUsers}`, {
     method: 'GET',
@@ -38,7 +38,7 @@ export const invokeAgent = async (message: string, threadId?: string) => {
 
 export const createReport = async (reportData: CreateReportDto) => {
   const config = useRuntimeConfig();
-  const baseUrl = config.public.nestApiUrl;
+  const baseUrl = config.public.nestBaseUrl;
   console.log('Base url:', baseUrl);
   const auth = useAuthStore();
   return await fetch(baseUrl+'/api/reports', {

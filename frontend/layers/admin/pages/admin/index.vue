@@ -308,10 +308,10 @@
           @click="navigateToReports"
         >
           <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-            Gestion des rapports des utilisateurs
+            Gestion des signalements utilisateurs
           </h3>
           <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">
-            Consulter et gérer les rapports soumis par les utilisateurs
+            Consulter et gérer les signalements soumis par les utilisateurs
           </p>
           <div class="text-blue-600 dark:text-blue-400 text-sm font-medium">
             Accéder →

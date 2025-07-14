@@ -17,7 +17,12 @@ export default defineNuxtRouteMiddleware(async () => {
     return;
   }
 
-  if (!auth.token) {
+  // Check if user is authenticated and token is valid (not expired)
+  if (!auth.isAuthenticated) {
+    // If token exists but is expired, handle it properly
+    if (auth.token && auth.isTokenExpired) {
+      await auth.handleExpiredToken();
+    }
     return navigateTo("/authentication");
   }
 });

@@ -99,8 +99,9 @@
 import { ref, watch, computed } from 'vue';
 import { Modal, useModal } from '@ui/components/modal';
 import { Api } from './api';
-import {LoaderCircle} from "lucide-vue-next";
-import {ReportStatus} from "@/enums";
+import { LoaderCircle } from "lucide-vue-next";
+import { ReportStatus } from "@/enums";
+import { Button } from '@ui/components/button';
 
 interface Content {
   source_id: string
