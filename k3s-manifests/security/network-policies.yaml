@@ -377,7 +377,7 @@ spec:
         - protocol: TCP
           port: 3333
         - protocol: TCP
-          port: 9108
+          port: 9114
         - protocol: TCP
           port: 9187
         - protocol: TCP

@@ -109,6 +109,6 @@ metadata:
 spec:
   selector:
     app: sync
-    ports:
-      - port: 3333
-        targetPort: 3333
+  ports:
+    - port: 3333
+      targetPort: 3333
