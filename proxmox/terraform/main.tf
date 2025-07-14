@@ -99,7 +99,7 @@ variable "lxc_template" {
 }
 
 variable "lxc_password" {
-  description = "Password for LXC root user"
+  description = "Password for the k3s user in LXC containers"
   sensitive   = true
 }
 
@@ -138,4 +138,5 @@ module "database_lxc" {
   ip_address   = "${local.base_ip}${each.value.vmid}"
   ssh_pubkey   = file("~/.ssh/id_rsa.pub")
   database_type = each.value.db_type
+  password     = var.lxc_password
 }

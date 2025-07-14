@@ -58,6 +58,23 @@ Apres avoir déployé les LXC via Terraform, lancer la commande suivant pour ins
 ```bash
 cd ../ansible
 ansible-playbook database-setup.yml --vault-password-file group_vars/all/.vault_pass.txt
+
+# pour vérifier l'installation de Postgres
+ssh root@192.168.1.142
+systemctl status postgresql
+sudo -u postgres psql -c 'SELECT version();'
+netstat -tlnp | grep 5432
+tail -20 /var/log/postgresql/postgresql-16-main.log
+
+# pour vérifier l'installation de ElasticSearch
+ssh root@192.168.1.144
+systemctl status elasticsearch
+# version et cluster health
+curl -X GET 'localhost:9200/_cluster/health?pretty'
+# vérification du port
+netstat -tlnp | grep 9200
+# logs
+tail -20 /var/log/elasticsearch/queryforge-cluster.log
 ```
 
 Après avoir déployé les VM via Terraform, lancer la commande suivant pour installer k3s dans les VMs en fonction du role de la VM :
