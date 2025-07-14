@@ -1,0 +1,51 @@
+- name: Setup PostgreSQL LXC
+  hosts: postgres-db
+  become: true
+  vars:
+    ansible_user: root
+    ansible_ssh_pass: "{{ lxc_password }}"
+
+  tasks:
+    - name: Wait for LXC to be ready
+      wait_for_connection:
+        timeout: 120
+
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Copy PostgreSQL install script
+      copy:
+        src: roles/databases/files/install_postgresql.sh
+        dest: /tmp/install_postgresql.sh
+        mode: "0755"
+
+    - name: Install PostgreSQL
+      shell: /tmp/install_postgresql.sh
+
+- name: Setup Elasticsearch LXC
+  hosts: elasticsearch-db
+  become: true
+  vars:
+    ansible_user: root
+    ansible_ssh_pass: "{{ lxc_password }}"
+
+  tasks:
+    - name: Wait for LXC to be ready
+      wait_for_connection:
+        timeout: 120
+
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Copy Elasticsearch install script
+      copy:
+        src: roles/databases/files/install_elasticsearch.sh
+        dest: /tmp/install_elasticsearch.sh
+        mode: "0755"
+
+    - name: Install Elasticsearch
+      shell: /tmp/install_elasticsearch.sh

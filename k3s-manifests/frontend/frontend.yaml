@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: query-forge-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4444"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: frontend
+          image: mathieuvss/query-forge-frontend:latest
+          env:
+            - name: NUXT_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: NUXT_HOST
+            - name: NUXT_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: FRONTEND_PORT
+            - name: AUTH_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: AUTH_HOST
+            - name: NEST_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: NEST_HOST
+            - name: SCRAPER_LOCAL_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SCRAPING_HOST
+            - name: AGENT_IA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: AGENT_IA_HOST
+          ports:
+            - containerPort: 4444
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 4444
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 4444
+            initialDelaySeconds: 120
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: query-forge-dev
+  labels:
+    app: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 4444

@@ -1,0 +1,123 @@
+# Vertical Pod Autoscaler pour NestJS
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: nestjs-vpa
+  namespace: query-forge-dev
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nestjs
+  updatePolicy:
+    updateMode: "Auto" # Auto, Recreation, Initial, Off
+  resourcePolicy:
+    containerPolicies:
+      - containerName: nestjs
+        minAllowed:
+          cpu: 100m
+          memory: 128Mi
+        maxAllowed:
+          cpu: 2
+          memory: 4Gi
+        controlledResources: ["cpu", "memory"]
+
+---
+# Vertical Pod Autoscaler pour Frontend
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: frontend-vpa
+  namespace: query-forge-dev
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: frontend
+        minAllowed:
+          cpu: 50m
+          memory: 64Mi
+        maxAllowed:
+          cpu: 1
+          memory: 2Gi
+        controlledResources: ["cpu", "memory"]
+
+---
+# Vertical Pod Autoscaler pour Agent AI Service
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: agent-ai-service-vpa
+  namespace: query-forge-dev
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: agent-ai-service
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: agent-ai-service
+        minAllowed:
+          cpu: 200m
+          memory: 256Mi
+        maxAllowed:
+          cpu: 4
+          memory: 8Gi
+        controlledResources: ["cpu", "memory"]
+
+---
+# Vertical Pod Autoscaler pour Scraping Service
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: scraping-service-vpa
+  namespace: query-forge-dev
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: scraping-service
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: scraping-service
+        minAllowed:
+          cpu: 100m
+          memory: 128Mi
+        maxAllowed:
+          cpu: 2
+          memory: 4Gi
+        controlledResources: ["cpu", "memory"]
+
+---
+# Vertical Pod Autoscaler pour Auth Service
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: auth-service-vpa
+  namespace: query-forge-dev
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: auth-service
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: auth-service
+        minAllowed:
+          cpu: 50m
+          memory: 64Mi
+        maxAllowed:
+          cpu: 1
+          memory: 2Gi
+        controlledResources: ["cpu", "memory"]

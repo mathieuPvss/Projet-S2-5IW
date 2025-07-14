@@ -1,0 +1,8 @@
+@use 'partials/variables';
+@use 'partials/globals';
+@use 'components/gradienShadow';
+@use 'components/scrollbar';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

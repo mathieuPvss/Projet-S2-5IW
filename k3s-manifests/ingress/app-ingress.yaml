@@ -1,0 +1,105 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: query-forge-ingress
+  namespace: query-forge-dev
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+    kubernetes.io/ingress.class: traefik
+spec:
+  tls:
+    - hosts:
+        - query-forge-dev.ualtarh.com # frontend
+        - api.ualtarh.com # nestjs
+        - auth.ualtarh.com # auth-service
+        - agent.ualtarh.com # agent-ia-service
+        - scraping.ualtarh.com # scraping-service
+        - adminer.ualtarh.com # adminer
+        - kibana.ualtarh.com # kibana
+      secretName: query-forge-tls
+  rules:
+    # Frontend
+    - host: query-forge-dev.ualtarh.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+
+    # API Backend
+    - host: api.ualtarh.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: nestjs-service
+                port:
+                  number: 3000
+
+    # Auth Service
+    - host: auth.ualtarh.com
+      http:
+        paths:
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 4000
+
+    # Agent IA Service
+    - host: agent.ualtarh.com
+      http:
+        paths:
+          - path: /app
+            pathType: Prefix
+            backend:
+              service:
+                name: agent-ai-service
+                port:
+                  number: 8088
+
+    # Scraping Service
+    - host: scraping.ualtarh.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: scraping-service
+                port:
+                  number: 3001
+
+    # Adminer
+    - host: adminer.ualtarh.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: adminer-service
+                port:
+                  number: 8080
+
+    # Kibana
+    - host: kibana.ualtarh.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kibana-service
+                port:
+                  number: 5601

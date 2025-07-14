@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch-metrics
+  namespace: query-forge-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch-metrics
+  template:
+    metadata:
+      labels:
+        app: elasticsearch-metrics
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9108"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: elasticsearch-metrics-exporter
+          image: prometheuscommunity/elasticsearch-exporter:v1.9.0
+          ports:
+            - containerPort: 9108
+          args:
+            - "--es.uri=http://elasticsearch-service-external:9200"
+            - "--es.all"
+            - "--es.indices"
+            - "--es.snapshots"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-service-metrics
+  namespace: query-forge-dev
+  labels:
+    app: elasticsearch-metrics
+spec:
+  selector:
+    app: elasticsearch-metrics
+  ports:
+    - name: elasticsearch-metrics
+      port: 9108
+      targetPort: 9108

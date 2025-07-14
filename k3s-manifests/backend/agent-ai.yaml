@@ -1,0 +1,91 @@
+# k3s-manifests/backend/agent-ia-service.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-ai
+  namespace: query-forge-dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: agent-ai
+  template:
+    metadata:
+      labels:
+        app: agent-ai
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8088"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: agent-ai
+          image: mathieuvss/agent-ai-service:latest
+          env:
+            - name: ELASTICSEARCH_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: ELASTICSEARCH_HOSTS
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: OPENAI_API_KEY
+            - name: AGENT_AI_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: AGENT_AI_PORT
+            - name: AGENT_AI_REQUIRE_AUTH
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: AGENT_AI_REQUIRE_AUTH
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: JWT_SECRET
+          ports:
+            - containerPort: 8088
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8088
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8088
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-ai-service
+  namespace: query-forge-dev
+  labels:
+    app: agent-ai
+spec:
+  selector:
+    app: agent-ai
+  ports:
+    - port: 8088
+      targetPort: 8088

@@ -1,0 +1,438 @@
+# ferme toutes les connexions entrantes et sortantes de mes pods du namespace query-forge-dev
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+  namespace: query-forge-dev
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+# ------------------------ACCESS TO EXTERNAL BDDS---------------------------------
+---
+# permet au pod nestjs de se connecter aux bdds externes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nestjs-to-external-bdds
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: nestjs
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.1.142/32 # PostgreSQL (lxc) a changer
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - ipBlock:
+            cidr: 192.168.1.144/32 # ElasticSearch (lxc) a changer
+      ports:
+        - protocol: TCP
+          port: 9200
+---
+# permet au pod sync de se connecter aux bdds externes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-sync-to-external-bdds
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: sync
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.1.142/32 # PostgreSQL (lxc) a changer
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - ipBlock:
+            cidr: 192.168.1.144/32 # ElasticSearch (lxc) a changer
+      ports:
+        - protocol: TCP
+          port: 9200
+---
+# permet au pod auth de se connecter a la bdd postgres externe
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-auth-to-external-postgres
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: auth
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.1.142/32 # PostgreSQL (lxc) a changer
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# permet au pod kibana de se connecter a la bdd elasticsearch externe
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kibana-to-external-elasticsearch
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: kibana
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.1.144/32 # ElasticSearch (lxc) a changer
+      ports:
+        - protocol: TCP
+          port: 9200
+---
+# permet au pod agent-ai de se connecter a la bdd elasticsearch externe
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-agent-ai-to-external-elasticsearch
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: agent-ai
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.1.144/32 # ElasticSearch (lxc) a changer
+      ports:
+        - protocol: TCP
+          port: 9200
+---
+# permet au pod kibana de se connecter a la bdd elasticsearch externe
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kibana-to-external-elasticsearch
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: kibana
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.1.144/32 # ElasticSearch (lxc) a changer
+      ports:
+        - protocol: TCP
+          port: 9200
+---
+# permet au pod adminer de se connecter a la bdd postgres externe
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-adminer-to-external-postgres
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: adminer
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.1.142/32 # PostgreSQL (lxc) a changer
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# ------------------------ACCESS FROM FRONTEND---------------------------------
+# Pas besoin de ses regles car la communication se fait depuis l'exterieur via les hotes de mes sous-domaines et donc passe par traefik et on a une regle dans ce fichier pour permettre a traefik dacceder aux services kubernetes
+# # permet au pod frontend de se connecter à nestjs sur le port 3000
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-frontend-to-backend
+#   namespace: query-forge-dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: nestjs
+#   policyTypes:
+#     - Ingress
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: frontend
+#       ports:
+#         - protocol: TCP
+#           port: 3000
+# ---
+# # permet au pod frontend de se connecter à auth sur le port 4000
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-frontend-to-auth
+#   namespace: query-forge-dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: auth
+#   policyTypes:
+#     - Ingress
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: frontend
+#       ports:
+#         - protocol: TCP
+#           port: 4000
+# ---
+# # permet au pod frontend de se connecter à scraper sur le port 3001
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-frontend-to-scraper
+#   namespace: query-forge-dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: scraper
+#   policyTypes:
+#     - Ingress
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: frontend
+#       ports:
+#         - protocol: TCP
+#           port: 3001
+# ---
+# # permet au pod frontend de se connecter à agent-ai sur le port 8088
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-frontend-to-agent-ai
+#   namespace: query-forge-dev
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: agent-ai
+#   policyTypes:
+#     - Ingress
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: frontend
+#       ports:
+#         - protocol: TCP
+#           port: 8088
+
+# ------------------------ACCESS FROM AGENT-AI---------------------------------
+---
+# permet au pod agent-ai de se connecter à l'extérieur (notamment à l'api openai)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-agent-ai-to-external
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: agent-ai
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+
+# ------------------------ACCESS FROM SCRAPER---------------------------------
+---
+# permet au pod scraper de se connecter à l'extérieur pour scraper les sites web
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-scraper-to-external
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: scraper
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+
+# ------------------------ACCESS FROM SYNC---------------------------------
+---
+# permet au pod sync de se connecter à scraper sur le port 3001
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-sync-to-scraper
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: scraper
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: sync
+      ports:
+        - protocol: TCP
+          port: 3001
+
+---
+# ------------------------ACCESS FROM AUTH ---------------------------------
+# permet au pod auth de se connecter à l'extérieur (notamment pour l'envoi d'email avec gmail)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-auth-to-external
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: auth
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+
+# ------------------------ACCESS FROM PROMETHEUS ---------------------------------
+---
+# permet au pod prometheus de se connecter aux pods du namespace query-forge-dev
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape
+  namespace: query-forge-dev
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 8088
+        - protocol: TCP
+          port: 4000
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 3001
+        - protocol: TCP
+          port: 3333
+        - protocol: TCP
+          port: 9108
+        - protocol: TCP
+          port: 9187
+        - protocol: TCP
+          port: 4444
+
+# ------------------------ACCESS FOR DNS---------------------------------
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: query-forge-dev
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+# ------------------------ACCESS FOR TRAEFIK---------------------------------
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-to-services
+  namespace: query-forge-dev
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app: traefik
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 4000
+        - protocol: TCP
+          port: 8088
+        - protocol: TCP
+          port: 3001
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 5601

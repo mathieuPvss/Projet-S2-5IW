@@ -1,0 +1,11 @@
+{
+  "startUrl": "https://stackoverflow.com/questions",
+  "scrapeFields": {
+    "title": "h3 a",
+    "votes": ".s-post-summary--stats-item:first-child",
+    "answers": ".s-post-summary--stats-item:nth-child(2)",
+    "author": ".s-user-card--link"
+  },
+  "nextPageSelector": "text:Next",
+  "maxPages": 3
+}

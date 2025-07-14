@@ -1,0 +1,23 @@
+services:
+  sync-service:
+    build:
+      context: ./backend/sync-service
+      dockerfile: Dockerfile
+    container_name: sync-service-query-forge-dev
+    ports:
+      - ${SYNC_PORT}:${SYNC_PORT}
+    volumes:
+      - ./backend/sync-service/src:/app/src
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - APIFY_API_TOKEN=${APIFY_API_TOKEN}
+      - SCRAPER_SERVICE_URL=${SCRAPER_SERVICE_URL}
+      - SYNC_PORT=${SYNC_PORT}
+
+    restart: unless-stopped

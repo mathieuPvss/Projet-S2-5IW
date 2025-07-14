@@ -1,0 +1,169 @@
+services:
+  postgres:
+    image: postgres:17.4
+    container_name: postgres-query-forge-dev
+    volumes:
+      - postgres-query-forge-dev:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+  nestjs:
+    build:
+      context: ./backend/query-forge-dev
+      dockerfile: Dockerfile
+    container_name: nestjs-query-forge-dev
+    working_dir: /app
+    volumes:
+      - ./backend/query-forge-dev:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
+    ports:
+      - 3000:${NEST_PORT}
+      - 9229:9229
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - NEST_PORT=${NEST_PORT}
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      - NODE_ENV=${NEST_ENV}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - FRONTEND_URL=${FRONTEND_URL}
+    depends_on:
+      - postgres
+      - elasticsearch
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer-query-forge-dev
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: elasticsearch
+    ports:
+      - ${ES_PORT}:9200
+    environment:
+      - discovery.type=${EL_DISCOVERY_TYPE}
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS}
+      - ES_PORT=${ES_PORT}
+      - xpack.security.enabled=false
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    container_name: kibana
+    ports:
+      - ${KIBANA_PORT}:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+    depends_on:
+      - elasticsearch
+
+  agent-ia-service:
+    build:
+      context: ./backend/agent-ia-service
+      dockerfile: Dockerfile
+    container_name: agent-ia-service-query-forge-dev
+    working_dir: /app
+    volumes:
+      - ./backend/agent-ia-service:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
+    ports:
+      - ${AGENT_AI_PORT}:${AGENT_AI_PORT}
+    environment:
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AGENT_AI_PORT=${AGENT_AI_PORT}
+      - AGENT_AI_REQUIRE_AUTH=${AGENT_AI_REQUIRE_AUTH}
+      - JWT_SECRET=${JWT_SECRET}
+
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service-query-forge-dev
+    working_dir: /app
+    volumes:
+      - ./backend/auth-service:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
+    ports:
+      - 4000:4000
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN}
+      - PORT=${AUTH_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - NEST_BASE_URL=${NEST_BASE_URL}
+    depends_on:
+      - postgres
+
+  scraping-service:
+    container_name: scraping-service
+    build:
+      context: ./backend/scraping-service
+      dockerfile: Dockerfile
+    ports:
+      - ${SCRAPING_SERVICE_PORT}:${SCRAPING_SERVICE_PORT}
+    volumes:
+      - ./backend/scraping-service:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
+    environment:
+      - SCRAPING_SERVICE_PORT=${SCRAPING_SERVICE_PORT}
+    cap_add:
+      - SYS_ADMIN
+    init: true
+    working_dir: /app
+    security_opt:
+      - seccomp:unconfined
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+      args:
+        - AUTH_BASE_URL=${AUTH_BASE_URL}
+        - NEST_BASE_URL=${NEST_LOCAL_URL}
+        - SCRAPER_LOCAL_URL=${SCRAPER_LOCAL_URL}
+        - AGENT_IA_HOST=${AGENT_IA_HOST}
+    container_name: frontend-query-forge-dev
+    working_dir: /app
+    volumes:
+      # - ./frontend:/app
+      - /app/node_modules # utiliser pour ecraser le node_modules de l'image avec le node_modules de ma hote machine qui est un arm ce qui cause des erreurs de build
+    environment:
+      - NUXT_HOST=${NUXT_HOST}
+      - NUXT_PORT=${NUXT_PORT}
+      - AUTH_BASE_URL=${AUTH_BASE_URL}
+      - NEST_BASE_URL=${NEST_LOCAL_URL}
+      - SCRAPER_LOCAL_URL=${SCRAPER_LOCAL_URL}
+      - AGENT_IA_HOST=${AGENT_IA_HOST}
+    ports:
+      - 4444:4444
+    depends_on:
+      - nestjs
+      - auth-service
+      - agent-ia-service
+
+volumes:
+  postgres-query-forge-dev:
+  esdata:

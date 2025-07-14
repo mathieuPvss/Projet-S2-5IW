@@ -1,0 +1,16 @@
+FROM node:23-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm i
+
+COPY . .
+
+RUN chmod +x entrypoint.sh
+RUN chmod +x entrypoint.prod.sh
+
+EXPOSE 8080
+
+CMD ["/bin/sh", "./entrypoint.prod.sh"]

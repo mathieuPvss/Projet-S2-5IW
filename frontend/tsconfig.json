@@ -1,0 +1,11 @@
+{
+  "extends": "./.playground/.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@lib/*": ["./layers/base/lib/*"],
+      "@ui/*": ["./layers/ui/*"],
+    }
+  }
+}

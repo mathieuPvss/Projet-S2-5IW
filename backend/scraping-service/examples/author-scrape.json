@@ -1,0 +1,13 @@
+{
+  "startUrl": "https://quotes.toscrape.com/",
+  "followLinks": {
+    "selector": "a[href*='/author/']",
+    "limit": 3
+  },
+  "scrapeFields": {
+    "name": ".author-title",
+    "born": ".author-born-date",
+    "location": ".author-born-location",
+    "description": ".author-description"
+  }
+}

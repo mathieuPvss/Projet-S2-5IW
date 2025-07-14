@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scraping
+  namespace: query-forge-dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scraping
+  template:
+    metadata:
+      labels:
+        app: scraping
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: scraping
+          image: mathieuvss/scraping-service:latest
+          env:
+            - name: SCRAPING_SERVICE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SCRAPING_SERVICE_PORT
+          ports:
+            - containerPort: 3001
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scraping-service
+  namespace: query-forge-dev
+  labels:
+    app: scraping
+spec:
+  selector:
+    app: scraping
+  ports:
+    - port: 3001
+      targetPort: 3001
