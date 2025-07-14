@@ -8,11 +8,21 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { QuestionsService } from './questions.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
+import { CreateQuestionWithUsagesDto } from './dto/create-question-with-usages.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { Question } from './entities/question.entity';
 import { MetricsService } from '../metrics/metrics.service';
 
@@ -35,6 +45,85 @@ export class QuestionsController {
     const result = await this.questionsService.create(createQuestionDto);
     this.metricsService.incrementQuestions('create');
     return result;
+  }
+
+  @Post('with-usages')
+  @ApiOperation({
+    summary:
+      'Créer une nouvelle question avec création automatique des usages pour les sources API',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'La question et ses usages ont été créés avec succès.',
+    schema: {
+      type: 'object',
+      properties: {
+        question: { $ref: '#/components/schemas/Question' },
+        usagesCreated: { type: 'number' },
+      },
+    },
+  })
+  async createWithUsages(
+    @Body() createQuestionDto: CreateQuestionWithUsagesDto,
+  ) {
+    const result =
+      await this.questionsService.createQuestionWithUsages(createQuestionDto);
+    this.metricsService.incrementQuestions('createWithUsages');
+    return result;
+  }
+
+  @Post('import-csv')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Importer des questions depuis un fichier CSV' })
+  @ApiResponse({
+    status: 201,
+    description: 'Les questions ont été importées avec succès.',
+    schema: {
+      type: 'object',
+      properties: {
+        questionsCreated: { type: 'number' },
+        usagesCreated: { type: 'number' },
+        errors: { type: 'array', items: { type: 'string' } },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Erreur de validation du fichier CSV.',
+  })
+  async importFromCSV(@UploadedFile() file: any) {
+    if (!file) {
+      throw new BadRequestException('Aucun fichier fourni');
+    }
+
+    if (file.mimetype !== 'text/csv' && !file.originalname.endsWith('.csv')) {
+      throw new BadRequestException('Le fichier doit être au format CSV');
+    }
+
+    const csvContent = file.buffer.toString('utf-8');
+    const result =
+      await this.questionsService.importQuestionsFromCSV(csvContent);
+    this.metricsService.incrementQuestions('importCSV');
+    return result;
+  }
+
+  @Get('count')
+  @ApiOperation({ summary: 'Récupérer le nombre total de questions' })
+  @ApiResponse({
+    status: 200,
+    description: 'Nombre total de questions.',
+    schema: {
+      type: 'object',
+      properties: {
+        count: { type: 'number' },
+      },
+    },
+  })
+  async count() {
+    const count = await this.questionsService.count();
+    this.metricsService.incrementQuestions('count');
+    return { count };
   }
 
   @Get()

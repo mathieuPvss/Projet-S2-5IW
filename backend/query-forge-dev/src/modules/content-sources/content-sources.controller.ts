@@ -39,6 +39,30 @@ export class ContentSourcesController {
     return result;
   }
 
+  @Get('stats')
+  @ApiOperation({
+    summary: 'Récupérer les statistiques des sources de contenu',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Statistiques des sources de contenu.',
+    schema: {
+      type: 'object',
+      properties: {
+        total: { type: 'number' },
+        api: { type: 'number' },
+        scraper: { type: 'number' },
+        enabled: { type: 'number' },
+        disabled: { type: 'number' },
+      },
+    },
+  })
+  async getStats() {
+    const result = await this.contentSourcesService.getStats();
+    this.metricsService.incrementContentSources('stats');
+    return result;
+  }
+
   @Get()
   @ApiOperation({ summary: 'Récupérer toutes les sources de contenu' })
   @ApiResponse({

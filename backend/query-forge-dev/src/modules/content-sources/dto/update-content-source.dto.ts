@@ -28,7 +28,7 @@ export class UpdateContentSourceDto {
   })
   @IsOptional()
   @IsString()
-  type?: 'scraper';
+  type?: 'scraper' | 'api';
 
   @ApiProperty({
     description: 'Configuration de la source',

@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   type SidebarProps,
 } from "@ui/components/sidebar";
-import { Flag, User } from "lucide-vue-next";
+import { Flag, Home, User, Database } from "lucide-vue-next";
 import SiteIcon from "@/layers/base/components/SiteIcon.vue";
 
 const props = withDefaults(defineProps<SidebarProps>(), {
@@ -21,7 +21,13 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 const data = {
   navMain: [
     {
-      title: "Reports",
+      title: "Accueil",
+      url: "/admin",
+      icon: Home,
+      isActive: true,
+    },
+    {
+      title: "Rapports",
       url: "/admin/reports",
       icon: Flag,
       isActive: true,
@@ -30,6 +36,12 @@ const data = {
       title: "Users",
       url: "/admin/users",
       icon: User,
+      isActive: true,
+    },
+    {
+      title: "Source API",
+      url: "/admin/source-api",
+      icon: Database,
       isActive: true,
     },
   ],
