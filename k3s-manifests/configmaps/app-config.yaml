@@ -55,3 +55,9 @@ data:
   NEST_HOST: "api.ualtarh.com"
   SCRAPING_HOST: "scraping.ualtarh.com"
   AGENT_IA_HOST: "agent.ualtarh.com"
+
+  # URLs complètes pour le frontend
+  AUTH_BASE_URL: "https://auth.ualtarh.com"
+  NEST_BASE_URL: "https://api.ualtarh.com"
+  SCRAPER_LOCAL_URL: "https://scraping.ualtarh.com"
+  AGENT_IA_BASE_URL: "https://agent.ualtarh.com"

@@ -75,9 +75,11 @@ sleep 60
 
 echo "🌐 Phase 8: Traefik"
 kubectl apply -f ../traefik/helmChartConfig-traefik.yaml
+kubectl apply -f ../traefik/middleware-redirect.yaml
 kubectl apply -f ../traefik/traefik-service.yaml
 
 echo "⏳ Attente du redémarrage automatique de Traefik..."
+kubectl rollout restart deployment/traefik -n kube-system
 kubectl rollout status deployment/traefik -n kube-system --timeout=300s
 
 echo "🌍 Phase 9: Ingress"

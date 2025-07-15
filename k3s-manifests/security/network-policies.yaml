@@ -10,13 +10,13 @@ spec:
     - Ingress
     - Egress
 
-# ------------------------ACCESS TO EXTERNAL BDDS---------------------------------
+# ------------------------ACCESS TO INTERNAL BDDS---------------------------------
 ---
-# permet au pod nestjs de se connecter aux bdds externes
+# permet au pod nestjs de se connecter aux bdds internes
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-nestjs-to-external-bdds
+  name: allow-nestjs-to-internal-bdds
   namespace: query-forge-dev
 spec:
   podSelector:
@@ -26,23 +26,25 @@ spec:
     - Egress
   egress:
     - to:
-        - ipBlock:
-            cidr: 192.168.1.142/32 # PostgreSQL (lxc) a changer
+        - podSelector:
+            matchLabels:
+              app: postgres
       ports:
         - protocol: TCP
           port: 5432
     - to:
-        - ipBlock:
-            cidr: 192.168.1.144/32 # ElasticSearch (lxc) a changer
+        - podSelector:
+            matchLabels:
+              app: elasticsearch
       ports:
         - protocol: TCP
           port: 9200
 ---
-# permet au pod sync de se connecter aux bdds externes
+# permet au pod sync de se connecter aux bdds internes
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-sync-to-external-bdds
+  name: allow-sync-to-internal-bdds
   namespace: query-forge-dev
 spec:
   podSelector:
@@ -52,23 +54,25 @@ spec:
     - Egress
   egress:
     - to:
-        - ipBlock:
-            cidr: 192.168.1.142/32 # PostgreSQL (lxc) a changer
+        - podSelector:
+            matchLabels:
+              app: postgres
       ports:
         - protocol: TCP
           port: 5432
     - to:
-        - ipBlock:
-            cidr: 192.168.1.144/32 # ElasticSearch (lxc) a changer
+        - podSelector:
+            matchLabels:
+              app: elasticsearch
       ports:
         - protocol: TCP
           port: 9200
 ---
-# permet au pod auth de se connecter a la bdd postgres externe
+# permet au pod auth de se connecter a la bdd postgres interne
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-auth-to-external-postgres
+  name: allow-auth-to-internal-postgres
   namespace: query-forge-dev
 spec:
   podSelector:
@@ -78,8 +82,9 @@ spec:
     - Egress
   egress:
     - to:
-        - ipBlock:
-            cidr: 192.168.1.142/32 # PostgreSQL (lxc) a changer
+        - podSelector:
+            matchLabels:
+              app: postgres
       ports:
         - protocol: TCP
           port: 5432
@@ -104,11 +109,11 @@ spec:
         - protocol: TCP
           port: 9200
 ---
-# permet au pod agent-ai de se connecter a la bdd elasticsearch externe
+# permet au pod agent-ai de se connecter a la bdd elasticsearch interne
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-agent-ai-to-external-elasticsearch
+  name: allow-agent-ai-to-internal-elasticsearch
   namespace: query-forge-dev
 spec:
   podSelector:
@@ -118,37 +123,18 @@ spec:
     - Egress
   egress:
     - to:
-        - ipBlock:
-            cidr: 192.168.1.144/32 # ElasticSearch (lxc) a changer
+        - podSelector:
+            matchLabels:
+              app: elasticsearch
       ports:
         - protocol: TCP
           port: 9200
 ---
-# permet au pod kibana de se connecter a la bdd elasticsearch externe
+# permet au pod adminer de se connecter a la bdd postgres interne
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-kibana-to-external-elasticsearch
-  namespace: query-forge-dev
-spec:
-  podSelector:
-    matchLabels:
-      app: kibana
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - ipBlock:
-            cidr: 192.168.1.144/32 # ElasticSearch (lxc) a changer
-      ports:
-        - protocol: TCP
-          port: 9200
----
-# permet au pod adminer de se connecter a la bdd postgres externe
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-adminer-to-external-postgres
+  name: allow-adminer-to-internal-postgres
   namespace: query-forge-dev
 spec:
   podSelector:
@@ -158,11 +144,33 @@ spec:
     - Egress
   egress:
     - to:
-        - ipBlock:
-            cidr: 192.168.1.142/32 # PostgreSQL (lxc) a changer
+        - podSelector:
+            matchLabels:
+              app: postgres
       ports:
         - protocol: TCP
           port: 5432
+---
+# permet au pod kibana de se connecter a la bdd elasticsearch interne
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kibana-to-internal-elasticsearch
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: kibana
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: elasticsearch
+      ports:
+        - protocol: TCP
+          port: 9200
 ---
 # ------------------------ACCESS FROM FRONTEND---------------------------------
 # Pas besoin de ses regles car la communication se fait depuis l'exterieur via les hotes de mes sous-domaines et donc passe par traefik et on a une regle dans ce fichier pour permettre a traefik dacceder aux services kubernetes
@@ -276,16 +284,16 @@ spec:
 
 # ------------------------ACCESS FROM SCRAPER---------------------------------
 ---
-# permet au pod scraper de se connecter à l'extérieur pour scraper les sites web
+# permet au pod scraping de se connecter à l'extérieur pour scraper les sites web
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-scraper-to-external
+  name: allow-scraping-to-external
   namespace: query-forge-dev
 spec:
   podSelector:
     matchLabels:
-      app: scraper
+      app: scraping
   policyTypes:
     - Egress
   egress:
@@ -300,16 +308,16 @@ spec:
 
 # ------------------------ACCESS FROM SYNC---------------------------------
 ---
-# permet au pod sync de se connecter à scraper sur le port 3001
+# permet au pod sync de se connecter à scraping sur le port 3001
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-sync-to-scraper
+  name: allow-sync-to-scraping
   namespace: query-forge-dev
 spec:
   podSelector:
     matchLabels:
-      app: scraper
+      app: scraping
   policyTypes:
     - Ingress
   ingress:
@@ -333,6 +341,62 @@ spec:
   podSelector:
     matchLabels:
       app: auth
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 587  # SMTP Gmail
+        - protocol: TCP
+          port: 465  # SMTPS Gmail
+
+# ------------------------ACCESS FROM NESTJS ---------------------------------
+---
+# permet au pod nestjs de se connecter à l'extérieur (pour l'envoi d'email)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nestjs-to-external
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: nestjs
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 587  # SMTP Gmail
+        - protocol: TCP
+          port: 465  # SMTPS Gmail
+
+# ------------------------ACCESS FROM SYNC ---------------------------------
+---
+# permet au pod sync de se connecter à l'extérieur (YouTube API, Apify)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-sync-to-external
+  namespace: query-forge-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: sync
   policyTypes:
     - Egress
   egress:
@@ -420,7 +484,7 @@ spec:
               kubernetes.io/metadata.name: kube-system
           podSelector:
             matchLabels:
-              app: traefik
+              app.kubernetes.io/name: traefik
       ports:
         - protocol: TCP
           port: 80

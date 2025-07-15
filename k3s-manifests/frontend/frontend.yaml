@@ -45,12 +45,12 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: SCRAPING_HOST
+                  key: SCRAPER_LOCAL_URL
             - name: AGENT_IA_HOST
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: AGENT_IA_HOST
+                  key: AGENT_IA_BASE_URL
           ports:
             - containerPort: 4444
           resources:
@@ -91,5 +91,5 @@ spec:
   selector:
     app: frontend
   ports:
-    - port: 80
+    - port: 4444
       targetPort: 4444

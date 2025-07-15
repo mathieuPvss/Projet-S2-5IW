@@ -4,14 +4,14 @@ metadata:
   name: traefik-service-metrics
   namespace: kube-system
   labels:
-    app: traefik
+    app.kubernetes.io/name: traefik
 spec:
   selector:
-    app: traefik
+    app.kubernetes.io/name: traefik
   ports:
     - name: metrics
-      port: 9100
-      targetPort: 9100
+      port: 8080
+      targetPort: 8080
   type: ClusterIP
 
 ---
@@ -21,12 +21,12 @@ metadata:
   name: traefik-service-dashboard
   namespace: kube-system
   labels:
-    app: traefik
+    app.kubernetes.io/name: traefik
 spec:
   selector:
-    app: traefik
+    app.kubernetes.io/name: traefik
   ports:
     - name: dashboard
-      port: 8080
-      targetPort: 8080
+      port: 9000
+      targetPort: 9000
   type: ClusterIP

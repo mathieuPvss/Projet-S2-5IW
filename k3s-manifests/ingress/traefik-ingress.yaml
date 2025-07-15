@@ -7,8 +7,8 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
-    kubernetes.io/spec.ingressClassName: traefik
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
         - traefik.ualtarh.com
@@ -23,4 +23,4 @@ spec:
               service:
                 name: traefik-service-dashboard
                 port:
-                  number: 8080
+                  number: 9000
