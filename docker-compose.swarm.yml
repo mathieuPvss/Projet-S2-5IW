@@ -36,10 +36,6 @@ services:
 
   nestjs:
     image: mathieuvss/query-forge-nestjs:latest
-    working_dir: /app
-    volumes:
-      - ./backend/query-forge-dev:/app
-      - /app/node_modules
     networks:
       - proxy
       - internal
@@ -114,10 +110,6 @@ services:
 
   agent-ia-service:
     image: mathieuvss/agent-ia-service:latest
-    working_dir: /app
-    volumes:
-      - ./backend/agent-ia-service:/app
-      - /app/node_modules
     networks:
       - proxy
       - internal
@@ -137,10 +129,6 @@ services:
 
   auth-service:
     image: mathieuvss/auth-service:latest
-    working_dir: /app
-    volumes:
-      - ./backend/auth-service:/app
-      - /app/node_modules
     networks:
       - proxy
       - internal
@@ -168,10 +156,6 @@ services:
 
   scraping-service:
     image: mathieuvss/scraping-service:latest
-    working_dir: /app
-    volumes:
-      - ./backend/scraping-service:/app
-      - /app/node_modules
     networks:
       - proxy
       - internal
@@ -188,8 +172,6 @@ services:
 
   sync-service:
     image: mathieuvss/sync-service:latest
-    volumes:
-      - ./backend/sync-service/src:/app/src
     networks:
       - proxy
       - internal
@@ -215,9 +197,6 @@ services:
 
   frontend:
     image: mathieuvss/query-forge-frontend:latest
-    working_dir: /app
-    volumes:
-      - /app/node_modules
     networks:
       - proxy
     environment:
