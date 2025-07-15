@@ -1,0 +1,55 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: cloudflare-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: lo.gauthier.glo@gmail.com
+    privateKeySecretRef:
+      name: cloudflare-issuer-key
+    solvers:
+    - dns01:
+        cloudflare:
+          email: lo.gauthier.glo@gmail.com
+          apiTokenSecretRef:
+            name: cloudflare-secret
+            key: CF_API_KEY
+      selector:
+        dnsZones:
+        - "ualtarh.com"
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: query-forge-tls
+  namespace: query-forge-dev
+spec:
+  secretName: query-forge-tls
+  issuerRef:
+    name: cloudflare-issuer
+    kind: ClusterIssuer
+  dnsNames:
+  - query-forge-dev.ualtarh.com
+  - api.ualtarh.com
+  - auth.ualtarh.com
+  - agent.ualtarh.com
+  - scraping.ualtarh.com
+  - adminer.ualtarh.com
+  - kibana.ualtarh.com
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: monitoring-tls
+  namespace: query-forge-dev
+spec:
+  secretName: monitoring-tls
+  issuerRef:
+    name: cloudflare-issuer
+    kind: ClusterIssuer
+  dnsNames:
+  - grafana.ualtarh.com
+  - prometheus.ualtarh.com

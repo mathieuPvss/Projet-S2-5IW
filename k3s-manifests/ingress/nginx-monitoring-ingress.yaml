@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monitoring-nginx-ingress
+  namespace: query-forge-dev
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: grafana-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - Monitoring"
+    cert-manager.io/cluster-issuer: "cloudflare-issuer"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - grafana.ualtarh.com
+        - prometheus.ualtarh.com
+      secretName: monitoring-tls
+  rules:
+    # Grafana
+    - host: grafana.ualtarh.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana-service
+                port:
+                  number: 3000
+
+    # Prometheus
+    - host: prometheus.ualtarh.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-service
+                port:
+                  number: 9090

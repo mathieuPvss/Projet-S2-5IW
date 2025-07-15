@@ -1,23 +1,27 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: query-forge-ingress
+  name: query-forge-nginx-ingress
   namespace: query-forge-dev
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
-    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    cert-manager.io/cluster-issuer: "cloudflare-issuer"
 spec:
-  ingressClassName: traefik
+  ingressClassName: nginx
   tls:
     - hosts:
-        - query-forge-dev.ualtarh.com # frontend
-        - api.ualtarh.com # nestjs
-        - auth.ualtarh.com # auth-service
-        - agent.ualtarh.com # agent-ia-service
-        - scraping.ualtarh.com # scraping-service
-        - adminer.ualtarh.com # adminer
-        - kibana.ualtarh.com # kibana
+        - query-forge-dev.ualtarh.com
+        - api.ualtarh.com
+        - auth.ualtarh.com
+        - agent.ualtarh.com
+        - scraping.ualtarh.com
+        - adminer.ualtarh.com
+        - kibana.ualtarh.com
       secretName: query-forge-tls
   rules:
     # Frontend

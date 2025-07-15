@@ -1,0 +1,171 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cert-manager-controller
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["extensions", "networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get", "list", "watch", "create", "delete", "update"]
+- apiGroups: ["cert-manager.io"]
+  resources: ["*"]
+  verbs: ["*"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-manager-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-controller
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: cert-manager
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cert-manager
+  template:
+    metadata:
+      labels:
+        app: cert-manager
+    spec:
+      serviceAccountName: cert-manager
+      containers:
+      - name: cert-manager
+        image: quay.io/jetstack/cert-manager-controller:v1.13.1
+        args:
+        - --v=2
+        - --cluster-resource-namespace=cert-manager
+        - --leader-election-namespace=kube-system
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-webhook
+  namespace: cert-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cert-manager-webhook
+  template:
+    metadata:
+      labels:
+        app: cert-manager-webhook
+    spec:
+      serviceAccountName: cert-manager
+      containers:
+      - name: cert-manager-webhook
+        image: quay.io/jetstack/cert-manager-webhook:v1.13.1
+        args:
+        - --v=2
+        - --secure-port=10250
+        - --dynamic-serving-ca-secret-namespace=$(POD_NAMESPACE)
+        - --dynamic-serving-ca-secret-name=cert-manager-webhook-ca
+        - --dynamic-serving-dns-names=cert-manager-webhook,cert-manager-webhook.cert-manager,cert-manager-webhook.cert-manager.svc
+        ports:
+        - name: https
+          containerPort: 10250
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cert-manager-webhook
+  namespace: cert-manager
+spec:
+  type: ClusterIP
+  ports:
+  - name: https
+    port: 443
+    targetPort: 10250
+  selector:
+    app: cert-manager-webhook
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-cainjector
+  namespace: cert-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cert-manager-cainjector
+  template:
+    metadata:
+      labels:
+        app: cert-manager-cainjector
+    spec:
+      serviceAccountName: cert-manager
+      containers:
+      - name: cert-manager-cainjector
+        image: quay.io/jetstack/cert-manager-cainjector:v1.13.1
+        args:
+        - --v=2
+        - --leader-election-namespace=kube-system
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
