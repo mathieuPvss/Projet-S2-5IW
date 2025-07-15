@@ -73,7 +73,7 @@ kubectl apply -f ../tools/adminer.yaml
 echo "⏳ Attente du démarrage des services... (60s)"
 sleep 60
 
-echo "🌐 Phase 8: Traefik"
+echo "🌐 Phase 8: Traefik avec NodePort"
 kubectl apply -f ../traefik/helmChartConfig-traefik.yaml
 kubectl apply -f ../traefik/middleware-redirect.yaml
 kubectl apply -f ../traefik/traefik-service.yaml
@@ -97,8 +97,13 @@ echo "Work in progress"
 
 echo "✅ Déploiement terminé!"
 echo ""
-echo "📱 Applications accessibles via:"
-echo "   - App principale: https://query-forge-dev.ualtarh.com (HTTP redirigé vers HTTPS)"
+echo "📱 Applications accessibles via NodePort:"
+echo "   - HTTP: http://192.168.1.181:30080"
+echo "   - HTTPS: https://192.168.1.181:30443"
+echo "   - Traefik Dashboard: http://192.168.1.181:30900"
+echo ""
+echo "📱 Applications accessibles via domaines (si Cloudflare configuré):"
+echo "   - App principale: https://query-forge-dev.ualtarh.com"
 echo "   - Kibana: https://kibana.ualtarh.com"
 echo "   - Adminer: https://adminer.ualtarh.com"
 echo ""
@@ -113,3 +118,9 @@ echo "   ✅ Métriques Prometheus intégrées"
 echo "   ✅ Dashboard Traefik avec authentification"
 echo "   ✅ Load balancing automatique"
 echo "   ✅ securisation des routes /metrics"
+echo "   ✅ NodePort configuration (30080/30443/30900)"
+echo ""
+echo "🔍 Vérification du statut:"
+echo "   kubectl get svc -n kube-system | grep traefik"
+echo "   kubectl get pods -n query-forge-dev"
+echo "   kubectl get ingress -n query-forge-dev"
