@@ -1,0 +1,3 @@
+---
+# Default variables for common role
+vm_user: "k3s" 

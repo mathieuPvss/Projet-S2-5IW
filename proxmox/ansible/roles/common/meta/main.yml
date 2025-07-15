@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: "Your Name"
+  description: "Common packages installation role for Debian VMs"
+  company: "Your Company"
+  license: "MIT"
+  min_ansible_version: 2.9
+  platforms:
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - common
+    - packages
+    - git
+    - docker
+
+dependencies: [] 
