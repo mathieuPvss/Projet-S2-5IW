@@ -1,0 +1,447 @@
+version: "3.8"
+
+services:
+  adminer:
+    image: adminer:latest
+    networks:
+      - backend-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app == true
+      resources:
+        reservations:
+          memory: 64M
+        limits:
+          memory: 128M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:17.4
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.database == true
+      resources:
+        reservations:
+          memory: 512M
+        limits:
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    configs:
+      - source: postgres_config
+        target: /etc/postgresql/postgresql.conf
+    secrets:
+      - postgres_password
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - backend-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.database == true
+      resources:
+        reservations:
+          memory: 1G
+        limits:
+          memory: 2G
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+
+  nestjs:
+    image: ${DOCKER_REGISTRY:-localhost}/nestjs-query-forge:${VERSION:-latest}
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=5432
+      - JWT_SECRET=${JWT_SECRET}
+      - NEST_PORT=3000
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - NODE_ENV=production
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - NEST_BASE_URL=${NEST_BASE_URL}
+    networks:
+      - backend-network
+      - frontend-network
+    deploy:
+      mode: replicated
+      replicas: 3
+      placement:
+        constraints:
+          - node.labels.app == true
+      resources:
+        reservations:
+          memory: 256M
+        limits:
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+    depends_on:
+      - postgres
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  auth-service:
+    image: ${DOCKER_REGISTRY:-localhost}/auth-service:${VERSION:-latest}
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=5432
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN}
+      - PORT=4000
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - NEST_BASE_URL=${NEST_BASE_URL}
+      - AUTH_BASE_URL=${AUTH_BASE_URL}
+    networks:
+      - backend-network
+      - frontend-network
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.app == true
+      resources:
+        reservations:
+          memory: 128M
+        limits:
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  agent-ia-service:
+    image: ${DOCKER_REGISTRY:-localhost}/agent-ia-service:${VERSION:-latest}
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AGENT_AI_PORT=5000
+      - AGENT_AI_REQUIRE_AUTH=${AGENT_AI_REQUIRE_AUTH}
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - backend-network
+      - frontend-network
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.app == true
+      resources:
+        reservations:
+          memory: 256M
+        limits:
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+    depends_on:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  scraping-service:
+    image: ${DOCKER_REGISTRY:-localhost}/scraping-service:${VERSION:-latest}
+    environment:
+      - SCRAPING_SERVICE_PORT=6000
+    networks:
+      - backend-network
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.app == true
+      resources:
+        reservations:
+          memory: 256M
+        limits:
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  sync-service:
+    image: ${DOCKER_REGISTRY:-localhost}/sync-service:${VERSION:-latest}
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=5432
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - APIFY_API_TOKEN=${APIFY_API_TOKEN}
+      - SCRAPER_SERVICE_URL=${SCRAPER_SERVICE_URL}
+      - SYNC_PORT=7000
+    networks:
+      - backend-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app == true
+      resources:
+        reservations:
+          memory: 128M
+        limits:
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+    depends_on:
+      - postgres
+      - elasticsearch
+      - scraping-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    image: ${DOCKER_REGISTRY:-localhost}/frontend:${VERSION:-latest}
+    environment:
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=3000
+      - AUTH_BASE_URL=${AUTH_BASE_URL}
+      - NEST_BASE_URL=${NEST_BASE_URL}
+      - SCRAPER_LOCAL_URL=https://scraping.ualtarh.com
+      - AGENT_IA_HOST=${AGENT_IA_HOST}
+    networks:
+      - frontend-network
+    deploy:
+      mode: replicated
+      replicas: 3
+      placement:
+        constraints:
+          - node.labels.frontend == true
+      resources:
+        reservations:
+          memory: 128M
+        limits:
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+    depends_on:
+      - nestjs
+      - auth-service
+      - agent-ia-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_NAME=kibana
+      - SERVER_HOST=0.0.0.0
+    networks:
+      - backend-network
+      - monitoring-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.monitoring == true
+      resources:
+        reservations:
+          memory: 256M
+        limits:
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+    depends_on:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
+    networks:
+      - frontend-network
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.frontend == true
+      resources:
+        reservations:
+          memory: 64M
+        limits:
+          memory: 128M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+    depends_on:
+      - frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/postgres
+  elasticsearch-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/elasticsearch
+
+networks:
+  backend-network:
+    driver: overlay
+    attachable: true
+  frontend-network:
+    driver: overlay
+    attachable: true
+  monitoring-network:
+    driver: overlay
+    attachable: true
+
+configs:
+  postgres_config:
+    file: ./postgres.conf
+  nginx_config:
+    file: ./nginx.conf
+
+secrets:
+  postgres_password:
+    external: true
