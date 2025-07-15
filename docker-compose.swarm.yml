@@ -31,9 +31,7 @@ services:
       replicas: 1
 
   nestjs:
-    build:
-      context: ./backend/query-forge-dev
-      dockerfile: Dockerfile
+    image: mathieuvss/query-forge-nestjs:latest
     working_dir: /app
     volumes:
       - ./backend/query-forge-dev:/app
@@ -68,7 +66,7 @@ services:
       replicas: 1
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
     environment:
       - discovery.type=${EL_DISCOVERY_TYPE}
       - ES_JAVA_OPTS=${ES_JAVA_OPTS}
@@ -81,7 +79,7 @@ services:
       replicas: 1
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    image: docker.elastic.co/kibana/kibana:9.0.0
     environment:
       - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
     depends_on:
@@ -93,9 +91,7 @@ services:
       replicas: 1
 
   agent-ia-service:
-    build:
-      context: ./backend/agent-ia-service
-      dockerfile: Dockerfile
+    image: mathieuvss/agent-ia-service:latest
     working_dir: /app
     volumes:
       - ./backend/agent-ia-service:/app
@@ -113,9 +109,7 @@ services:
       replicas: 2
 
   auth-service:
-    build:
-      context: ./backend/auth-service
-      dockerfile: Dockerfile
+    image: mathieuvss/auth-service:latest
     working_dir: /app
     volumes:
       - ./backend/auth-service:/app
@@ -143,9 +137,7 @@ services:
       replicas: 2
 
   scraping-service:
-    build:
-      context: ./backend/scraping-service
-      dockerfile: Dockerfile
+    image: mathieuvss/scraping-service:latest
     working_dir: /app
     volumes:
       - ./backend/scraping-service:/app
@@ -164,9 +156,7 @@ services:
       replicas: 2
 
   sync-service:
-    build:
-      context: ./backend/sync-service
-      dockerfile: Dockerfile
+    image: mathieuvss/sync-service:latest
     volumes:
       - ./backend/sync-service/src:/app/src
     networks:
@@ -189,14 +179,7 @@ services:
       replicas: 1
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: dockerfile
-      args:
-        - AUTH_BASE_URL=${AUTH_BASE_URL}
-        - NEST_BASE_URL=${NEST_LOCAL_URL}
-        - SCRAPER_LOCAL_URL=${SCRAPER_LOCAL_URL}
-        - AGENT_IA_HOST=${AGENT_IA_HOST}
+    image: mathieuvss/query-forge-frontend:latest
     working_dir: /app
     volumes:
       - /app/node_modules
