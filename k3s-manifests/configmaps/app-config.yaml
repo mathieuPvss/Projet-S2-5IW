@@ -16,9 +16,10 @@ data:
   # Kubernetes Services URLs
   ELASTICSEARCH_HOSTS: "http://elasticsearch-service:9200"
   SCRAPER_SERVICE_URL: "http://scraping-service:3001" # utiliser le nom du service scraping-service pour l'url
-  AUTH_BASE_URL: "http://auth-service:4000"
-  NEST_BASE_URL: "http://nestjs-service:3000"
-  FRONTEND_URL: "http://frontend-service:4444"
+  NEST_BASE_URL_LOCAL: "http://nestjs-service:3000"
+
+  # used to send mails
+  FRONTEND_URL: "https://query-forge-dev.ualtarh.com"
 
   # Ports
   NEST_PORT: "3000"
