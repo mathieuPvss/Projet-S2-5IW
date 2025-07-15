@@ -112,7 +112,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: NEST_BASE_URL
+                  key: NEST_BASE_URL_LOCAL
 
 ---
 apiVersion: v1

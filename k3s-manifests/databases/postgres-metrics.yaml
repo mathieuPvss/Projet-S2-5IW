@@ -27,7 +27,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: app-secret
-                  key: POSTGRES_URI_EXTERNAL
+                  key: POSTGRES_URI
           envFrom:
             - secretRef:
                 name: app-secret

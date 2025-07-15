@@ -1,10 +1,10 @@
 #!/bin/bash
-# todo: change ip 
-echo "🔍 Test de connectivité vers PostgreSQL LXC (192.168.1.142:5432)..."
-timeout 10 bash -c 'until nc -z 192.168.1.142 5432; do echo "   ⏳ Attente PostgreSQL..."; sleep 2; done' && echo "   ✅ PostgreSQL accessible" || echo "   ❌ PostgreSQL inaccessible"
+# Test des bases de données internes dans le cluster K3s
+echo "🔍 Test de connectivité vers PostgreSQL interne..."
+kubectl wait --for=condition=ready pod -l app=postgres -n query-forge-dev --timeout=300s && echo "   ✅ PostgreSQL accessible" || echo "   ❌ PostgreSQL inaccessible"
 
-echo "🔍 Test de connectivité vers Elasticsearch LXC (192.168.1.142:9200)..."
-timeout 10 bash -c 'until nc -z 192.168.1.144 9200; do echo "   ⏳ Attente Elasticsearch..."; sleep 2; done' && echo "   ✅ Elasticsearch accessible" || echo "   ❌ Elasticsearch inaccessible"
+echo "🔍 Test de connectivité vers Elasticsearch interne..."
+kubectl wait --for=condition=ready pod -l app=elasticsearch -n query-forge-dev --timeout=300s && echo "   ✅ Elasticsearch accessible" || echo "   ❌ Elasticsearch inaccessible"
 
 echo "📊 Vérification que les exporters de métriques sont prêts..."
 kubectl wait --for=condition=available --timeout=300s deployment/postgres-metrics -n query-forge-dev

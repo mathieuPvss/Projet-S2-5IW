@@ -3,8 +3,10 @@
 echo "🚀 Déploiement complet sur K3s avec Traefik..."
 
 # Créer les répertoires de données sur les nœuds
-echo "📁 Création des répertoires de données (traefik, prometheus, grafana)"
+echo "📁 Création des répertoires de données (traefik, prometheus, grafana, bases de données)"
+sudo mkdir -p /var/lib/k3s/storage/{postgres,elasticsearch}
 sudo mkdir -p /data/{traefik,prometheus,grafana}
+sudo chmod 777 /var/lib/k3s/storage/{postgres,elasticsearch}
 sudo chmod 777 /data/{traefik,prometheus,grafana}
 
 # Déploiement par étapes
@@ -19,20 +21,21 @@ kubectl apply -f ../persistent-volumes/
 echo "⏳ Attente de la création des volumes... (10s)"
 sleep 10
 
-echo "🗄️ Phase 3: Bases de données postgres et elasticsearch"
-kubectl apply -f ../databases/postgres-external.yaml
-kubectl apply -f ../databases/elasticsearch-external.yaml
+echo "🗄️ Phase 3: Bases de données postgres et elasticsearch (internes)"
+kubectl apply -f ../databases/postgres-internal.yaml
+kubectl apply -f ../databases/elasticsearch-internal.yaml
 
 echo "🗄️ Phase 3.1: Set up metrics for postgres and elasticsearch"
-kubectl apply -f ../databases/postgres-metricsy.yaml
+kubectl apply -f ../databases/postgres-metrics.yaml
 kubectl apply -f ../databases/elasticsearch-metrics.yaml
 
-echo "⏳ Attente du démarrage des bases de données... (30s)"
-sleep 30
+echo "⏳ Attente du démarrage des bases de données... (60s)"
+sleep 60
 
-# Vérifier que les BD externes et métriques sont prêtes
-chmod +x ./test-external-services.sh
-./test-external-services.sh
+# Vérifier que les bases de données sont prêtes
+echo "🔍 Vérification du statut des bases de données..."
+kubectl wait --for=condition=ready pod -l app=postgres -n query-forge-dev --timeout=300s
+kubectl wait --for=condition=ready pod -l app=elasticsearch -n query-forge-dev --timeout=300s
 
 echo "⚙️ Phase 4: Services backend..."
 echo "⚙️ Phase 4.1: Auth"
@@ -72,9 +75,11 @@ sleep 60
 
 echo "🌐 Phase 8: Traefik"
 kubectl apply -f ../traefik/helmChartConfig-traefik.yaml
+kubectl apply -f ../traefik/middleware-redirect.yaml
 kubectl apply -f ../traefik/traefik-service.yaml
 
 echo "⏳ Attente du redémarrage automatique de Traefik..."
+kubectl rollout restart deployment/traefik -n kube-system
 kubectl rollout status deployment/traefik -n kube-system --timeout=300s
 
 echo "🌍 Phase 9: Ingress"

@@ -23,7 +23,7 @@ spec:
           ports:
             - containerPort: 9114
           args:
-            - "--es.uri=http://192.168.1.144:9200"
+            - "--es.uri=http://elasticsearch-service:9200"
             - "--es.all"
             - "--es.indices"
 ---

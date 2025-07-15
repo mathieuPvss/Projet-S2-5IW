@@ -34,4 +34,4 @@ data:
             
       - job_name: 'traefik'
         static_configs:
-          - targets: ['traefik-metrics.kube-system.svc.cluster.local:9100']
+          - targets: ['traefik-service-metrics.kube-system.svc.cluster.local:8080']
