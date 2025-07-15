@@ -5,7 +5,7 @@ metadata:
   namespace: query-forge-dev
 data:
   # Database
-  POSTGRES_HOST: "postgres-service-external"
+  POSTGRES_HOST: "postgres-service"
   POSTGRES_PORT: "5432"
 
   # Elasticsearch
@@ -14,7 +14,7 @@ data:
   ES_JAVA_OPTS: "-Xms512m -Xmx512m"
 
   # Kubernetes Services URLs
-  ELASTICSEARCH_HOSTS: "http://192.168.1.144:9200"
+  ELASTICSEARCH_HOSTS: "http://elasticsearch-service:9200"
   SCRAPER_SERVICE_URL: "http://scraping-service:3001" # utiliser le nom du service scraping-service pour l'url
   AUTH_BASE_URL: "http://auth-service:4000"
   NEST_BASE_URL: "http://nestjs-service:3000"

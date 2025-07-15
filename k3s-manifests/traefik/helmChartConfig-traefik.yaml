@@ -30,11 +30,11 @@ spec:
             key: CF_API_KEY
 
     # Volumes pour ACME
-    volumes:
+    additionalVolumes:
       - name: acme-storage
         persistentVolumeClaim:
           claimName: traefik-pvc
 
-    volumeMounts:
+    additionalVolumeMounts:
       - name: acme-storage
         mountPath: /data
