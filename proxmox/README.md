@@ -59,15 +59,15 @@ Après la créationde VM et/ou LXC installez Git, Docker et installer une clé S
 #To run the setup on specific groups:"
 #---------------------------------------"
 # All hosts:
-ansible-playbook -i inventory/hosts.ini setup-vms.yml
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --vault-password-file group_vars/all/.vault_pass.txt
 # Only VMs:
-ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit master,worker
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit master,worker --vault-password-file group_vars/all/.vault_pass.txt
 # Only databases:
-ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit databases
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit databases --vault-password-file group_vars/all/.vault_pass.txt
 # Only master: 
-ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit master
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit master --vault-password-file group_vars/all/.vault_pass.txt
 # Only workers: 
-ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit worker
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit worker --vault-password-file group_vars/all/.vault_pass.txt
 ```
 
 *(optionnel)* Pour installer Postgres et ElasticSearch sur des LXC, lancez la commande suivant pour installer les base de données :

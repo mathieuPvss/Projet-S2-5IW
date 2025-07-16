@@ -4,7 +4,6 @@
   become: yes
   vars:
     vm_user: "k3s"
-    ssh_public_key_path: "{{ playbook_dir }}/ssh-keys/k3s-cluster-key.pub"
 
   tasks:
     - name: Update apt cache
@@ -82,16 +81,11 @@
         group: "{{ vm_user }}"
         mode: '0600'
 
-    - name: Read public key from file
-      slurp:
-        src: "{{ ssh_public_key_path }}"
-      register: public_key_content
-
     - name: Add public key to authorized_keys
       authorized_key:
         user: "{{ vm_user }}"
         state: present
-        key: "{{ public_key_content.content | b64decode }}"
+        key: "{{ lookup('file', 'ssh-keys/k3s-cluster-key.pub') }}"
 
     - name: Verify Git installation
       command: git --version
@@ -123,4 +117,4 @@
 
     - name: Display SSH key setup completion
       debug:
-        msg: "SSH key setup completed for {{ inventory_hostname }}" 
+        msg: "SSH key setup completed for {{ inventory_hostname }}"
