@@ -1,0 +1,126 @@
+---
+- name: Setup VMs with Git, Docker and SSH Keys
+  hosts: all
+  become: yes
+  vars:
+    vm_user: "k3s"
+    ssh_public_key_path: "{{ playbook_dir }}/ssh-keys/k3s-cluster-key.pub"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - software-properties-common
+          - git
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Update apt cache after adding Docker repository
+      apt:
+        update_cache: yes
+
+    - name: Install Docker packages
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create docker group if it doesn't exist
+      group:
+        name: docker
+        state: present
+
+    - name: Add k3s user to docker group
+      user:
+        name: "{{ vm_user }}"
+        groups: docker
+        append: yes
+
+    - name: Create .ssh directory for k3s user
+      file:
+        path: "/home/{{ vm_user }}/.ssh"
+        state: directory
+        owner: "{{ vm_user }}"
+        group: "{{ vm_user }}"
+        mode: '0700'
+
+    - name: Create private SSH key from vault content
+      copy:
+        content: "{{ ssh_private_key_content }}"
+        dest: "/home/{{ vm_user }}/.ssh/id_ed25519"
+        owner: "{{ vm_user }}"
+        group: "{{ vm_user }}"
+        mode: '0600'
+
+    - name: Read public key from file
+      slurp:
+        src: "{{ ssh_public_key_path }}"
+      register: public_key_content
+
+    - name: Add public key to authorized_keys
+      authorized_key:
+        user: "{{ vm_user }}"
+        state: present
+        key: "{{ public_key_content.content | b64decode }}"
+
+    - name: Verify Git installation
+      command: git --version
+      register: git_version
+      changed_when: false
+
+    - name: Display Git version
+      debug:
+        msg: "Git version: {{ git_version.stdout }}"
+
+    - name: Verify Docker installation
+      command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Display Docker version
+      debug:
+        msg: "Docker version: {{ docker_version.stdout }}"
+
+    - name: Test Docker functionality
+      command: docker run hello-world
+      register: docker_test
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Display Docker test result
+      debug:
+        msg: "Docker test: {{ docker_test.stdout_lines }}"
+
+    - name: Display SSH key setup completion
+      debug:
+        msg: "SSH key setup completed for {{ inventory_hostname }}" 
