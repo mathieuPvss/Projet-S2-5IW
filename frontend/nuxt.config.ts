@@ -30,11 +30,13 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      aiApiUrl: process.env.AGENT_IA_HOST || "http://localhost:8088",
-      nestBaseUrl: process.env.NEST_BASE_URL || "http://localhost:3001",
-      authBaseUrl: process.env.AUTH_BASE_URL || "http://localhost:4000",
+      aiApiUrl: process.env.NUXT_PUBLIC_AI_API_URL || "http://localhost:8088",
+      nestBaseUrl:
+        process.env.NUXT_PUBLIC_NEST_BASE_URL || "http://localhost:3001",
+      authBaseUrl:
+        process.env.NUXT_PUBLIC_AUTH_BASE_URL || "http://localhost:4000",
       scrapingServiceUrl:
-        process.env.SCRAPER_LOCAL_URL || "http://localhost:3003",
+        process.env.NUXT_PUBLIC_SCRAPER_URL || "http://localhost:3003",
     },
   },
   devtools: { enabled: true },
