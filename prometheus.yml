@@ -1,0 +1,55 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Docker Swarm services metrics
+  - job_name: 'frontend'
+    static_configs:
+      - targets: ['frontend:4444']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:4000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'nestjs'
+    static_configs:
+      - targets: ['nestjs:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'scraping-service'
+    static_configs:
+      - targets: ['scraping-service:3001']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'agent-ia-service'
+    static_configs:
+      - targets: ['agent-ia-service:8088']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'sync-service'
+    static_configs:
+      - targets: ['sync-service:3333']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Prometheus lui-même
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter pour les métriques système
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']

@@ -30,6 +30,8 @@ DOMAINS=(
     "scraping.mapa-server.org"
     "adminer.mapa-server.org"
     "kibana.mapa-server.org"
+    "prometheus.mapa-server.org"
+    "grafana.mapa-server.org"
 )
 
 # Construire la commande certbot
