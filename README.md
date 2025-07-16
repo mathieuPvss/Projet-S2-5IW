@@ -1,43 +1,54 @@
-# 🔍 QueryForge - Plateforme de Recherche de Contenus Développement
+# 🔍 QueryForge - Plateforme Intelligente de Recherche de Contenus Développement
 
 ## 📝 Description du Projet
 
-**QueryForge** est une plateforme intelligente de recherche de contenus éducatifs sur le développement informatique. Le projet permet aux utilisateurs de rechercher des **vidéos, articles et ressources** en utilisant des **requêtes en langage naturel**.
+**QueryForge** est une plateforme intelligente de recherche de contenus éducatifs sur le développement informatique. Le projet permet aux utilisateurs de rechercher des **vidéos, articles et ressources** en utilisant des **requêtes en langage naturel** avec des **agents IA avancés**.
 
 ### 🎯 Fonctionnalités Principales
 
-- **Recherche intelligente** : Saisie de requêtes en langage naturel
-- **Analyse IA** : Traitement des requêtes avec OpenAI pour extraire les mots-clés pertinents pour ensuite les exécuter sur Elasticsearch
-- **Sources multiples** : Indexation de contenus depuis YouTube, Stack Overflow, TikTok
-- **Scraping automatisé** : Récupération de données depuis les sites sans API publique
-- **Synchronisation** : Mise à jour automatique des contenus via des jobs périodiques
-- **Interface moderne** : Interface utilisateur intuitive et responsive
+- **🤖 Recherche intelligente** : Saisie de requêtes en langage naturel avec agents IA
+- **🔄 Streaming temps réel** : Réponses IA en streaming avec Server-Sent Events
+- **🧠 Agents IA avancés** : Traitement des requêtes avec LangGraph et OpenAI
+- **🌐 Sources multiples** : Indexation de contenus depuis YouTube, Stack Overflow, TikTok
+- **🕷️ Scraping automatisé** : Récupération de données depuis les sites sans API publique
+- **⚡ Synchronisation** : Mise à jour automatique des contenus via des jobs périodiques
+- **📊 Monitoring complet** : Observabilité avec Prometheus et Grafana
+- **🔐 Sécurité avancée** : SSL automatisé, authentification JWT, network policies
+- **📱 Interface moderne** : Interface utilisateur intuitive et responsive
 
 ---
 
-## 🏗️ Architecture & Microservices
+## 🏗️ Architecture Microservices
 
-Le projet suit une **architecture microservices** avec les composants suivants :
+Le projet suit une **architecture microservices moderne** avec monitoring et observabilité complète :
 
 ### 📦 Services Backend
 
-| Service              | Description                        | Port | Technologie          |
-| -------------------- | ---------------------------------- | ---- | -------------------- |
-| **query-forge-dev**  | API principale, gestion métier     | 3000 | NestJS + TypeScript  |
-| **auth-service**     | Authentification et autorisation   | 4000 | Node.js + Express    |
-| **agent-ia-service** | Traitement IA des requêtes         | 8088 | Node.js + LangGraph  |
-| **scraping-service** | Service de scraping de contenus    | 3001 | Node.js + Puppeteer  |
-| **sync-service**     | Synchronisation avec APIs externes | 3333 | Node.js + TypeScript |
+| Service              | Port | Technologie        | Fonctionnalité                   | Métriques     |
+| -------------------- | ---- | ------------------ | -------------------------------- | ------------- |
+| **query-forge-dev**  | 3000 | NestJS + TypeORM   | API principale, gestion métier   | ✅ `/metrics` |
+| **auth-service**     | 4000 | Express + JWT      | Authentification et autorisation | ✅ `/metrics` |
+| **agent-ia-service** | 8088 | LangGraph + OpenAI | Traitement IA des requêtes       | ✅ `/metrics` |
+| **scraping-service** | 3001 | Puppeteer          | Scraping de contenus web         | ✅ `/metrics` |
+| **sync-service**     | 3333 | TypeScript         | Synchronisation APIs externes    | ✅ `/metrics` |
 
-### 🖥️ Services Frontend & Infrastructure
+### 🖥️ Frontend & Infrastructure
 
-| Service           | Description                   | Port | Technologie      |
-| ----------------- | ----------------------------- | ---- | ---------------- |
-| **frontend**      | Interface utilisateur         | 4444 | Nuxt.js + Vue.js |
-| **postgres**      | Base de données relationnelle | 5432 | PostgreSQL 17.4  |
-| **elasticsearch** | Moteur de recherche           | 9200 | Elasticsearch    |
-| **kibana**        | Interface Elasticsearch       | 5601 | Kibana           |
-| **adminer**       | Interface base de données     | 8080 | Adminer          |
+| Service           | Port   | Technologie         | Fonctionnalité                |
+| ----------------- | ------ | ------------------- | ----------------------------- |
+| **frontend**      | 4444   | Nuxt.js 3 + Vue.js  | Interface utilisateur         |
+| **postgres**      | 5432   | PostgreSQL 17.4     | Base de données relationnelle |
+| **elasticsearch** | 9200   | Elasticsearch 9.0.0 | Moteur de recherche           |
+| **kibana**        | 5601   | Kibana 9.0.0        | Interface Elasticsearch       |
+| **nginx**         | 80/443 | Nginx               | Reverse proxy + SSL/TLS       |
+
+### 📊 Monitoring & Observabilité
+
+| Service           | Port | Technologie   | Fonctionnalité              |
+| ----------------- | ---- | ------------- | --------------------------- |
+| **prometheus**    | 9090 | Prometheus    | Collecte de métriques       |
+| **grafana**       | 3001 | Grafana       | Tableaux de bord monitoring |
+| **node-exporter** | 9100 | Node Exporter | Métriques système           |
 
 ---
 
@@ -50,33 +61,44 @@ Le projet suit une **architecture microservices** avec les composants suivants :
 - **TailwindCSS** - Framework CSS utilitaire
 - **Pinia** - Gestion d'état pour Vue.js
 - **TypeScript** - Superset typé de JavaScript
+- **Architecture Layers** - Modularité avec couches admin/app/base/ui
 
 ### Backend
 
-- **NestJS** - Framework Node.js progressif
-- **Node.js** - Runtime JavaScript
-- **TypeScript** - Langage de programmation typé
+- **NestJS** - Framework Node.js progressif avec TypeORM
 - **Express.js** - Framework web minimaliste
-- **TypeORM** - ORM pour TypeScript/JavaScript
-
-### Base de Données & Recherche
-
-- **PostgreSQL** - Base de données relationnelle
-- **Elasticsearch** - Moteur de recherche et d'analyse
-- **Kibana** - Visualisation des données Elasticsearch
+- **TypeScript** - Langage de programmation typé
+- **JWT** - Authentification stateless avec refresh tokens
 
 ### Intelligence Artificielle
 
-- **Agents IA** - Système d'agents pour l'analyse de requêtes avec LangGraph
+- **LangGraph** - Framework d'agents IA pour workflows complexes
+- **OpenAI GPT** - Modèles de langage pour traitement des requêtes
+- **Server-Sent Events** - Streaming temps réel des réponses IA
+- **Elasticsearch Tools** - Intégration native pour recherche sémantique
+
+### Base de Données & Recherche
+
+- **PostgreSQL 17.4** - Base de données relationnelle
+- **Elasticsearch 9.0.0** - Moteur de recherche et d'analyse
+- **Kibana 9.0.0** - Visualisation des données Elasticsearch
 
 ### Infrastructure & DevOps
 
 - **Docker** - Conteneurisation
-- **Docker Compose** - Orchestration de conteneurs
-- **K3s** - Distribution Kubernetes légère
-- **Traefik** - Reverse proxy et load balancer
-- **Grafana** - Monitoring et alerting
+- **Docker Compose** - Orchestration développement
+- **Docker Swarm** - Orchestration production
+- **K3s** - Distribution Kubernetes légère (work in progress)
+- **Nginx** - Reverse proxy et load balancer
+- **Let's Encrypt** - Certificats SSL automatisés
 - **Prometheus** - Collecte de métriques
+- **Grafana** - Monitoring et alerting
+
+### Infrastructure as Code
+
+- **Terraform** - Provisioning infrastructure Proxmox
+- **Ansible** - Configuration automatisée
+- **Proxmox** - Virtualisation et conteneurs
 
 ---
 
@@ -84,293 +106,407 @@ Le projet suit une **architecture microservices** avec les composants suivants :
 
 ```
 Projet-S2-5IW/
-├── 📂 backend/                    # Services backend
+├── 📂 backend/                    # Microservices backend
 │   ├── 📂 query-forge-dev/        # API principale NestJS
-│   │   ├── 📂 src/
-│   │   │   ├── 📂 modules/         # Modules métier
-│   │   │   ├── 📂 migrations/      # Migrations base de données
-│   │   │   └── 📂 seeds/           # Données de test
-│   │   └── 📄 package.json
+│   │   ├── 📂 src/modules/         # Modules métier (users, reports, questions)
+│   │   ├── 📂 migrations/          # Migrations TypeORM
+│   │   ├── 📂 seeds/               # Données de test
+│   │   └── 📄 METRICS.md           # Documentation métriques
 │   ├── 📂 auth-service/            # Service d'authentification
-│   ├── 📂 agent-ia-service/        # Service IA
-│   ├── 📂 scraping-service/        # Service de scraping
-│   └── 📂 sync-service/            # Service de synchronisation
+│   │   ├── 📂 src/                 # Code source TypeScript
+│   │   └── 📄 METRICS.md           # Métriques authentification
+│   ├── 📂 agent-ia-service/        # Service IA avec LangGraph
+│   │   ├── 📂 Agents/              # Agents IA
+│   │   │   └── 📂 translate-for-elk/ # Agent de traitement Elasticsearch
+│   │   ├── 📂 serveur/             # Serveur Express avec SSE
+│   │   └── 📄 METRICS.md           # Métriques IA
+│   ├── 📂 scraping-service/        # Service de scraping Puppeteer
+│   │   └── 📄 METRICS.md           # Métriques scraping
+│   └── 📂 sync-service/            # Synchronisation APIs externes
 │
-├── 📂 frontend/                    # Application Nuxt.js
-│   ├── 📂 layers/                  # Architecture en couches
+├── 📂 frontend/                    # Application Nuxt.js 3
+│   ├── 📂 layers/                  # Architecture modulaire
 │   │   ├── 📂 admin/               # Interface administration
 │   │   ├── 📂 app/                 # Application principale
 │   │   ├── 📂 base/                # Couche de base
-│   │   └── 📂 ui/                  # Composants UI
-│   ├── 📂 components/              # Composants Vue
+│   │   └── 📂 ui/                  # Composants UI (shadcn-vue)
 │   ├── 📂 stores/                  # Stores Pinia
-│   └── 📂 middleware/              # Middlewares Nuxt
+│   ├── 📂 middleware/              # Middlewares Nuxt
+│   └── 📂 components/              # Composants Vue
 │
-├── 📂 k3s-manifests/               # Déploiement Kubernetes
+├── 📂 conf/                        # Configuration
+│   ├── 📄 nginx.conf               # Configuration Nginx avec SSL
+│   └── 📄 prometheus.yml           # Configuration monitoring
+│
+├── 📂 scripts/                     # Scripts d'automatisation
+│   ├── 📄 generate-ssl-cert.sh     # Génération certificats SSL Let's Encrypt
+│   ├── 📄 renew-ssl-cert.sh        # Renouvellement automatique SSL
+│   └── 📄 import-elasticsearch.sh  # Import données Elasticsearch
+│
+├── 📂 k3s-manifests/               # Déploiement Kubernetes (work in progress)
 │   ├── 📂 backend/                 # Manifests services backend
 │   ├── 📂 frontend/                # Manifests frontend
-│   ├── 📂 databases/               # Manifests bases de données
-│   ├── 📂 monitoring/              # Monitoring (Grafana, Prometheus)
-│   └── 📂 ingress/                 # Configuration ingress
+│   ├── 📂 databases/               # PostgreSQL + Elasticsearch
+│   ├── 📂 monitoring/              # Prometheus + Grafana + Kibana
+│   ├── 📂 ingress/                 # Traefik + routing
+│   ├── 📂 autoscaling/             # HPA + VPA
+│   ├── 📂 security/                # Network policies
+│   └── 📂 scripts/                 # Scripts déploiement automatisé
 │
-├── 📂 proxmox/                     # Infrastructure Proxmox
+├── 📂 proxmox/                     # Infrastructure physique
 │   ├── 📂 terraform/               # Infrastructure as Code
 │   └── 📂 ansible/                 # Configuration automatisée
 │
 ├── 📄 compose.yaml                 # Docker Compose développement
-├── 📄 compose.prod.yaml            # Docker Compose production
+├── 📄 compose.sync.yaml            # Docker Compose avec sync-service
+├── 📄 docker-compose.swarm.yml     # Docker Swarm production
+├── 📄 deploy.sh                    # Script de déploiement Swarm
+├── 📄 .env                         # Variables d'environnement
+├── 📄 contents.json                # Données Elasticsearch
 └── 📄 README.md                    # Documentation
 ```
 
 ---
 
-## 🚀 Commandes de Développement
+## 🚀 Déploiement & Environnements
 
-### 🔧 Prérequis
+### 💻 Développement Local - Docker Compose
+
+#### Prérequis
 
 ```bash
 # Installer Docker et Docker Compose
 # Installer Node.js 18+ et npm/yarn
-# Cloner le repository
 git clone <repository-url>
 cd Projet-S2-5IW
 ```
 
-### 💻 Environnement de Développement
+#### Configuration environnement
 
-Au préalable, il faut créer un fichier .env dans la racine du projet avec les variables d'environnement suivantes :(plus trop à jour il me semble)
+Créez un fichier `.env` avec les variables suivantes :
 
 ```bash
-POSTGRES_HOST=
-POSTGRES_USER=
-POSTGRES_PASSWORD=
-POSTGRES_DB=
-POSTGRES_PORT=
+# PostgreSQL
+POSTGRES_HOST=postgres
+POSTGRES_USER=query_forge_dev_user
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=query_forge_dev
+POSTGRES_PORT=5432
 
-#nestjs
-NEST_PORT=
-NEST_ENV=
+# NestJS
+NEST_PORT=3000
+NEST_ENV=development
 
-#auth service
-JWT_SECRET=
-JWT_EXPIRES_IN=
-REFRESH_TOKEN_EXPIRES_IN=
-AUTH_PORT=
-EMAIL_USER=
-EMAIL_PASS=
-FRONTEND_URL=
+# Authentication Service
+JWT_SECRET=your_super_secret_jwt_key
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=7d
+AUTH_PORT=4000
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_email_password
+FRONTEND_URL=http://localhost:4444
 
+# Elasticsearch
+STACK_VERSION=9.0.0
+EL_DISCOVERY_TYPE=single-node
+ES_PORT=127.0.0.1:9200
+ES_JAVA_OPTS="-Xms1g -Xmx1g"
+ELASTICSEARCH_HOSTS=http://elasticsearch:9200
 
-#elastic
-STACK_VERSION=
-EL_DISCOVERY_TYPE=
-ES_PORT=
-ES_JAVA_OPTS=
+# Kibana
+KIBANA_PASSWORD=password
+KIBANA_PORT=5601
 
-#kibana
-KIBANA_PASSWORD=
-KIBANA_PORT=
-ELASTICSEARCH_HOSTS=
+# Agent IA Service
+OPENAI_API_KEY=your_openai_api_key
+AGENT_AI_PORT=8088
+AGENT_AI_REQUIRE_AUTH=false
+AGENT_IA_HOST=http://localhost:8088
 
-#sync service
-YOUTUBE_API_KEY=
-APIFY_API_TOKEN=
-SYNC_PORT=
+# Scraping Service
+SCRAPING_SERVICE_PORT=3001
+SCRAPER_SERVICE_URL=http://scraping-service:3001
+SCRAPER_LOCAL_URL=http://localhost:3001
 
-#agent ia
-OPENAI_API_KEY=
-AGENT_AI_PORT=
-AGENT_AI_REQUIRE_AUTH=
-AGENT_IA_HOST=
-
-#scraping service
-SCRAPING_SERVICE_PORT=
-SCRAPER_SERVICE_URL=
-SCRAPER_LOCAL_URL=
+# Sync Service
+YOUTUBE_API_KEY=your_youtube_api_key
+APIFY_API_TOKEN=your_apify_token
+SYNC_PORT=3333
 
 # Frontend
-NUXT_HOST=
-NUXT_PORT=
-AUTH_BASE_URL=
-NEST_BASE_URL=
-NEST_LOCAL_URL=
+NUXT_HOST=0.0.0.0
+NUXT_PORT=4444
+AUTH_BASE_URL=http://localhost:4000
+NEST_BASE_URL=http://nestjs:3000
+NEST_LOCAL_URL=http://localhost:3000
+
+# Variables publiques frontend (pour production)
+NUXT_PUBLIC_AI_API_URL=https://agent.mapa-server.org
+NUXT_PUBLIC_NEST_BASE_URL=https://api.mapa-server.org
+NUXT_PUBLIC_AUTH_BASE_URL=https://auth.mapa-server.org
+NUXT_PUBLIC_SCRAPER_URL=https://scraping.mapa-server.org
 ```
 
-#### Démarrage de tous les services
+#### Démarrage des services
 
 ```bash
-# Démarrer tous les services en mode développement
+# Démarrer tous les services
 docker-compose up -d --build
 
-# Voir les logs en temps réel
+# Voir les logs
 docker-compose logs -f
 
-# Lancer les migrations
+# Migrations et seeds
 docker exec -it nestjs-query-forge-dev sh -c "cd /app && npm run migration:run"
-
-# Seeder la base de données
 docker exec -it nestjs-query-forge-dev sh -c "cd /app && npm run seed"
 
-# Lancer le script pour ajouter de la donnée dans la base de données elasticsearch préalablement créée via le sync service sur notre ancien serveur
+# Import données Elasticsearch
 cd scripts/
 ./import-elasticsearch.sh localhost:9200 ../contents.json
-
-# Pour créer une nouvelle migration
-docker exec -it nestjs-query-forge-dev sh -c "cd /app && npm run migration:generate"
-
-# Pour lancer les migrations
-docker exec -it nestjs-query-forge-dev sh -c "cd /app && npm run migration:run"
-
-# docker l'on veut tester le service sync
-docker compose -f compose.prod.yaml up -d --build
 ```
 
-### 🛠️ Commandes Utiles de Développement
+### 🐳 Production - Docker Swarm
+
+#### Configuration SSL et déploiement
 
 ```bash
-# Reconstruire un service spécifique
-docker-compose build nestjs
-docker-compose up -d nestjs
+# 1. Cloner le projet
+git clone <repository-url>
+cd Projet-S2-5IW
 
-# Accéder au shell d'un conteneur
-docker-compose exec nestjs sh
-docker-compose exec postgres psql -U query_forge -d query_forge_db
+# 2. Configurer .env pour production (domaines mapa-server.org)
 
-# Voir les logs d'un service spécifique
-docker-compose logs -f nestjs
-docker-compose logs -f elasticsearch
+# 3. Générer certificats SSL
+cd scripts/
+./generate-ssl-cert.sh
 
-# Nettoyer les volumes et containers
-docker-compose down -v
-docker system prune -f
+# 4. Initialiser Docker Swarm
+docker swarm init
+
+# 5. Déployer la stack
+./deploy.sh
 ```
 
----
-
-## 🚀 Déploiement Production
-
-### ☸️ Production avec Kubernetes (K3s)
-
-#### Installation des VMS pour kubernetes (le faire sur un serveur proxmox) + les lxc pour les base de données elasticsearch et postgres.
-
-# Terraform
-
-## Instructions
+#### Surveillance et debug
 
 ```bash
-cd terraform
-terraform init # init
-terraform plan -out=./tf.plan # utilise la config dans un fichier tf.plan
-terraform apply -auto-approve tf.plan # applique la config pour créer les vm et tout
-./generate_inventory.sh # lance un script pour générer un fichier hosts.ini avec des datas à feed comme les IPs des VM créées Ansible
+# Vérifier l'état général
+sudo docker stack ls
+sudo docker service ls
+sudo docker node ls
+
+# Vérifier les services
+sudo docker service ps query-forge-dev_nginx --no-trunc
+sudo docker service logs query-forge-dev_nestjs
+
+# Redémarrer un service si nécessaire
+sudo docker service update --force query-forge-dev_frontend
 ```
 
-# Ansible
-
-## Instruction
-
-Apres avoir déployé les LXC via Terraform, lancer la commande suivant pour installer les base de données :
+#### Import données Elasticsearch
 
 ```bash
+# Transformer le fichier pour format bulk
+sed 's/^/{"index":{"_index":"contents"}}\n/' contents.json > contents_bulk.json
+
+# Importer
+curl -X POST "localhost:9200/_bulk" \
+  -H "Content-Type: application/x-ndjson" \
+  --data-binary @contents_bulk.json
+
+# Vérifier
+curl "localhost:9200/contents/_count"
+```
+
+#### Accès aux services
+
+- **🌐 Application** : https://query-forge-dev.mapa-server.org
+- **📊 Grafana** : https://grafana.mapa-server.org (admin/admin123)
+- **🔍 Kibana** : https://kibana.mapa-server.org
+- **📈 Prometheus** : https://prometheus.mapa-server.org
+- **🗄️ Adminer** : https://adminer.mapa-server.org
+
+### ☸️ Production Avancée - Kubernetes (K3s) [Work in Progress]
+
+> **Note**: L'architecture Kubernetes est fonctionnelle dans l'esprit mais encore en développement. Elle inclut tous les composants nécessaires pour une production scalable.
+
+#### Infrastructure Proxmox
+
+```bash
+# 1. Provisioning avec Terraform
+cd proxmox/terraform
+terraform init
+terraform plan -out=./tf.plan
+terraform apply -auto-approve tf.plan
+./generate_inventory.sh
+
+# 2. Configuration avec Ansible
 cd ../ansible
 ansible-playbook database-setup.yml --vault-password-file group_vars/all/.vault_pass.txt
-
-# pour vérifier l'installation de Postgres
-ssh root@192.168.1.142
-systemctl status postgresql
-sudo -u postgres psql -c 'SELECT version();'
-netstat -tlnp | grep 5432
-tail -20 /var/log/postgresql/postgresql-16-main.log
-
-# pour vérifier l'installation de ElasticSearch
-ssh root@192.168.1.144
-systemctl status elasticsearch
-# version et cluster health
-curl -X GET 'localhost:9200/_cluster/health?pretty'
-# vérification du port
-netstat -tlnp | grep 9200
-# logs
-tail -20 /var/log/elasticsearch/queryforge-cluster.log
-```
-
-Après avoir déployé les VM via Terraform, lancer la commande suivant pour installer k3s dans les VMs en fonction du role de la VM :
-
-```bash
-cd ../ansible
 ansible-playbook playbook.yml --vault-password-file group_vars/all/.vault_pass.txt
 ```
 
-#### Déploiement sur K3s
-
-Aller sur la VM k3s master et lancer les commandes suivantes :
+#### Déploiement K3s
 
 ```bash
+# Sur le master K3s
 cd k3s-manifests/
 
-# Build les images
+# Build et déploiement
 ./scripts/build-images.sh
-
-# Lancer le script de déploiement
 ./scripts/deploy.sh
 
+# Surveillance
+kubectl get pods -n query-forge
+kubectl logs -f deployment/nestjs -n query-forge
+kubectl top nodes
 ```
 
-#### Accès aux Interfaces
+#### Fonctionnalités K3s
 
-- **query-forge-dev.ualtarh.com** # frontend
-- **api.ualtarh.com** # nestjs
-- **auth.ualtarh.com** # auth-service
-- **agent.ualtarh.com** # agent-ia-service
-- **scraping.ualtarh.com** # scraping-service
-- **adminer.ualtarh.com** # adminer
-- **kibana.ualtarh.com** # kibana
-- **grafana.ualtarh.com** # grafana
-- **traefik.ualtarh.com** # traefik dashboard
+- **🔄 Autoscaling** : HPA et VPA configurés
+- **📊 Monitoring** : Prometheus + Grafana intégrés
+- **🌐 Ingress** : Traefik avec SSL automatique
+- **🔒 Sécurité** : Network policies et secrets
+- **💾 Databases** : PostgreSQL et Elasticsearch configurés
 
-#### Commandes de Monitoring
+---
+
+## 📊 Monitoring et Observabilité
+
+### 🎯 Métriques par Service
+
+Chaque microservice expose des métriques détaillées sur `/metrics` :
+
+- **📈 Performances** : Latence, throughput, durées d'opération
+- **🔄 Santé** : Status des services, connexions base de données
+- **🚨 Erreurs** : Taux d'erreur, codes de statut HTTP
+- **👥 Utilisation** : Nombre d'utilisateurs, requêtes par minute
+
+### 📊 Configuration Grafana
 
 ```bash
-# Vérifier le statut des pods
-kubectl get pods -n query-forge
+# Accès Grafana
+https://grafana.mapa-server.org
+Login: admin / admin123
 
-# Voir les logs d'un service
-kubectl logs -f deployment/nestjs -n query-forge
+# Ajouter Prometheus
+Configuration → Data Sources → Add data source
+URL: http://prometheus:9090
 
-# Vérifier les métriques
-kubectl top nodes
-kubectl top pods -n query-forge
+# Dashboards recommandés
+- 11159 : Node.js Application Dashboard
+- 12486 : Node.js Metrics
+- 893 : Docker and system monitoring
+- 1860 : Node Exporter Full
 ```
 
 ---
 
 ## 🔐 Sécurité
 
-- **Authentification JWT** avec refresh tokens
-- **Validation des données** avec des DTOs TypeScript
-- **Chiffrement des mots de passe** avec bcrypt
-- **CORS** configuré pour les domaines autorisés
+### 🛡️ Authentification & Autorisation
+
+- **JWT** avec refresh tokens et expiration configurable
+- **Validation** des données avec DTOs TypeScript
+- **Chiffrement** des mots de passe avec bcrypt
+- **CORS** configuré pour domaines autorisés
 - **Rate limiting** sur les APIs
-- **Network policies** Kubernetes pour l'isolation
+
+### 🔒 Infrastructure
+
+- **SSL/TLS** automatisé avec Let's Encrypt
+- **Network policies** Kubernetes pour isolation
+- **Secrets** gérés séparément des configurations
+- **Reverse proxy** Nginx avec headers sécurisés
 
 ---
 
-## 📊 Performance
+## ⚡ Performance & Scalabilité
 
-- **Indexation Elasticsearch** optimisée
-- **Auto-scaling** avec HPA/VPA sur Kubernetes
+### 🚀 Optimisations
+
+- **Indexation Elasticsearch** optimisée pour recherche sémantique
+- **Streaming SSE** pour réponses IA temps réel
+- **Load balancing** avec Nginx upstream
+- **Caching** intelligent au niveau service
+
+### 📈 Scalabilité
+
+- **Réplication** services critiques (auth: 2, nestjs: 2, agent: 2)
+- **Auto-scaling** HPA/VPA sur Kubernetes
+- **Monitoring proactif** avec alertes Grafana
+- **Resource limits** configurés par service
+
+---
+
+## 🛠️ Commandes Utiles
+
+### 🔧 Développement
+
+```bash
+# Reconstruction service spécifique
+docker-compose build nestjs && docker-compose up -d nestjs
+
+# Accès aux conteneurs
+docker-compose exec nestjs sh
+docker-compose exec postgres psql -U query_forge -d query_forge_db
+
+# Logs spécifiques
+docker-compose logs -f nestjs
+docker-compose logs -f elasticsearch
+
+# Nettoyage
+docker-compose down -v && docker system prune -f
+```
+
+### 🐳 Production Swarm
+
+```bash
+# Redéploiement complet
+sudo docker stack rm query-forge-dev
+./deploy.sh
+
+# Mise à jour service
+sudo docker service update --image mathieuvss/query-forge-frontend:latest query-forge-dev_frontend
+
+# Renouvellement SSL
+cd scripts/ && ./renew-ssl-cert.sh
+```
 
 ---
 
 ## 💡 Équipe de Développement
 
-- **Mathieu Pannetrat** - Développeur Full-Stack
+- **Mathieu Pannetrat** - Développeur Full-Stack & DevOps
 - **Gauthier Lo** - Développeur Full-Stack
 - **Jean-Paul Hayek** - Développeur Full-Stack
 
 ---
 
-## 📄 Licence
+## 📊 Évolution du Projet
 
-Ce projet est sous licence je sais pas quoi.
+### ✅ Fonctionnalités Récentes
+
+- **🤖 Agents IA avancés** avec LangGraph et streaming
+- **📊 Monitoring complet** Prometheus + Grafana
+- **🔐 SSL automatisé** avec Let's Encrypt
+- **🐳 Docker Swarm** production-ready
+- **🏗️ Infrastructure as Code** Terraform + Ansible
+
+### 🚧 Work in Progress
+
+- **☸️ Kubernetes (K3s)** - Architecture complète fonctionnelle
+- **📱 Interface mobile** optimisée
+- **🔄 CI/CD Pipeline** avec GitHub Actions
+- **🌍 Multi-région** deployment
 
 ---
+
+## 📄 Licence
+
+Ce projet est développé dans le cadre académique ESGI.
+
+---
+
+**🔍 QueryForge - Intelligence Artificielle au service de la recherche de contenus développement**
