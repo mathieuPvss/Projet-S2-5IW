@@ -1,0 +1,299 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - proxy
+    volumes:
+      - ./conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/ssl:ro # Volume pour les certificats SSL
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+
+  postgres:
+    image: postgres:17.4
+    volumes:
+      - postgres-query-forge-dev:/var/lib/postgresql/data
+    networks:
+      - internal
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 10s
+
+  nestjs:
+    image: mathieuvss/query-forge-nestjs:latest
+    networks:
+      - proxy
+      - internal
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=5432
+      - JWT_SECRET=${JWT_SECRET}
+      - NEST_PORT=${NEST_PORT}
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      - NODE_ENV=${NEST_ENV}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - FRONTEND_URL=${FRONTEND_URL}
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: any
+        delay: 10s
+    depends_on:
+      - postgres
+      - elasticsearch
+
+  adminer:
+    image: adminer:latest
+    networks:
+      - proxy
+      - internal
+    depends_on:
+      - postgres
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=${EL_DISCOVERY_TYPE}
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS}
+      - xpack.security.enabled=false
+      - bootstrap.memory_lock=true
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - internal
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 2G
+      restart_policy:
+        condition: any
+        delay: 10s
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.0.0
+    environment:
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+    depends_on:
+      - elasticsearch
+    networks:
+      - proxy
+      - internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 10s
+
+  agent-ia-service:
+    image: mathieuvss/agent-ia-service:latest
+    networks:
+      - proxy
+      - internal
+    environment:
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AGENT_AI_PORT=${AGENT_AI_PORT}
+      - AGENT_AI_REQUIRE_AUTH=${AGENT_AI_REQUIRE_AUTH}
+      - JWT_SECRET=${JWT_SECRET}
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: any
+        delay: 10s
+    depends_on:
+      - elasticsearch
+
+  auth-service:
+    image: mathieuvss/auth-service:latest
+    networks:
+      - proxy
+      - internal
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=5432
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN}
+      - PORT=${AUTH_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - NEST_BASE_URL=${NEST_BASE_URL}
+    depends_on:
+      - postgres
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: any
+        delay: 10s
+
+  scraping-service:
+    image: mathieuvss/scraping-service:latest
+    networks:
+      - proxy
+      - internal
+    environment:
+      - SCRAPING_SERVICE_PORT=${SCRAPING_SERVICE_PORT}
+    cap_add:
+      - SYS_ADMIN
+    init: true
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: any
+        delay: 10s
+
+  sync-service:
+    image: mathieuvss/sync-service:latest
+    networks:
+      - proxy
+      - internal
+    environment:
+      - POSTGRES_HOST=postgres # Utilisez postgres, pas ${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=5432 # Port par défaut
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - APIFY_API_TOKEN=${APIFY_API_TOKEN}
+      - SCRAPER_SERVICE_URL=${SCRAPER_SERVICE_URL}
+      - SYNC_PORT=${SYNC_PORT}
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+    depends_on:
+      - postgres
+      - elasticsearch
+
+  frontend:
+    image: mathieuvss/query-forge-frontend:latest
+    networks:
+      - proxy
+    environment:
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=4444
+      - AUTH_BASE_URL=${AUTH_BASE_URL}
+      - NEST_BASE_URL=${NEST_LOCAL_URL}
+      - SCRAPER_LOCAL_URL=${SCRAPER_LOCAL_URL}
+      - AGENT_IA_HOST=${AGENT_IA_HOST}
+      - NUXT_PUBLIC_AI_API_URL=${NUXT_PUBLIC_AI_API_URL}
+      - NUXT_PUBLIC_NEST_BASE_URL=${NUXT_PUBLIC_NEST_BASE_URL}
+      - NUXT_PUBLIC_AUTH_BASE_URL=${NUXT_PUBLIC_AUTH_BASE_URL}
+      - NUXT_PUBLIC_SCRAPER_URL=${NUXT_PUBLIC_SCRAPER_URL}
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 10s
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    networks:
+      - proxy
+      - internal
+    volumes:
+      - ./conf/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--storage.tsdb.retention.time=200h"
+      - "--web.enable-lifecycle"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    networks:
+      - proxy
+      - internal
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+    depends_on:
+      - prometheus
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    ports:
+      - "9100:9100"
+    networks:
+      - internal
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+volumes:
+  postgres-query-forge-dev:
+    driver: local
+  esdata:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  proxy:
+    driver: overlay
+    attachable: true
+  internal:
+    driver: overlay
+    attachable: true

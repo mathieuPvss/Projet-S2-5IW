@@ -30,11 +30,12 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      aiApiUrl: process.env.AGENT_IA_HOST || "http://localhost:8088",
-      nestBaseUrl: process.env.NEST_BASE_URL || "http://localhost:3001",
-      authBaseUrl: process.env.AUTH_BASE_URL || "http://localhost:4000",
-      scrapingServiceUrl:
-        process.env.SCRAPER_LOCAL_URL || "http://localhost:3003",
+      aiApiUrl: process.env.NUXT_PUBLIC_AI_API_URL || "http://localhost:8088",
+      nestBaseUrl:
+        process.env.NUXT_PUBLIC_NEST_BASE_URL || "http://localhost:3001",
+      authBaseUrl:
+        process.env.NUXT_PUBLIC_AUTH_BASE_URL || "http://localhost:4000",
+      scrapingServiceUrl: "https://scraping.mapa-server.org",
     },
   },
   devtools: { enabled: true },
