@@ -138,7 +138,7 @@ cd Projet-S2-5IW
 
 ### 💻 Environnement de Développement
 
-Au préalable, il faut créer un fichier .env dans la racine du projet avec les variables d'environnement suivantes :
+Au préalable, il faut créer un fichier .env dans la racine du projet avec les variables d'environnement suivantes :(plus trop à jour il me semble)
 
 ```bash
 POSTGRES_HOST=
