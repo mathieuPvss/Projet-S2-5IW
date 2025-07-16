@@ -35,8 +35,7 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_NEST_BASE_URL || "http://localhost:3001",
       authBaseUrl:
         process.env.NUXT_PUBLIC_AUTH_BASE_URL || "http://localhost:4000",
-      scrapingServiceUrl:
-        process.env.NUXT_PUBLIC_SCRAPER_URL || "http://localhost:3003",
+      scrapingServiceUrl: "https://scraping.mapa-server.org",
     },
   },
   devtools: { enabled: true },
