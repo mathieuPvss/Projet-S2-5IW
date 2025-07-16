@@ -21,13 +21,13 @@ if [ $? -eq 0 ]; then
     # Copier les nouveaux certificats
     MAIN_DOMAIN="query-forge-dev.mapa-server.org"
     
-    sudo cp "/etc/letsencrypt/live/$MAIN_DOMAIN/fullchain.pem" certs/cert.pem
-    sudo cp "/etc/letsencrypt/live/$MAIN_DOMAIN/privkey.pem" certs/key.pem
+    sudo cp "/etc/letsencrypt/live/$MAIN_DOMAIN/fullchain.pem" ../certs/cert.pem
+    sudo cp "/etc/letsencrypt/live/$MAIN_DOMAIN/privkey.pem" ../certs/key.pem
     
     # Changer les permissions
-    sudo chmod 644 certs/cert.pem
-    sudo chmod 644 certs/key.pem
-    sudo chown $USER:$USER certs/cert.pem certs/key.pem
+    sudo chmod 644 ../certs/cert.pem
+    sudo chmod 644 ../certs/key.pem
+    sudo chown $USER:$USER ../certs/cert.pem ../certs/key.pem
     
     # Redémarrer les services Docker
     echo -e "${YELLOW}Redémarrage des services Docker...${NC}"

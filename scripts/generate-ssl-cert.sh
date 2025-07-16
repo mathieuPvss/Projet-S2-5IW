@@ -11,8 +11,8 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}=== Génération du certificat SSL pour mapa-server.org ===${NC}"
 
-# Créer le dossier certs s'il n'existe pas
-mkdir -p certs
+# Créer le dossier certs dans la racine du projet
+mkdir -p ../certs
 
 # Vérifier si certbot est installé
 if ! command -v certbot &> /dev/null; then
@@ -70,15 +70,15 @@ if [ $? -eq 0 ]; then
     # Le certificat principal (premier domaine de la liste)
     MAIN_DOMAIN="${DOMAINS[0]}"
     
-    sudo cp "/etc/letsencrypt/live/$MAIN_DOMAIN/fullchain.pem" certs/cert.pem
-    sudo cp "/etc/letsencrypt/live/$MAIN_DOMAIN/privkey.pem" certs/key.pem
+    sudo cp "/etc/letsencrypt/live/$MAIN_DOMAIN/fullchain.pem" ../certs/cert.pem
+    sudo cp "/etc/letsencrypt/live/$MAIN_DOMAIN/privkey.pem" ../certs/key.pem
     
     # Changer les permissions pour que Docker puisse lire
-    sudo chmod 644 certs/cert.pem
-    sudo chmod 644 certs/key.pem
-    sudo chown $USER:$USER certs/cert.pem certs/key.pem
+    sudo chmod 644 ../certs/cert.pem
+    sudo chmod 644 ../certs/key.pem
+    sudo chown $USER:$USER ../certs/cert.pem ../certs/key.pem
     
-    echo -e "${GREEN}Certificats copiés dans ./certs/${NC}"
+    echo -e "${GREEN}Certificats copiés dans ../certs/${NC}"
     echo -e "${GREEN}Vous pouvez maintenant relancer votre stack Docker Swarm${NC}"
     
 else
