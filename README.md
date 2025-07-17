@@ -21,6 +21,7 @@
 ## 🏗️ Architecture Microservices
 
 Le projet suit une **architecture microservices moderne** avec monitoring et observabilité complète :
+![Architecture Diagram](Infra-kube.png)
 
 ### 📦 Services Backend
 
@@ -341,7 +342,11 @@ terraform apply -auto-approve tf.plan
 
 # 2. Configuration avec Ansible
 cd ../ansible
+# Après la création de VM et/ou LXC installez Git, Docker et installer une clé SSH en exécutant le book suivant
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --vault-password-file group_vars/all/.vault_pass.txt
+# installation de k3s dans les VMs
 ansible-playbook database-setup.yml --vault-password-file group_vars/all/.vault_pass.txt
+# installation de postresql et elasticsearch dans les LXC
 ansible-playbook playbook.yml --vault-password-file group_vars/all/.vault_pass.txt
 ```
 
