@@ -1,0 +1,111 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install required packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - software-properties-common
+      - git
+    state: present
+
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    state: present
+    filename: docker
+
+- name: Update apt cache after adding Docker repository
+  apt:
+    update_cache: yes
+
+- name: Install Docker packages
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+
+- name: Start and enable Docker service
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Add k3s user to docker group
+  user:
+    name: "{{ vm_user }}"
+    groups: docker
+    append: yes
+
+- name: Create docker group if it doesn't exist
+  group:
+    name: docker
+    state: present
+
+- name: Verify Git installation
+  command: git --version
+  register: git_version
+  changed_when: false
+
+- name: Display Git version
+  debug:
+    msg: "Git version: {{ git_version.stdout }}"
+
+- name: Verify Docker installation
+  command: docker --version
+  register: docker_version
+  changed_when: false
+
+- name: Display Docker version
+  debug:
+    msg: "Docker version: {{ docker_version.stdout }}"
+
+- name: Test Docker functionality
+  command: docker run hello-world
+  register: docker_test
+  changed_when: false
+  ignore_errors: yes
+
+- name: Display Docker test result
+  debug:
+    msg: "Docker test: {{ docker_test.stdout_lines }}"
+
+- name: Generate SSH key for k3s user (if not exists)
+  user:
+    name: "{{ vm_user }}"
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/id_rsa
+    ssh_key_passphrase: ""
+  become: yes
+
+- name: Display SSH key generation result
+  debug:
+    msg: "SSH key generated for user {{ vm_user }}"
+
+- name: Display SSH public key
+  shell: cat /home/{{ vm_user }}/.ssh/id_rsa.pub
+  register: ssh_public_key
+  become: yes
+  become_user: "{{ vm_user }}"
+  changed_when: false
+
+- name: Show SSH public key
+  debug:
+    msg: "SSH Public Key for {{ vm_user }}: {{ ssh_public_key.stdout }}" 

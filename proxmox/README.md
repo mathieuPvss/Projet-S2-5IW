@@ -53,7 +53,24 @@ terraform apply -auto-approve tf.plan # applique la config pour créer les vm et
 
 ## Instruction
 
-Apres avoir déployé les LXC via Terraform, lancer la commande suivant pour installer les base de données :
+Après la créationde VM et/ou LXC installez Git, Docker et installer une clé SSH en exécutant le book suivant : 
+
+```bash
+#To run the setup on specific groups:"
+#---------------------------------------"
+# All hosts:
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --vault-password-file group_vars/all/.vault_pass.txt
+# Only VMs:
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit master,worker --vault-password-file group_vars/all/.vault_pass.txt
+# Only databases:
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit databases --vault-password-file group_vars/all/.vault_pass.txt
+# Only master: 
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit master --vault-password-file group_vars/all/.vault_pass.txt
+# Only workers: 
+ansible-playbook -i inventory/hosts.ini setup-vms.yml --limit worker --vault-password-file group_vars/all/.vault_pass.txt
+```
+
+*(optionnel)* Pour installer Postgres et ElasticSearch sur des LXC, lancez la commande suivant pour installer les base de données :
 
 ```bash
 cd ../ansible
@@ -77,7 +94,7 @@ netstat -tlnp | grep 9200
 tail -20 /var/log/elasticsearch/queryforge-cluster.log
 ```
 
-Après avoir déployé les VM via Terraform, lancer la commande suivant pour installer k3s dans les VMs en fonction du role de la VM :
+*(optionnel)* Pour installer k3s dans les VMs, lancez la commande suivant pour installer k3s dans les VMs en fonction du role de la VM :
 
 ```bash
 cd ../ansible
