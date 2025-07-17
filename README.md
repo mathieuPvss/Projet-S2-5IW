@@ -160,7 +160,6 @@ Projet-S2-5IW/
 ├── 📄 compose.yaml                 # Docker Compose développement
 ├── 📄 compose.sync.yaml            # Docker Compose avec sync-service
 ├── 📄 docker-compose.swarm.yml     # Docker Swarm production
-├── 📄 deploy.sh                    # Script de déploiement Swarm
 ├── 📄 .env                         # Variables d'environnement
 ├── 📄 contents.json                # Données Elasticsearch
 └── 📄 README.md                    # Documentation
@@ -284,7 +283,7 @@ cd scripts/
 docker swarm init
 
 # 5. Déployer la stack
-./deploy.sh
+export $(cat .env) > /dev/null 2>&1; docker stack deploy query-forge-dev -c docker-compose.swarm.yml
 ```
 
 #### Surveillance et debug
@@ -465,7 +464,7 @@ docker-compose down -v && docker system prune -f
 ```bash
 # Redéploiement complet
 sudo docker stack rm query-forge-dev
-./deploy.sh
+export $(cat .env) > /dev/null 2>&1; docker stack deploy query-forge-dev -c docker-compose.swarm.yml
 
 # Mise à jour service
 sudo docker service update --image mathieuvss/query-forge-frontend:latest query-forge-dev_frontend
